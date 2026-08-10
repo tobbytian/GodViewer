@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GodViewer</string>
+    <string name="apply">应用</string>
+    <string name="perform_origin_click">触发原点击</string>
+    <string name="successfully_modified">成功修改</string>
+    <string name="anytext_working_now">AnyText运行中</string>
+    <string name="about">关于</string>
+    <string name="requirement_content">系统要求:\n1.已经Root\n2.安装了Xposed框架</string>
+    <string name="github">Github</string>
+    <string name="get_source">在Github上获取源码</string>
+    <string name="caution_text">本软件完全免费且开源，仅供学习交流使用，请从Github页面上下载本应用，或者自己编译安装包，避免未知来源的安装包。</string>
+    <string name="about_description">本软件可以修改正在运行的应用的布局参数，就像浏览器中的元素审查一样。</string>
+    <string name="caution">注意</string>
+    <string name="cancel">取消</string>
+    <string name="width">宽度</string>
+    <string name="width_value">宽度值</string>
+    <string name="height">高度</string>
+    <string name="height_value">高度值</string>
+    <string name="enter_text">输入文本</string>
+    <string name="text_content">文本内容</string>
+    <string name="max_line">最大行数</string>
+    <string name="identical">相同值</string>
+    <string name="parent">父控件</string>
+    <string name="children">子控件</string>
+    <string name="select_parent">选择父控件</string>
+    <string name="select_children">选择子控件</string>
+    <string name="show_global_layout_bounds">显示全局边界布局</string>
+    <string name="force_clickable">全局控件可点击</string>
+    <string name="image_url">图片链接</string>
+    <string name="scale_type">缩放类型</string>
+    <string name="hide">隐藏</string>
+    <string name="reset">重置规则</string>
+</resources>
