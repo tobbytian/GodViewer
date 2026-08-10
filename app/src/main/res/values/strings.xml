@@ -29,5 +29,6 @@
     <string name="image_url">Image Url</string>
     <string name="scale_type">Scale Type</string>
     <string name="hide">Hide</string>
+    <string name="advanced">Advanced</string>
     <string name="reset">Reset Rule</string>
 </resources>

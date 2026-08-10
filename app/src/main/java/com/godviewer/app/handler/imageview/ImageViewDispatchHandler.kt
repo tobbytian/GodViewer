@@ -3,6 +3,7 @@ package com.godviewer.app.handler.imageview
 import android.view.View
 import android.widget.ImageView
 import com.godviewer.app.handler.ViewDispatchHandler
+import com.godviewer.app.ui.QuickAttrDialog
 
 /**
  * @author hhvvg
@@ -15,7 +16,8 @@ class ImageViewDispatchHandler : ViewDispatchHandler {
     }
 
     override fun handle(view: View) {
-        val dialog = ImageViewAttrDialog(view as ImageView)
+        val imageView = view as ImageView
+        val dialog = QuickAttrDialog(imageView) { ImageViewAttrDialog(imageView) }
         dialog.show()
     }
 }

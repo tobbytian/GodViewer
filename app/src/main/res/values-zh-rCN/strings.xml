@@ -30,5 +30,6 @@
     <string name="image_url">图片链接</string>
     <string name="scale_type">缩放类型</string>
     <string name="hide">隐藏</string>
+    <string name="advanced">高级</string>
     <string name="reset">重置规则</string>
 </resources>
