@@ -1,0 +1,15 @@
+# Android / Gradle 构建产物
+.gradle/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# 系统 / 杂项
+.DS_Store
+Thumbs.db
