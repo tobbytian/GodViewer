@@ -30,6 +30,7 @@ import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
 import com.godviewer.app.ui.adapter.ViewItemListAdapter
 import com.godviewer.app.util.APP_FIELD_FORCE_CLICKABLE
 import com.godviewer.app.util.APP_FIELD_SHOW_BOUNDS
+import com.godviewer.app.util.EditMode
 import com.godviewer.app.util.dp
 import com.godviewer.app.util.drawLayoutBounds
 import com.godviewer.app.util.getInjectedField
@@ -223,10 +224,28 @@ abstract class BaseAttrDialog<T : BaseViewAttrData>(protected val itemView: View
             SpannableString(moduleRes.getText(R.string.perform_origin_click))
         binding.hideButton.text = SpannableString(moduleRes.getText(R.string.hide))
         binding.resetButton.text = SpannableString(moduleRes.getText(R.string.reset))
+        binding.exitEditModeButton.text =
+            SpannableString(moduleRes.getText(R.string.exit_edit_mode))
+        // 布局 XML 里的 @string 在目标进程 inflate 时解析不出，这里用 moduleRes 统一设置
+        binding.marginTitle.text = SpannableString(moduleRes.getString(R.string.margin))
+        binding.paddingTitle.text = SpannableString(moduleRes.getString(R.string.padding))
+        binding.marginLeft.hint = moduleRes.getString(R.string.left)
+        binding.marginTop.hint = moduleRes.getString(R.string.top)
+        binding.marginRight.hint = moduleRes.getString(R.string.right)
+        binding.marginBottom.hint = moduleRes.getString(R.string.bottom)
+        binding.paddingLeft.hint = moduleRes.getString(R.string.left)
+        binding.paddingTop.hint = moduleRes.getString(R.string.top)
+        binding.paddingRight.hint = moduleRes.getString(R.string.right)
+        binding.paddingBottom.hint = moduleRes.getString(R.string.bottom)
     }
 
     private fun setupButtons() {
         binding.cancelButton.setOnClickListener {
+            dismiss()
+        }
+        // 退出编辑模式：状态写 OFF 后关闭，目标应用恢复正常点击（无感，本次运行生效）
+        binding.exitEditModeButton.setOnClickListener {
+            EditMode.setEnabled(false)
             dismiss()
         }
         binding.applyButton.setOnClickListener {

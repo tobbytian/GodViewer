@@ -1,6 +1,7 @@
 package com.godviewer.app
 
 import android.view.View
+import com.godviewer.app.util.EditMode
 
 const val IGNORE_HOOK = "GODVIEWER_IGNORE_HOOK"
 
@@ -15,6 +16,11 @@ class ViewClickWrapper(
 
     override fun onClick(v: View?) {
         if (v == null) {
+            return
+        }
+        // 编辑模式关闭时透传原始点击，不弹编辑弹窗（无感使用目标应用）
+        if (!EditMode.isEnabled()) {
+            performOriginClick()
             return
         }
         val dispatched = ViewDispatcher.dispatch(v)

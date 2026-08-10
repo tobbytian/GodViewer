@@ -19,6 +19,12 @@
     <string name="enter_text">Enter text</string>
     <string name="text_content">Text Content</string>
     <string name="max_line">Max Line</string>
+    <string name="margin">Margin (dp)</string>
+    <string name="padding">Padding (dp)</string>
+    <string name="left">Left</string>
+    <string name="top">Top</string>
+    <string name="right">Right</string>
+    <string name="bottom">Bottom</string>
     <string name="identical">Identical</string>
     <string name="parent">Parent</string>
     <string name="children">Children</string>
@@ -30,5 +36,12 @@
     <string name="scale_type">Scale Type</string>
     <string name="hide">Hide</string>
     <string name="advanced">Advanced</string>
+    <string name="edit_mode">Edit Mode</string>
+    <string name="exit_edit_mode">Exit Edit Mode</string>
+    <string name="edit_mode_enabled_toast">Edit mode enabled</string>
+    <string name="edit_mode_disabled_toast">Edit mode disabled</string>
+    <string name="edit_mode_on">Enabled</string>
+    <string name="edit_mode_off">Disabled</string>
+    <string name="edit_mode_enable">Enable</string>
     <string name="reset">Reset Rule</string>
 </resources>

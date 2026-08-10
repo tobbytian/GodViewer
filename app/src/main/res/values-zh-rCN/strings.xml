@@ -20,6 +20,12 @@
     <string name="enter_text">输入文本</string>
     <string name="text_content">文本内容</string>
     <string name="max_line">最大行数</string>
+    <string name="margin">边距 (dp)</string>
+    <string name="padding">内边距 (dp)</string>
+    <string name="left">左</string>
+    <string name="top">上</string>
+    <string name="right">右</string>
+    <string name="bottom">下</string>
     <string name="identical">相同值</string>
     <string name="parent">父控件</string>
     <string name="children">子控件</string>
@@ -31,5 +37,12 @@
     <string name="scale_type">缩放类型</string>
     <string name="hide">隐藏</string>
     <string name="advanced">高级</string>
+    <string name="edit_mode">编辑模式</string>
+    <string name="exit_edit_mode">退出编辑模式</string>
+    <string name="edit_mode_enabled_toast">编辑模式已开启</string>
+    <string name="edit_mode_disabled_toast">编辑模式已关闭</string>
+    <string name="edit_mode_on">已开启</string>
+    <string name="edit_mode_off">已关闭</string>
+    <string name="edit_mode_enable">开启</string>
     <string name="reset">重置规则</string>
 </resources>
