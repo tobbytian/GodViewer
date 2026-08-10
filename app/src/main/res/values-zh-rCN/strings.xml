@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GodViewer</string>
+    <string name="app_name">上帝视角</string>
     <string name="apply">应用</string>
     <string name="perform_origin_click">触发原点击</string>
     <string name="successfully_modified">成功修改</string>

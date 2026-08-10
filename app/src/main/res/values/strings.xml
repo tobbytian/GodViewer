@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GodViewer</string>
+    <string name="app_name">上帝视角</string>
     <string name="apply">Apply</string>
     <string name="perform_origin_click">Original Click</string>
     <string name="successfully_modified">Successfully modified</string>
