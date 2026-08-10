@@ -25,3 +25,7 @@
 
 # Gson 反射序列化持久化规则
 -keep class com.godviewer.app.data.** { *; }
+
+# Xposed 模块自身代码全部保留：点击分发器通过 Class.newInstance() 反射创建 handler，
+# 弹窗 / 工具类经 XModuleResources 与 XposedHelpers 反射访问，混淆会破坏这些路径
+-keep class com.godviewer.app.** { *; }
