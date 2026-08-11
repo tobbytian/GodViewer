@@ -51,4 +51,5 @@
     <string name="delete_rule_confirm_message">确定删除该规则？视图将还原为原始状态（可通过通知栏「撤销」恢复）。</string>
     <string name="no_rules">暂无规则</string>
     <string name="hidden_status">已隐藏</string>
+    <string name="position_path">位置</string>
 </resources>

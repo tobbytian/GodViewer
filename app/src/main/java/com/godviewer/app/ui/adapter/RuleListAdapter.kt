@@ -55,7 +55,8 @@ class RuleListAdapter(
         val activityName = rule.activityClass.substringAfterLast('.')
         val detail = rule.resourceName
             ?: rule.text?.let { "text: $it" }
-            ?: rule.depth.joinToString("/")
+            ?: rule.description?.let { "desc: $it" }
+            ?: moduleRes.getString(R.string.position_path) + ": " + displayDepth(rule.depth)
         binding.ruleSubtitle.text = SpannableString("$activityName · $detail")
 
         // 缩略图：当前 Activity 中定位活视图并绘制；找不到则用占位图标
@@ -72,5 +73,13 @@ class RuleListAdapter(
         binding.deleteButton.text = SpannableString(moduleRes.getString(R.string.delete))
         binding.deleteButton.setOnClickListener { onDelete(rule) }
         return itemView
+    }
+
+    /** 深度路径的友好显示：超过 6 段时截断（如 0/1/0/0/0/2/…） */
+    private fun displayDepth(depth: List<Int>): String {
+        if (depth.size <= 6) {
+            return depth.joinToString("/")
+        }
+        return depth.take(6).joinToString("/") + "/…"
     }
 }
