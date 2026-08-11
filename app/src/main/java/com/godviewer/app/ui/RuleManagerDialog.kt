@@ -15,6 +15,7 @@ import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.databinding.LayoutRuleDeleteConfirmBinding
 import com.godviewer.app.databinding.LayoutRuleManagerDialogBinding
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
+import com.godviewer.app.hook.hookers.ActivityLifecycleHooker
 import com.godviewer.app.ui.adapter.RuleListAdapter
 
 /**
@@ -77,8 +78,8 @@ class RuleManagerDialog(context: Context) : AlertDialog(context) {
         confirmBinding.confirmCancel.setOnClickListener { confirmDialog.dismiss() }
         confirmBinding.confirmDelete.setOnClickListener {
             confirmDialog.dismiss()
-            // 还原当前 Activity 中的目标视图后再删除（删除可被撤销）
-            ViewRuleManager.deleteRule(rule, context as? Activity)
+            // 还原各存活 Activity 中的目标视图后再删除（删除可被撤销）
+            ViewRuleManager.deleteRule(rule, ActivityLifecycleHooker.liveActivities())
             refreshList()
         }
         confirmDialog.show()

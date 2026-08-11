@@ -8,6 +8,7 @@ import com.godviewer.app.util.findViewBestMatch
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import java.util.Collections
 import java.util.WeakHashMap
 
 /**
@@ -27,7 +28,13 @@ class ActivityLifecycleHooker : IHooker {
         @Volatile
         private var resumedActivity: Activity? = null
 
+        /** 存活（已 onPostResume 且未 onDestroy）的 Activity，删除规则时用于还原各 Activity 中的视图 */
+        private val liveActivities =
+            Collections.newSetFromMap(WeakHashMap<Activity, Boolean>())
+
         fun resumedActivity(): Activity? = resumedActivity
+
+        fun liveActivities(): Set<Activity> = liveActivities
     }
 
     override fun onHook(param: XC_LoadPackage.LoadPackageParam) {
@@ -37,6 +44,7 @@ class ActivityLifecycleHooker : IHooker {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val activity = param.thisObject as? Activity ?: return
                     resumedActivity = activity
+                    liveActivities.add(activity)
                     replay(activity)
                     registerLayoutListener(activity)
                 }
@@ -50,6 +58,7 @@ class ActivityLifecycleHooker : IHooker {
                     if (resumedActivity === activity) {
                         resumedActivity = null
                     }
+                    liveActivities.remove(activity)
                     unregisterLayoutListener(activity)
                 }
             }
