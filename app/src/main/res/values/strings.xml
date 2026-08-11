@@ -45,4 +45,9 @@
     <string name="edit_mode_enable">Enable</string>
     <string name="reset">Reset Rule</string>
     <string name="undo">Undo</string>
+    <string name="manage_rules">Manage Rules</string>
+    <string name="delete">Delete</string>
+    <string name="delete_rule_confirm_message">Delete this rule? The view will be restored to its original state (undoable via the Undo button).</string>
+    <string name="no_rules">No rules yet</string>
+    <string name="hidden_status">Hidden</string>
 </resources>

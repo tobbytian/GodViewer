@@ -16,6 +16,7 @@ import com.godviewer.app.R
 import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
 import com.godviewer.app.hook.hookers.ActivityLifecycleHooker
+import com.godviewer.app.ui.RuleManagerDialog
 
 /**
  * 通知栏编辑模式开关（只运行在被注入的目标进程内）。
@@ -33,6 +34,7 @@ object EditModeNotification {
 
     const val ACTION_TOGGLE = "com.godviewer.app.action.TOGGLE_EDIT_MODE"
     const val ACTION_UNDO = "com.godviewer.app.action.UNDO_LAST_OPERATION"
+    const val ACTION_MANAGE_RULES = "com.godviewer.app.action.MANAGE_RULES"
 
     private const val CHANNEL_ID = "godviewer_edit_mode"
     private const val NOTIFICATION_ID = 0x4756 // "GV"
@@ -66,6 +68,12 @@ object EditModeNotification {
             Intent(ACTION_UNDO),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val manageRulesIntent = PendingIntent.getBroadcast(
+            app,
+            2,
+            Intent(ACTION_MANAGE_RULES),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         val builder = NotificationCompat.Builder(app, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_edit)
             .setContentTitle(moduleRes.getString(R.string.edit_mode))
@@ -83,6 +91,11 @@ object EditModeNotification {
                 android.R.drawable.ic_menu_revert,
                 moduleRes.getString(R.string.undo),
                 undoIntent
+            )
+            .addAction(
+                android.R.drawable.ic_menu_manage,
+                moduleRes.getString(R.string.manage_rules),
+                manageRulesIntent
             )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -115,6 +128,14 @@ object EditModeNotification {
                         val undone = ViewRuleManager.undoLastOperation(activity)
                         Log.d(TAG, "undo received, undone=$undone")
                     }
+                    // 打开规则管理弹窗：列出全部规则，可逐条删除
+                    ACTION_MANAGE_RULES -> {
+                        val activity = ActivityLifecycleHooker.resumedActivity()
+                        if (activity != null) {
+                            runCatching { RuleManagerDialog(activity).show() }
+                                .onFailure { Log.e(TAG, "show rule manager failed", it) }
+                        }
+                    }
                     // 通知只负责"开启"编辑模式（已开启时重复点击无效果）；
                     // "关闭"由编辑弹窗的"退出编辑模式"按钮负责。setEnabled 内部会自动刷新通知
                     else -> {
@@ -127,6 +148,7 @@ object EditModeNotification {
         val filter = IntentFilter().apply {
             addAction(ACTION_TOGGLE)
             addAction(ACTION_UNDO)
+            addAction(ACTION_MANAGE_RULES)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             app.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)

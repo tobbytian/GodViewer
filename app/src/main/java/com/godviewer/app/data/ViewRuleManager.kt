@@ -121,6 +121,19 @@ object ViewRuleManager {
         Log.d(TAG, "rule deleted: ${rule.key()}")
     }
 
+    /** 删除一条规则；[restoreIn] 非空时先在对应 Activity 中还原该规则关联的视图 */
+    fun deleteRule(rule: ViewRule, restoreIn: Activity?) {
+        restoreIn?.let { activity ->
+            findViewBestMatch(activity, rule)?.let { view ->
+                restoreView(view, rule)
+            }
+        }
+        deleteRule(rule)
+    }
+
+    /** 当前全部规则（规则管理列表使用） */
+    fun allRules(): List<ViewRule> = rules
+
     /** 是否有可撤销的操作 */
     fun canUndo(): Boolean = undoStack.isNotEmpty()
 

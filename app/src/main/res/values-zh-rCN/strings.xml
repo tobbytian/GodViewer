@@ -46,4 +46,9 @@
     <string name="edit_mode_enable">开启</string>
     <string name="reset">重置规则</string>
     <string name="undo">撤销</string>
+    <string name="manage_rules">管理规则</string>
+    <string name="delete">删除</string>
+    <string name="delete_rule_confirm_message">确定删除该规则？视图将还原为原始状态（可通过通知栏「撤销」恢复）。</string>
+    <string name="no_rules">暂无规则</string>
+    <string name="hidden_status">已隐藏</string>
 </resources>
