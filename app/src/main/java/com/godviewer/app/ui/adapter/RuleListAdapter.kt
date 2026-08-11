@@ -31,7 +31,8 @@ import java.util.Locale
 class RuleListAdapter(
     private val rules: List<ViewRule>,
     private val activity: Activity?,
-    private val onDelete: (ViewRule) -> Unit
+    private val onDelete: (ViewRule) -> Unit,
+    private val onRowClick: (ViewRule) -> Unit
 ) : BaseAdapter() {
 
     override fun getCount(): Int = rules.size
@@ -75,6 +76,8 @@ class RuleListAdapter(
 
         binding.deleteButton.text = SpannableString(moduleRes.getString(R.string.delete))
         binding.deleteButton.setOnClickListener { onDelete(rule) }
+        // 整行可点：打开规则详情（行带 IGNORE_HOOK 标签，不会被编辑模式点击拦截）
+        itemView.setOnClickListener { onRowClick(rule) }
         return itemView
     }
 
