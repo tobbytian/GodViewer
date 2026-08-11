@@ -44,4 +44,5 @@
     <string name="edit_mode_off">Disabled</string>
     <string name="edit_mode_enable">Enable</string>
     <string name="reset">Reset Rule</string>
+    <string name="undo">Undo</string>
 </resources>

@@ -6,12 +6,14 @@ import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.View
 import androidx.core.view.drawToBitmap
+import androidx.core.view.isVisible
 import com.godviewer.app.IGNORE_HOOK
 import com.godviewer.app.R
 import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.databinding.LayoutQuickAttrDialogBinding
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
 import com.godviewer.app.util.EditMode
+import com.godviewer.app.util.getAttachedActivityFromView
 
 /**
  * 精简编辑弹窗：只展示元素名称、元素图标和 隐藏/高级/取消。
@@ -46,6 +48,7 @@ class QuickAttrDialog(
     }
 
     private fun setupText() {
+        binding.undoButton.text = SpannableString(moduleRes.getText(R.string.undo))
         binding.hideButton.text = SpannableString(moduleRes.getText(R.string.hide))
         binding.advancedButton.text = SpannableString(moduleRes.getText(R.string.advanced))
         binding.cancelButton.text = SpannableString(moduleRes.getText(R.string.cancel))
@@ -57,6 +60,12 @@ class QuickAttrDialog(
         binding.cancelButton.setOnClickListener {
             dismiss()
         }
+        // 撤销上一个规则操作（如刚隐藏了别的视图）；无可撤销操作时隐藏按钮
+        binding.undoButton.setOnClickListener {
+            ViewRuleManager.undoLastOperation(getAttachedActivityFromView(itemView))
+            dismiss()
+        }
+        binding.undoButton.isVisible = ViewRuleManager.canUndo()
         // 退出编辑模式：状态写 OFF 后关闭，目标应用恢复正常点击（无感，本次运行生效）
         binding.exitEditModeButton.setOnClickListener {
             EditMode.setEnabled(false)

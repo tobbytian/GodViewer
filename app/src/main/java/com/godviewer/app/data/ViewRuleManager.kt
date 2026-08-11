@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.godviewer.app.glide.GlideApp
+import com.godviewer.app.util.findViewBestMatch
 import com.godviewer.app.util.getAttachedActivityFromView
 import com.godviewer.app.util.getViewHierarchyDepth
 import com.godviewer.app.util.isInActivityWindow
@@ -26,12 +27,21 @@ object ViewRuleManager {
 
     private const val TAG = "GodViewer.Rule"
 
+    /** 撤销栈深度上限（内存态，进程重启即清空） */
+    private const val MAX_UNDO_STEPS = 10
+
     @Volatile
     private var initialized = false
     private var store: RuleStore? = null
 
     @Volatile
     private var rules: List<ViewRule> = emptyList()
+
+    /**
+     * 内存撤销栈：每次 [saveRule] / [deleteRule] 前压入当前规则列表，
+     * [undoLastOperation] 出栈恢复上一步状态（规则数据 + 持久化 + 视图回放）。
+     */
+    private val undoStack = ArrayDeque<List<ViewRule>>()
 
     /** 已应用图片的规则键 -> URL，避免全局布局回调里反复用 Glide 加载 */
     private val appliedImages = HashMap<ViewRule.RuleKey, String>()
@@ -89,6 +99,7 @@ object ViewRuleManager {
 
     /** 保存（或更新）一条规则 */
     fun saveRule(rule: ViewRule) {
+        pushUndoState()
         rule.timestamp = System.currentTimeMillis()
         appliedImages.remove(rule.key())
         val index = rules.indexOfFirst { it.key() == rule.key() }
@@ -103,10 +114,59 @@ object ViewRuleManager {
 
     /** 删除一条规则 */
     fun deleteRule(rule: ViewRule) {
+        pushUndoState()
         appliedImages.remove(rule.key())
         rules = rules.filterNot { it.key() == rule.key() }
         store?.save(rules)
         Log.d(TAG, "rule deleted: ${rule.key()}")
+    }
+
+    /** 是否有可撤销的操作 */
+    fun canUndo(): Boolean = undoStack.isNotEmpty()
+
+    /** 撤销栈是否已满，满时丢弃最旧的记录 */
+    private fun pushUndoState() {
+        undoStack.addLast(rules)
+        if (undoStack.size > MAX_UNDO_STEPS) {
+            undoStack.removeFirst()
+        }
+    }
+
+    /**
+     * 撤销上一个规则操作：恢复上一步的规则列表并持久化；[activity] 非空时
+     * 对当前界面的视图做精确回放（先还原原始值再套用上一步的 modified），
+     * 被撤销掉的新建规则（如 新建+隐藏）则直接还原视图，让隐藏的视图重新可见。
+     *
+     * @return 是否成功撤销（撤销栈为空时返回 false）
+     */
+    fun undoLastOperation(activity: Activity?): Boolean {
+        if (undoStack.isEmpty()) {
+            return false
+        }
+        val previous = undoStack.removeLast()
+        val current = rules
+        rules = previous
+        appliedImages.clear()
+        store?.save(rules)
+        activity?.let { act ->
+            // 恢复后的每条规则：先还原原始值，再套用上一步的修改状态
+            for (rule in previous) {
+                findViewBestMatch(act, rule)?.let { view ->
+                    restoreView(view, rule)
+                    applyRuleToView(view, rule)
+                }
+            }
+            // 撤销后消失的规则（上一步才新建）：还原视图为创建前状态
+            for (rule in current) {
+                if (previous.none { it.key() == rule.key() }) {
+                    findViewBestMatch(act, rule)?.let { view ->
+                        restoreView(view, rule)
+                    }
+                }
+            }
+        }
+        Log.d(TAG, "rule undone: ${previous.size} rules restored")
+        return true
     }
 
     /** 重放：把规则的修改值应用到视图。返回是否发生了布局变化。 */

@@ -13,7 +13,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.godviewer.app.R
+import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
+import com.godviewer.app.hook.hookers.ActivityLifecycleHooker
 
 /**
  * 通知栏编辑模式开关（只运行在被注入的目标进程内）。
@@ -21,6 +23,8 @@ import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
  * 在目标进程发布一条常驻通知，通知上的"切换"按钮（或点击通知本体）通过
  * PendingIntent 广播，由本对象注册的动态 BroadcastReceiver 处理：
  * 取反 [EditMode] 状态、刷新通知并 Toast 反馈。
+ * "撤销"按钮同样走广播：调用 [ViewRuleManager.undoLastOperation] 恢复上一步规则操作
+ * （隐藏 / 应用修改 / 重置删除），被隐藏的视图会重新出现，从而可再次编辑或删除。
  * 接收器用 RECEIVER_EXPORTED 注册（自定义 action，无实际风险），确保广播可靠送达。
  */
 object EditModeNotification {
@@ -28,6 +32,7 @@ object EditModeNotification {
     private const val TAG = "GodViewer.EditMode"
 
     const val ACTION_TOGGLE = "com.godviewer.app.action.TOGGLE_EDIT_MODE"
+    const val ACTION_UNDO = "com.godviewer.app.action.UNDO_LAST_OPERATION"
 
     private const val CHANNEL_ID = "godviewer_edit_mode"
     private const val NOTIFICATION_ID = 0x4756 // "GV"
@@ -55,6 +60,12 @@ object EditModeNotification {
             Intent(ACTION_TOGGLE),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val undoIntent = PendingIntent.getBroadcast(
+            app,
+            1,
+            Intent(ACTION_UNDO),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         val builder = NotificationCompat.Builder(app, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_edit)
             .setContentTitle(moduleRes.getString(R.string.edit_mode))
@@ -67,6 +78,11 @@ object EditModeNotification {
                 android.R.drawable.ic_menu_edit,
                 moduleRes.getString(R.string.edit_mode_enable),
                 toggleIntent
+            )
+            .addAction(
+                android.R.drawable.ic_menu_revert,
+                moduleRes.getString(R.string.undo),
+                undoIntent
             )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -89,20 +105,34 @@ object EditModeNotification {
         receiverRegistered = true
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                Log.d(TAG, "toggle received")
                 if (context == null) {
                     return
                 }
-                // 通知只负责"开启"编辑模式（已开启时重复点击无效果）；
-                // "关闭"由编辑弹窗的"退出编辑模式"按钮负责。setEnabled 内部会自动刷新通知
-                EditMode.setEnabled(true)
+                when (intent?.action) {
+                    // 撤销上一个规则操作：恢复规则数据并回放当前界面的视图
+                    ACTION_UNDO -> {
+                        val activity = ActivityLifecycleHooker.resumedActivity()
+                        val undone = ViewRuleManager.undoLastOperation(activity)
+                        Log.d(TAG, "undo received, undone=$undone")
+                    }
+                    // 通知只负责"开启"编辑模式（已开启时重复点击无效果）；
+                    // "关闭"由编辑弹窗的"退出编辑模式"按钮负责。setEnabled 内部会自动刷新通知
+                    else -> {
+                        Log.d(TAG, "toggle received")
+                        EditMode.setEnabled(true)
+                    }
+                }
             }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            app.registerReceiver(receiver, IntentFilter(ACTION_TOGGLE), Context.RECEIVER_EXPORTED)
-        } else {
-            app.registerReceiver(receiver, IntentFilter(ACTION_TOGGLE))
+        val filter = IntentFilter().apply {
+            addAction(ACTION_TOGGLE)
+            addAction(ACTION_UNDO)
         }
-        Log.d(TAG, "toggle receiver registered")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            app.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            app.registerReceiver(receiver, filter)
+        }
+        Log.d(TAG, "notification receivers registered")
     }
 }

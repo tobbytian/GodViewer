@@ -45,4 +45,5 @@
     <string name="edit_mode_off">已关闭</string>
     <string name="edit_mode_enable">开启</string>
     <string name="reset">重置规则</string>
+    <string name="undo">撤销</string>
 </resources>

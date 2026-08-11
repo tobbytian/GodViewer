@@ -27,6 +27,14 @@
         android:gravity="end">
 
         <Button
+            android:id="@+id/undo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:tag="GODVIEWER_IGNORE_HOOK" />
+
+        <Button
             android:id="@+id/hide_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

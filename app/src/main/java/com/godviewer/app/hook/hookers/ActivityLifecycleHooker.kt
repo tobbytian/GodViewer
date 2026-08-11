@@ -22,12 +22,21 @@ class ActivityLifecycleHooker : IHooker {
 
     private val layoutListeners = WeakHashMap<Activity, ViewTreeObserver.OnGlobalLayoutListener>()
 
+    companion object {
+        /** 最近一次 onPostResume 的 Activity（撤销时用于回放当前界面的视图） */
+        @Volatile
+        private var resumedActivity: Activity? = null
+
+        fun resumedActivity(): Activity? = resumedActivity
+    }
+
     override fun onHook(param: XC_LoadPackage.LoadPackageParam) {
         XposedHelpers.findAndHookMethod(
             Activity::class.java, "onPostResume",
             object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val activity = param.thisObject as? Activity ?: return
+                    resumedActivity = activity
                     replay(activity)
                     registerLayoutListener(activity)
                 }
@@ -38,6 +47,9 @@ class ActivityLifecycleHooker : IHooker {
             object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val activity = param.thisObject as? Activity ?: return
+                    if (resumedActivity === activity) {
+                        resumedActivity = null
+                    }
                     unregisterLayoutListener(activity)
                 }
             }
