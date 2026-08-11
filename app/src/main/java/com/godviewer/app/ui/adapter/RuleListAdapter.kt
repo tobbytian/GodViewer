@@ -14,11 +14,14 @@ import com.godviewer.app.databinding.LayoutRuleItemBinding
 import com.godviewer.app.glide.GlideApp
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
 import com.godviewer.app.util.findViewBestMatch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * 规则管理列表适配器：展示目标进程内的全部规则。
  *
- * 行标题 =（已隐藏 ·）+ 视图类简名；副标题 = Activity 简名 · resourceName / text / depth。
+ * 行标题 =（已隐藏 ·）+ 视图类简名；副标题 = 修改时间（当天 HH:mm:ss，非当天 yyyy-MM-dd）。
  * 行首缩略图：通过 [findViewBestMatch] 在当前 Activity 中定位该规则对应的活视图，
  * 用 Glide 自定义 loader 绘制缩略图；定位不到（规则属于其他 Activity 或视图已销毁）时显示占位图标。
  * 「删除」按钮回调给 [onDelete]，由弹窗负责确认与删除。按钮带 IGNORE_HOOK 标签，
@@ -52,12 +55,7 @@ class RuleListAdapter(
         val prefix = if (hidden) moduleRes.getString(R.string.hidden_status) + " · " else ""
         binding.ruleTitle.text =
             SpannableString(prefix + rule.viewClass.substringAfterLast('.'))
-        val activityName = rule.activityClass.substringAfterLast('.')
-        val detail = rule.resourceName
-            ?: rule.text?.let { "text: $it" }
-            ?: rule.description?.let { "desc: $it" }
-            ?: moduleRes.getString(R.string.position_path) + ": " + displayDepth(rule.depth)
-        binding.ruleSubtitle.text = SpannableString("$activityName · $detail")
+        binding.ruleSubtitle.text = SpannableString(formatTimestamp(rule.timestamp))
 
         // 缩略图：当前 Activity 中定位活视图并绘制；找不到则用占位图标
         val liveView = activity?.let { findViewBestMatch(it, rule) }
@@ -75,11 +73,12 @@ class RuleListAdapter(
         return itemView
     }
 
-    /** 深度路径的友好显示：超过 6 段时截断（如 0/1/0/0/0/2/…） */
-    private fun displayDepth(depth: List<Int>): String {
-        if (depth.size <= 6) {
-            return depth.joinToString("/")
-        }
-        return depth.take(6).joinToString("/") + "/…"
+    /** 修改时间显示：当天 HH:mm:ss，非当天 yyyy-MM-dd */
+    private fun formatTimestamp(timestamp: Long): String {
+        val date = Date(timestamp)
+        val day = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val sameDay = day.format(date) == day.format(Date())
+        val pattern = if (sameDay) "HH:mm:ss" else "yyyy-MM-dd"
+        return SimpleDateFormat(pattern, Locale.getDefault()).format(date)
     }
 }

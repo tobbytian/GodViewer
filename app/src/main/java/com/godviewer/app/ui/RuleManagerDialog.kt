@@ -45,9 +45,9 @@ class RuleManagerDialog(context: Context) : AlertDialog(context) {
         binding.title.text = SpannableString(title)
     }
 
-    /** 重建规则列表；无规则时显示空态 */
+    /** 重建规则列表（按修改时间从新到旧）；无规则时显示空态 */
     private fun refreshList() {
-        val rules = ViewRuleManager.allRules()
+        val rules = ViewRuleManager.allRules().sortedByDescending { it.timestamp }
         binding.emptyView.isVisible = rules.isEmpty()
         binding.ruleList.isVisible = rules.isNotEmpty()
         binding.ruleList.adapter = RuleListAdapter(rules, context as? Activity) { rule ->
