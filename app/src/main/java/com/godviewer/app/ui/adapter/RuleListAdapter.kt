@@ -7,11 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.View.GONE
 import android.widget.BaseAdapter
+import androidx.core.view.drawToBitmap
 import com.godviewer.app.IGNORE_HOOK
 import com.godviewer.app.R
 import com.godviewer.app.data.ViewRule
+import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.databinding.LayoutRuleItemBinding
-import com.godviewer.app.glide.GlideApp
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
 import com.godviewer.app.util.findViewBestMatch
 import java.text.SimpleDateFormat
@@ -57,15 +58,19 @@ class RuleListAdapter(
             SpannableString(prefix + rule.viewClass.substringAfterLast('.'))
         binding.ruleSubtitle.text = SpannableString(formatTimestamp(rule.timestamp))
 
-        // 缩略图：当前 Activity 中定位活视图并绘制；找不到则用占位图标
-        val liveView = activity?.let { findViewBestMatch(it, rule) }
-        if (liveView != null && liveView.isLaidOut) {
-            GlideApp.with(itemView.context)
-                .load(liveView)
-                .skipMemoryCache(true)
-                .into(binding.ruleThumb)
+        // 缩略图：优先用规则创建时缓存的图（与编辑弹窗预览一致）；无缓存则尝试
+        // 当前 Activity 中的活视图直接绘制；都不行则用占位图标
+        val cachedThumb = ViewRuleManager.thumbnailFor(rule)
+        if (cachedThumb != null) {
+            binding.ruleThumb.setImageBitmap(cachedThumb)
         } else {
-            binding.ruleThumb.setImageResource(android.R.drawable.ic_menu_gallery)
+            val liveView = activity?.let { findViewBestMatch(it, rule) }
+            if (liveView != null && liveView.isLaidOut && liveView.width > 0 && liveView.height > 0) {
+                runCatching { binding.ruleThumb.setImageBitmap(liveView.drawToBitmap()) }
+                    .getOrElse { binding.ruleThumb.setImageResource(android.R.drawable.ic_menu_gallery) }
+            } else {
+                binding.ruleThumb.setImageResource(android.R.drawable.ic_menu_gallery)
+            }
         }
 
         binding.deleteButton.text = SpannableString(moduleRes.getString(R.string.delete))

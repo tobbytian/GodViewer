@@ -2,11 +2,13 @@ package com.godviewer.app.data
 
 import android.app.Activity
 import android.app.Application
+import android.graphics.Bitmap
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.drawToBitmap
 import com.godviewer.app.glide.GlideApp
 import com.godviewer.app.util.findViewBestMatch
 import com.godviewer.app.util.getAttachedActivityFromView
@@ -46,6 +48,13 @@ object ViewRuleManager {
     /** 已应用图片的规则键 -> URL，避免全局布局回调里反复用 Glide 加载 */
     private val appliedImages = HashMap<ViewRule.RuleKey, String>()
 
+    /**
+     * 规则键 -> 缩略图（内存缓存，进程重启即清空）。
+     * 在 [createRule] 时（视图仍可见、尚未被隐藏/修改）截取，与编辑弹窗预览图一致，
+     * 供规则管理列表展示；视图被隐藏后 drawToBitmap 画不出有效内容。
+     */
+    private val thumbnails = HashMap<ViewRule.RuleKey, Bitmap>()
+
     fun init(application: Application) {
         if (initialized) {
             return
@@ -82,7 +91,7 @@ object ViewRuleManager {
             return null
         }
         val snapshot = captureSnapshot(view)
-        return ViewRule(
+        val rule = ViewRule(
             packageName = activity.packageName,
             matchVersionCode = versionCode(activity),
             activityClass = activity.componentName.className,
@@ -95,6 +104,27 @@ object ViewRuleManager {
             modified = snapshot,
             timestamp = System.currentTimeMillis()
         )
+        // 视图此刻仍可见，截取缩略图供规则管理列表使用（与编辑弹窗预览一致）
+        if (view.isLaidOut && view.width > 0 && view.height > 0) {
+            runCatching { thumbnails[rule.key()] = scaleDownThumbnail(view.drawToBitmap()) }
+        }
+        return rule
+    }
+
+    /** 规则对应的缩略图（无缓存时为 null） */
+    fun thumbnailFor(rule: ViewRule): Bitmap? = thumbnails[rule.key()]
+
+    /** 缩略图最大边长限制，避免大视图占用过多内存 */
+    private fun scaleDownThumbnail(bitmap: Bitmap, max: Int = 256): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+        if (width <= max && height <= max) {
+            return bitmap
+        }
+        val scale = max.toFloat() / maxOf(width, height)
+        val newWidth = (width * scale).toInt().coerceAtLeast(1)
+        val newHeight = (height * scale).toInt().coerceAtLeast(1)
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
     }
 
     /** 保存（或更新）一条规则 */
@@ -116,6 +146,7 @@ object ViewRuleManager {
     fun deleteRule(rule: ViewRule) {
         pushUndoState()
         appliedImages.remove(rule.key())
+        thumbnails.remove(rule.key())
         rules = rules.filterNot { it.key() == rule.key() }
         store?.save(rules)
         Log.d(TAG, "rule deleted: ${rule.key()}")

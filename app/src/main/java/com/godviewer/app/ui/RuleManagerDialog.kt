@@ -53,6 +53,10 @@ class RuleManagerDialog(context: Context) : AlertDialog(context) {
         binding.ruleList.adapter = RuleListAdapter(rules, context as? Activity) { rule ->
             showDeleteConfirm(rule)
         }
+        // 点击规则行打开详情
+        binding.ruleList.setOnItemClickListener { _, _, position, _ ->
+            rules.getOrNull(position)?.let { RuleDetailDialog(context, it).show() }
+        }
     }
 
     /** 删除确认框：自定义带 IGNORE_HOOK 标签的视图，避免被编辑模式点击拦截 */
