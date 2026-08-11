@@ -50,7 +50,7 @@ class RuleManagerDialog(context: Context) : AlertDialog(context) {
         val rules = ViewRuleManager.allRules()
         binding.emptyView.isVisible = rules.isEmpty()
         binding.ruleList.isVisible = rules.isNotEmpty()
-        binding.ruleList.adapter = RuleListAdapter(rules) { rule ->
+        binding.ruleList.adapter = RuleListAdapter(rules, context as? Activity) { rule ->
             showDeleteConfirm(rule)
         }
     }

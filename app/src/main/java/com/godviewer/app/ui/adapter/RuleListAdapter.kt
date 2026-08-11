@@ -1,5 +1,6 @@
 package com.godviewer.app.ui.adapter
 
+import android.app.Activity
 import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.View
@@ -10,17 +11,22 @@ import com.godviewer.app.IGNORE_HOOK
 import com.godviewer.app.R
 import com.godviewer.app.data.ViewRule
 import com.godviewer.app.databinding.LayoutRuleItemBinding
+import com.godviewer.app.glide.GlideApp
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
+import com.godviewer.app.util.findViewBestMatch
 
 /**
  * 规则管理列表适配器：展示目标进程内的全部规则。
  *
  * 行标题 =（已隐藏 ·）+ 视图类简名；副标题 = Activity 简名 · resourceName / text / depth。
+ * 行首缩略图：通过 [findViewBestMatch] 在当前 Activity 中定位该规则对应的活视图，
+ * 用 Glide 自定义 loader 绘制缩略图；定位不到（规则属于其他 Activity 或视图已销毁）时显示占位图标。
  * 「删除」按钮回调给 [onDelete]，由弹窗负责确认与删除。按钮带 IGNORE_HOOK 标签，
  * 避免编辑模式下点击被 ViewClickWrapper 拦截。
  */
 class RuleListAdapter(
     private val rules: List<ViewRule>,
+    private val activity: Activity?,
     private val onDelete: (ViewRule) -> Unit
 ) : BaseAdapter() {
 
@@ -46,11 +52,23 @@ class RuleListAdapter(
         val prefix = if (hidden) moduleRes.getString(R.string.hidden_status) + " · " else ""
         binding.ruleTitle.text =
             SpannableString(prefix + rule.viewClass.substringAfterLast('.'))
-        val activity = rule.activityClass.substringAfterLast('.')
+        val activityName = rule.activityClass.substringAfterLast('.')
         val detail = rule.resourceName
             ?: rule.text?.let { "text: $it" }
             ?: rule.depth.joinToString("/")
-        binding.ruleSubtitle.text = SpannableString("$activity · $detail")
+        binding.ruleSubtitle.text = SpannableString("$activityName · $detail")
+
+        // 缩略图：当前 Activity 中定位活视图并绘制；找不到则用占位图标
+        val liveView = activity?.let { findViewBestMatch(it, rule) }
+        if (liveView != null && liveView.isLaidOut) {
+            GlideApp.with(itemView.context)
+                .load(liveView)
+                .skipMemoryCache(true)
+                .into(binding.ruleThumb)
+        } else {
+            binding.ruleThumb.setImageResource(android.R.drawable.ic_menu_gallery)
+        }
+
         binding.deleteButton.text = SpannableString(moduleRes.getString(R.string.delete))
         binding.deleteButton.setOnClickListener { onDelete(rule) }
         return itemView
