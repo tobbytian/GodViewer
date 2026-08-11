@@ -7,10 +7,12 @@ import android.text.SpannableString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import com.godviewer.app.IGNORE_HOOK
 import com.godviewer.app.R
 import com.godviewer.app.data.ViewAttrSnapshot
 import com.godviewer.app.data.ViewRule
+import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.databinding.LayoutRuleDetailDialogBinding
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
 import java.text.SimpleDateFormat
@@ -38,6 +40,13 @@ class RuleDetailDialog(context: Context, private val rule: ViewRule) : AlertDial
         val hidden = rule.changedVisibility && rule.modified.visibility == View.GONE
         val prefix = if (hidden) moduleRes.getString(R.string.hidden_status) + " · " else ""
         setTitle(prefix + rule.viewClass.substringAfterLast('.'))
+        // 顶部展示该规则对应的缩略图（无缩略图时隐藏）
+        val thumb = ViewRuleManager.thumbnailFor(rule)
+        if (thumb != null) {
+            binding.detailThumb.setImageBitmap(thumb)
+        } else {
+            binding.detailThumb.isVisible = false
+        }
         binding.detailText.text = SpannableString(buildDetail())
     }
 

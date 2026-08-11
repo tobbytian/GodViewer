@@ -79,6 +79,8 @@ class ActivityLifecycleHooker : IHooker {
         for (rule in rules) {
             val view = findViewBestMatch(activity, rule) ?: continue
             ViewRuleManager.applyRuleToView(view, rule)
+            // 旧规则/重启后：对可见视图补抓一次缩略图（已有则跳过）
+            ViewRuleManager.captureThumbnail(view, rule)
         }
     }
 }

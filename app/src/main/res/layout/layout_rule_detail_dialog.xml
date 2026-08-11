@@ -15,6 +15,14 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
+    <ImageView
+        android:id="@+id/detail_thumb"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginBottom="10dp"
+        android:scaleType="centerCrop"
+        android:tag="GODVIEWER_IGNORE_HOOK" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

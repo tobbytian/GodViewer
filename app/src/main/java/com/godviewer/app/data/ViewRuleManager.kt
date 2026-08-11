@@ -2,7 +2,9 @@ package com.godviewer.app.data
 
 import android.app.Activity
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.drawToBitmap
 import com.godviewer.app.glide.GlideApp
+import java.io.File
+import java.io.FileOutputStream
+import java.security.MessageDigest
 import com.godviewer.app.util.findViewBestMatch
 import com.godviewer.app.util.getAttachedActivityFromView
 import com.godviewer.app.util.getViewHierarchyDepth
@@ -35,6 +40,7 @@ object ViewRuleManager {
     @Volatile
     private var initialized = false
     private var store: RuleStore? = null
+    private var appContext: Context? = null
 
     @Volatile
     private var rules: List<ViewRule> = emptyList()
@@ -60,6 +66,7 @@ object ViewRuleManager {
             return
         }
         initialized = true
+        appContext = application.applicationContext
         val ruleStore = RuleStore(application.applicationContext)
         store = ruleStore
         rules = ruleStore.load()
@@ -104,15 +111,48 @@ object ViewRuleManager {
             modified = snapshot,
             timestamp = System.currentTimeMillis()
         )
-        // 视图此刻仍可见，截取缩略图供规则管理列表使用（与编辑弹窗预览一致）
-        if (view.isLaidOut && view.width > 0 && view.height > 0) {
-            runCatching { thumbnails[rule.key()] = scaleDownThumbnail(view.drawToBitmap()) }
-        }
+        // 视图此刻仍可见，截取缩略图供规则管理列表使用（与编辑弹窗预览一致），并持久化
+        captureThumbnail(view, rule)
         return rule
     }
 
-    /** 规则对应的缩略图（无缓存时为 null） */
-    fun thumbnailFor(rule: ViewRule): Bitmap? = thumbnails[rule.key()]
+    /**
+     * 规则对应的缩略图：内存缓存 → 磁盘文件 → null。
+     * 缩略图持久化在目标应用数据目录（files/godviewer/thumbnails/），
+     * 进程重启 / 模块更新后仍可读取。
+     */
+    fun thumbnailFor(rule: ViewRule): Bitmap? {
+        thumbnails[rule.key()]?.let { return it }
+        val file = thumbnailFile(rule.key()) ?: return null
+        if (!file.exists()) {
+            return null
+        }
+        return runCatching {
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            if (bitmap != null) {
+                thumbnails[rule.key()] = bitmap
+            }
+            bitmap
+        }.getOrNull()
+    }
+
+    /**
+     * 截取并持久化缩略图（视图须已布局且当前可见）。已有缩略图（内存或文件）时跳过，
+     * 避免重放过程中反复截取写文件。隐藏（GONE）或无尺寸的视图无法画出有效内容，跳过。
+     */
+    fun captureThumbnail(view: View, rule: ViewRule) {
+        if (thumbnailFor(rule) != null) {
+            return
+        }
+        if (view.visibility == View.GONE || !view.isLaidOut || view.width <= 0 || view.height <= 0) {
+            return
+        }
+        runCatching {
+            val bitmap = scaleDownThumbnail(view.drawToBitmap())
+            thumbnails[rule.key()] = bitmap
+            saveThumbnailToFile(rule.key(), bitmap)
+        }
+    }
 
     /** 缩略图最大边长限制，避免大视图占用过多内存 */
     private fun scaleDownThumbnail(bitmap: Bitmap, max: Int = 256): Bitmap {
@@ -125,6 +165,38 @@ object ViewRuleManager {
         val newWidth = (width * scale).toInt().coerceAtLeast(1)
         val newHeight = (height * scale).toInt().coerceAtLeast(1)
         return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+    }
+
+    private val thumbnailDir: File?
+        get() = appContext?.let { File(File(it.filesDir, "godviewer"), "thumbnails") }
+
+    private fun thumbnailFile(key: ViewRule.RuleKey): File? {
+        val dir = thumbnailDir ?: return null
+        return File(dir, thumbnailName(key))
+    }
+
+    /** 规则键 → 文件名：键内容 SHA-256 前 16 位十六进制 + .png */
+    private fun thumbnailName(key: ViewRule.RuleKey): String {
+        val raw = "${key.activityClass}|${key.viewClass}|${key.depth.joinToString(",")}"
+        return sha256(raw).take(16) + ".png"
+    }
+
+    private fun sha256(input: String): String = try {
+        MessageDigest.getInstance("SHA-256")
+            .digest(input.toByteArray())
+            .joinToString("") { "%02x".format(it.toInt() and 0xFF) }
+    } catch (e: Exception) {
+        input.hashCode().toString().replace("-", "n")
+    }
+
+    private fun saveThumbnailToFile(key: ViewRule.RuleKey, bitmap: Bitmap) {
+        val file = thumbnailFile(key) ?: return
+        runCatching {
+            file.parentFile?.mkdirs()
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+        }
     }
 
     /** 保存（或更新）一条规则 */
@@ -147,6 +219,7 @@ object ViewRuleManager {
         pushUndoState()
         appliedImages.remove(rule.key())
         thumbnails.remove(rule.key())
+        thumbnailFile(rule.key())?.delete()
         rules = rules.filterNot { it.key() == rule.key() }
         store?.save(rules)
         Log.d(TAG, "rule deleted: ${rule.key()}")
