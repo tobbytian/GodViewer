@@ -55,4 +55,19 @@
     <color name="md_theme_dark_inversePrimary">#6750A4</color>
     <color name="md_theme_dark_shadow">#000000</color>
     <color name="md_theme_dark_primaryInverse">#6750A4</color>
+
+    <!-- Host home screen -->
+    <color name="home_page_background">#F7F7FB</color>
+    <color name="home_card_background">#F0F1F6</color>
+    <color name="home_link_chip_background">#E8EAF0</color>
+    <color name="home_activated_card">#1565C0</color>
+    <color name="home_activated_on_card">#FFFFFF</color>
+    <color name="home_deactivated_card">#FFF3E0</color>
+    <color name="home_deactivated_on_card">#E65100</color>
+    <color name="home_title_text">#1C1B1F</color>
+    <color name="home_subtitle_text">#5F5E63</color>
+    <color name="home_nav_bar_background">@android:color/transparent</color>
+    <color name="home_nav_item_selected_bg">#F3E8FF</color>
+    <color name="home_nav_item_unselected">#6B6B75</color>
+    <color name="home_divider">#E0E2EA</color>
 </resources>

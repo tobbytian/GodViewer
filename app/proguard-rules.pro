@@ -23,6 +23,13 @@
 -keep class com.godviewer.app.hook.AnyHookPackage
 -keep class com.godviewer.app.hook.AnyHookZygote
 
+# Host activation probe: Xposed hooks isActivated via app ClassLoader + reflection
+-keep class com.godviewer.app.util.ModuleStatus { *; }
+-keepclassmembers class com.godviewer.app.util.ModuleStatus {
+    public static boolean isActivated();
+    public static boolean check();
+}
+
 # Gson 反射序列化持久化规则
 -keep class com.godviewer.app.data.** { *; }
 

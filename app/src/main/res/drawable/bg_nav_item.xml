@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Small pill behind the icon only; label sits below without a full-item wash. -->
+    <item android:state_checked="true">
+        <layer-list>
+            <item
+                android:width="56dp"
+                android:height="28dp"
+                android:gravity="center_horizontal|top"
+                android:top="4dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/home_nav_item_selected_bg" />
+                    <corners android:radius="14dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <color android:color="@android:color/transparent" />
+    </item>
+</selector>

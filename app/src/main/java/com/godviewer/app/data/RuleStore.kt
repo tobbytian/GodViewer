@@ -52,6 +52,10 @@ internal class RuleStore(private val context: Context) {
                 if (tmp.exists()) {
                     tmp.renameTo(file)
                 }
+                // 镜像同步到本体（失败不影响目标应用）
+                val packageName = rules.firstOrNull()?.packageName
+                    ?: context.packageName
+                RuleMirror.pushFromTarget(context, packageName, rules)
             } catch (e: Exception) {
                 // 持久化失败不影响目标应用运行
             }

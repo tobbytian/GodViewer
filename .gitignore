@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+tools-Android/
+.zcode/
+a.py
+HANDOFF.md

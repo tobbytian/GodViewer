@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="@android:color/transparent"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <FrameLayout
+        android:layout_width="64dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_horizontal">
+
+        <View
+            android:id="@+id/iconHighlight"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_nav_icon_selected"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/iconView"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            tools:src="@drawable/ic_nav_home_24" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/labelView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:ellipsize="none"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textColor="@color/home_nav_item_unselected"
+        android:textSize="11sp"
+        tools:text="主页" />
+</LinearLayout>

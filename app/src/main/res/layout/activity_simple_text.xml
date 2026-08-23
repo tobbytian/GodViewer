@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/home_page_background"
+    android:orientation="vertical"
+    tools:context=".ui.host.SimpleTextActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/home_page_background"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:titleTextColor="@color/home_title_text"
+        tools:title="Title" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true">
+
+        <TextView
+            android:id="@+id/bodyText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="4dp"
+            android:padding="24dp"
+            android:textColor="@color/home_title_text"
+            android:textIsSelectable="true"
+            android:textSize="15sp"
+            tools:text="Body" />
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
