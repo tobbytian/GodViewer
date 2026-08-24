@@ -10,12 +10,10 @@
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
+        style="@style/HostSecondaryToolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/home_page_background"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="@string/mirror_list_title"
-        app:titleTextColor="@color/home_title_text" />
+        android:layout_height="wrap_content"
+        app:title="@string/mirror_list_title" />
 
     <TextView
         android:layout_width="match_parent"

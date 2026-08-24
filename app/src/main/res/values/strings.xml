@@ -52,7 +52,7 @@
     <string name="settings_changelog_subtitle">What changed in recent versions</string>
     <string name="settings_user_agreement_title">User agreement</string>
     <string name="settings_user_agreement_subtitle">License and usage terms</string>
-    <string name="changelog_body">GodViewer changelog\n\n3.2.1 — New UI version\n• Host bottom navigation: Home / Guide / Rules / Settings\n• Rule mirror list with app icons and detail pages\n• Settings: language (system/zh/en), hide desktop icon, check updates, auto-update preference, changelog, user agreement\n• Global watermark and tab fade animation\n\n2.2.1\n• Cap preview image height so edit buttons stay visible for large views\n\n2.2.0\n• Rule manager in the injected UI\n• Persist and replay view rules after app restart</string>
+    <string name="changelog_body">GodViewer changelog\n\n3.2.2\n• Donate page with WeChat Pay and Alipay QR codes\n• Align secondary page toolbars with primary tab titles\n\n3.2.1 — New UI version\n• Host bottom navigation: Home / Guide / Rules / Settings\n• Rule mirror list with app icons and detail pages\n• Settings: language (system/zh/en), hide desktop icon, check updates, auto-update preference, changelog, user agreement\n• Global watermark and tab fade animation\n\n2.2.1\n• Cap preview image height so edit buttons stay visible for large views\n\n2.2.0\n• Rule manager in the injected UI\n• Persist and replay view rules after app restart</string>
     <string name="user_agreement_body">User agreement\n\nGodViewer is free and open-source software licensed under the GNU General Public License v3.0 (GPL-3.0).\n\n1. This software is provided for learning, research, and personal debugging only.\n2. You are solely responsible for how you use this module, including compliance with local laws and the terms of any target applications.\n3. Do not use GodViewer to tamper with apps in ways that harm others, bypass paid features illegally, or distribute malware.\n4. The software is provided \"AS IS\", without warranty of any kind. Authors are not liable for data loss, account bans, or device issues arising from use.\n5. Prefer installing builds you compile yourself or download from the official GitHub repository. Avoid unknown APK sources.\n6. By using this software you agree to the GPL-3.0 license terms and the cautions above.\n\nFull license text: https://www.gnu.org/licenses/gpl-3.0.html\nSource: https://github.com/tobbytian/GodViewer</string>
     <string name="status_activated">Activated</string>
     <string name="status_not_activated">Not activated</string>
@@ -61,7 +61,11 @@
     <string name="status_version_format">%1$s (%2$d)</string>
     <string name="link_github">GitHub</string>
     <string name="link_donate">Donate</string>
-    <string name="donate_placeholder">Thanks for your support! Donation options will be available later.</string>
+    <string name="donate_title">Donate</string>
+    <string name="donate_intro">If GodViewer helps you, a coffee is appreciated. Scan a QR code below with WeChat or Alipay. Thank you!</string>
+    <string name="donate_wechat">WeChat Pay</string>
+    <string name="donate_alipay">Alipay</string>
+
     <string name="mirror_entry_title">Synced rules</string>
     <string name="mirror_entry_subtitle">Rules mirrored from apps you edited</string>
     <string name="mirror_entry_subtitle_count">%1$d app(s) with mirrored rules</string>

@@ -53,7 +53,7 @@
     <string name="settings_changelog_subtitle">查看近期版本变化</string>
     <string name="settings_user_agreement_title">用户协议</string>
     <string name="settings_user_agreement_subtitle">许可与使用条款</string>
-    <string name="changelog_body">上帝视角 更新日志\n\n3.2.1 — 新 UI 版本\n• 宿主底部导航：主页 / 教程 / 规则 / 设置\n• 规则镜像列表（应用图标 + 详情页）\n• 设置：语言（跟随系统/中文/English）、隐藏桌面图标、检查更新、自动更新偏好、更新日志、用户协议\n• 全局水印与页签切换动画\n\n2.2.1\n• 限制预览图高度，大视图时编辑按钮仍可见\n\n2.2.0\n• 注入侧规则管理\n• 规则持久化，应用重启后自动回放</string>
+    <string name="changelog_body">上帝视角 更新日志\n\n3.2.2\n• 捐赠页：微信 / 支付宝收款码\n• 二级页面顶栏与一级页标题对齐\n\n3.2.1 — 新 UI 版本\n• 宿主底部导航：主页 / 教程 / 规则 / 设置\n• 规则镜像列表（应用图标 + 详情页）\n• 设置：语言（跟随系统/中文/English）、隐藏桌面图标、检查更新、自动更新偏好、更新日志、用户协议\n• 全局水印与页签切换动画\n\n2.2.1\n• 限制预览图高度，大视图时编辑按钮仍可见\n\n2.2.0\n• 注入侧规则管理\n• 规则持久化，应用重启后自动回放</string>
     <string name="user_agreement_body">用户协议\n\n上帝视角（GodViewer）是基于 GNU 通用公共许可证第 3 版（GPL-3.0）发布的免费开源软件。\n\n1. 本软件仅供学习、研究与个人调试使用。\n2. 你须自行对使用方式负责，包括遵守当地法律以及目标应用的服务条款。\n3. 禁止利用本模块侵害他人、非法绕过付费功能或传播恶意软件。\n4. 本软件按「现状」提供，不作任何担保。作者不对因使用导致的数据丢失、账号封禁或设备异常承担责任。\n5. 请优先自行编译，或从官方 GitHub 仓库下载安装包，避免来源不明的 APK。\n6. 使用本软件即表示你同意 GPL-3.0 许可条款及上述注意事项。\n\n完整许可证：https://www.gnu.org/licenses/gpl-3.0.html\n源码：https://github.com/tobbytian/GodViewer</string>
     <string name="status_activated">已激活</string>
     <string name="status_not_activated">未激活</string>
@@ -62,7 +62,11 @@
     <string name="status_version_format">%1$s (%2$d)</string>
     <string name="link_github">GitHub</string>
     <string name="link_donate">捐赠</string>
-    <string name="donate_placeholder">感谢支持！捐赠方式稍后开放。</string>
+    <string name="donate_title">捐赠</string>
+    <string name="donate_intro">如果上帝视角帮到了你，欢迎请作者喝杯咖啡。使用微信或支付宝扫描下方收款码即可，谢谢支持！</string>
+    <string name="donate_wechat">微信支付</string>
+    <string name="donate_alipay">支付宝</string>
+
     <string name="mirror_entry_title">已同步规则</string>
     <string name="mirror_entry_subtitle">从你编辑过的应用同步来的规则镜像</string>
     <string name="mirror_entry_subtitle_count">已有 %1$d 个应用同步了规则</string>

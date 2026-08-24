@@ -34,4 +34,13 @@
         <item name="android:textSize">11sp</item>
         <item name="android:includeFontPadding">false</item>
     </style>
+
+    <!-- Align secondary toolbar titles with primary tab titles (48dp top padding). -->
+    <style name="HostSecondaryToolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@color/home_page_background</item>
+        <item name="android:minHeight">?attr/actionBarSize</item>
+        <item name="android:paddingTop">32dp</item>
+        <item name="titleTextColor">@color/home_title_text</item>
+        <item name="navigationIcon">?attr/homeAsUpIndicator</item>
+    </style>
 </resources>

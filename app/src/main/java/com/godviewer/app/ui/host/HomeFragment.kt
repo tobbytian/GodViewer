@@ -14,10 +14,10 @@ import com.godviewer.app.BuildConfig
 import com.godviewer.app.R
 import com.godviewer.app.data.RuleMirror
 import com.godviewer.app.databinding.FragmentHomeBinding
-import com.godviewer.app.util.DONATE_URL
 import com.godviewer.app.util.GITHUB_PAGE_URL
 import com.godviewer.app.util.ModuleStatus
 import com.google.android.material.card.MaterialCardView
+
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -45,12 +45,9 @@ class HomeFragment : Fragment() {
 
         binding.githubButton.setOnClickListener { openUrl(GITHUB_PAGE_URL) }
         binding.donateButton.setOnClickListener {
-            if (DONATE_URL.isNotBlank()) {
-                openUrl(DONATE_URL)
-            } else {
-                Toast.makeText(requireContext(), R.string.donate_placeholder, Toast.LENGTH_SHORT).show()
-            }
+            startActivity(Intent(requireContext(), DonateActivity::class.java))
         }
+
     }
 
     override fun onResume() {
