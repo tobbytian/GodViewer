@@ -1,7 +1,11 @@
 package com.godviewer.app
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.godviewer.app.databinding.ActivityMainBinding
@@ -11,11 +15,18 @@ import com.godviewer.app.ui.host.HomeFragment
 import com.godviewer.app.ui.host.HostActivity
 import com.godviewer.app.ui.host.RulesFragment
 import com.godviewer.app.ui.host.SettingsFragment
-import com.godviewer.app.util.HiddenEntryNotifier
+import com.godviewer.app.util.HostControlBridge
+import com.godviewer.app.util.HostControlNotifier
 
 class MainActivity : HostActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private var selectedTabId = R.id.nav_home
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) {
+        HostControlNotifier.refresh(this)
+    }
 
     private data class Tab(
         val id: Int,
@@ -32,7 +43,8 @@ class MainActivity : HostActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        HiddenEntryNotifier.refresh(this)
+        maybeRequestNotificationPermission()
+        HostControlNotifier.refresh(this)
         setupTabs()
 
         val openSettings = intent?.getBooleanExtra(SettingsFragment.EXTRA_OPEN_SETTINGS, false) == true
@@ -44,9 +56,27 @@ class MainActivity : HostActivity() {
         selectTab(selectedTabId, animate = false)
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Opening the host app means previous target is no longer the active control context.
+        HostControlBridge.clearTargetState(this)
+        HostControlNotifier.refresh(this)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt(STATE_TAB, selectedTabId)
+    }
+
+    private fun maybeRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     private fun setupTabs() {

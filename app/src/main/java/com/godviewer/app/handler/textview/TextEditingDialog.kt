@@ -2,12 +2,12 @@ package com.godviewer.app.handler.textview
 
 import android.os.Bundle
 import android.text.SpannableString
-import android.view.LayoutInflater
 import android.widget.TextView
 import com.godviewer.app.R
 import com.godviewer.app.databinding.LayoutTextViewAttrBinding
 import com.godviewer.app.ui.BaseAttrDialog
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
+import com.godviewer.app.util.ModuleDialogUi
 
 /**
  * @author hhvvg
@@ -15,13 +15,10 @@ import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
  * Editing attributes in TextView.
  */
 class TextEditingDialog(private val view: TextView) : BaseAttrDialog<TextViewAttrData>(view) {
-    private val rootView by lazy {
-        val layout = moduleRes.getLayout(R.layout.layout_text_view_attr)
-        val inflater = LayoutInflater.from(context)
-        inflater.inflate(layout, null)
-    }
     private val binding by lazy {
-        LayoutTextViewAttrBinding.bind(rootView)
+        LayoutTextViewAttrBinding.bind(
+            ModuleDialogUi.inflate(context, R.layout.layout_text_view_attr)
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

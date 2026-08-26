@@ -28,7 +28,7 @@ object LauncherIconHelper {
                 PackageManager.DONT_KILL_APP,
             )
             HostPrefs.setLauncherIconHidden(context, hidden)
-            HiddenEntryNotifier.refresh(context)
+            HostControlNotifier.refresh(context)
             Log.d(TAG, "launcher icon hidden=$hidden")
         }.onFailure {
             Log.w(TAG, "failed to toggle launcher icon", it)

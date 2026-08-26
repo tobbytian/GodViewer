@@ -22,9 +22,9 @@
     <string name="guide_step_3_title">3. Scope target apps</string>
     <string name="guide_step_3_body">Add the apps you want to inspect to the module scope, then force-stop those apps (or reboot) so hooks load cleanly.</string>
     <string name="guide_step_4_title">4. Edit views</string>
-    <string name="guide_step_4_body">Open a scoped app, enable edit mode from the GodViewer notification or entry, tap a view, adjust size / margin / padding / visibility / text / image, then Apply. Rules are saved inside the target app and replay after restart.</string>
+    <string name="guide_step_4_body">Open a scoped app, pull down the notification shade, and use GodViewer\'s own notification: Enable / Undo / Manage Rules. Then tap a view, adjust size / margin / padding / visibility / text / image, and Apply. Rules are saved inside the target app and replay after restart.</string>
     <string name="guide_tips_title">Tips</string>
-    <string name="guide_tips_body">• Synced rules on the Rules tab are read-only mirrors pushed when a target saves rules.\n• Keep this app process alive (e.g. in recents) if you want mirrors to arrive reliably.\n• Only the target apps you edit need notification permission (for the edit-mode control). GodViewer itself does not request notification permission.\n• Corrupt rule files are ignored safely and will not crash the target app.</string>
+    <string name="guide_tips_body">• The control entry is GodViewer\'s own persistent notification — target apps no longer need notification permission for edit mode.\n• Keep GodViewer alive in the background so the notification can reach the last foreground target.\n• Synced rules on the Rules tab are read-only mirrors pushed when a target saves rules.\n• Corrupt rule files are ignored safely and will not crash the target app.</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_system">Follow system</string>
     <string name="settings_language_zh">中文</string>
@@ -40,6 +40,12 @@
     <string name="hidden_entry_channel_desc">Persistent shortcut to open GodViewer after the desktop icon is hidden</string>
     <string name="hidden_entry_notification_title">GodViewer</string>
     <string name="hidden_entry_notification_text">Tap to open · desktop icon is hidden</string>
+    <string name="host_control_channel_name">GodViewer controls</string>
+    <string name="host_control_channel_desc">Persistent entry: open GodViewer and control edit mode in the last target app</string>
+    <string name="host_control_notification_title">GodViewer</string>
+    <string name="host_control_no_target_text">No active target yet · open a scoped app first · tap to open GodViewer</string>
+    <string name="host_control_target_text">%1$s · edit mode %2$s · tap to open GodViewer</string>
+    <string name="host_control_no_target">No active target app. Open a scoped app first.</string>
     <string name="settings_check_update_title">Check for updates</string>
     <string name="settings_check_update_subtitle">Open GitHub releases</string>
     <string name="settings_check_update_subtitle_version">Current %1$s (%2$d) · open GitHub releases</string>
@@ -52,7 +58,7 @@
     <string name="settings_changelog_subtitle">What changed in recent versions</string>
     <string name="settings_user_agreement_title">User agreement</string>
     <string name="settings_user_agreement_subtitle">License and usage terms</string>
-    <string name="changelog_body">GodViewer changelog\n\n3.2.2\n• Donate page with WeChat Pay and Alipay QR codes\n• Align secondary page toolbars with primary tab titles\n\n3.2.1 — New UI version\n• Host bottom navigation: Home / Guide / Rules / Settings\n• Rule mirror list with app icons and detail pages\n• Settings: language (system/zh/en), hide desktop icon, check updates, auto-update preference, changelog, user agreement\n• Global watermark and tab fade animation\n\n2.2.1\n• Cap preview image height so edit buttons stay visible for large views\n\n2.2.0\n• Rule manager in the injected UI\n• Persist and replay view rules after app restart</string>
+    <string name="changelog_body">GodViewer changelog\n\n3.3.2\n• Move edit-mode entry to GodViewer host notification (enable / undo / manage rules); targets no longer need notification permission\n• More stable edit intercept via Activity touch dispatch + force-clickable refresh\n• Clear stale target when reopening the host app\n• Isolate injected dialogs from target themes; unify palette with host UI; fix advanced editor blank content\n\n3.2.2\n• Donate page with WeChat Pay and Alipay QR codes\n• Align secondary page toolbars with primary tab titles\n\n3.2.1 — New UI version\n• Host bottom navigation: Home / Guide / Rules / Settings\n• Rule mirror list with app icons and detail pages\n• Settings: language (system/zh/en), hide desktop icon, check updates, auto-update preference, changelog, user agreement\n• Global watermark and tab fade animation\n\n2.2.1\n• Cap preview image height so edit buttons stay visible for large views\n\n2.2.0\n• Rule manager in the injected UI\n• Persist and replay view rules after app restart</string>
     <string name="user_agreement_body">User agreement\n\nGodViewer is free and open-source software licensed under the GNU General Public License v3.0 (GPL-3.0).\n\n1. This software is provided for learning, research, and personal debugging only.\n2. You are solely responsible for how you use this module, including compliance with local laws and the terms of any target applications.\n3. Do not use GodViewer to tamper with apps in ways that harm others, bypass paid features illegally, or distribute malware.\n4. The software is provided \"AS IS\", without warranty of any kind. Authors are not liable for data loss, account bans, or device issues arising from use.\n5. Prefer installing builds you compile yourself or download from the official GitHub repository. Avoid unknown APK sources.\n6. By using this software you agree to the GPL-3.0 license terms and the cautions above.\n\nFull license text: https://www.gnu.org/licenses/gpl-3.0.html\nSource: https://github.com/tobbytian/GodViewer</string>
     <string name="status_activated">Activated</string>
     <string name="status_not_activated">Not activated</string>

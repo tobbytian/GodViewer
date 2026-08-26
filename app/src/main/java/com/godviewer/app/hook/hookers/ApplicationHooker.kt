@@ -37,10 +37,12 @@ class ApplicationHooker : IHooker {
             val app = AndroidAppHelper.currentApplication()
             // 加载持久化规则（目标应用自身数据目录）
             ViewRuleManager.init(app)
-            // 编辑模式状态（每次启动默认开启，退出只影响本次运行）
+            // 编辑模式状态（每次启动默认关闭，退出只影响本次运行）
             EditMode.init(app)
-            // 通知栏编辑模式开关（注册切换接收器 + 发布常驻通知）
-            EditModeNotification.init(app)
+            // 窗口级触摸拦截：编辑模式下可点选无 OnClickListener 的视图
+            EditModeTouchInterceptor.install()
+            // 接收宿主通知栏下发的控制命令（开启 / 撤销 / 管理规则）
+            TargetControlReceiver.init(app)
             val appClazz = app::class.java
             val callback = XposedHelpers.findField(appClazz, "mActivityLifecycleCallbacks")
             val callbackArray =
@@ -56,11 +58,12 @@ class ApplicationHooker : IHooker {
                 val app = AndroidAppHelper.currentApplication()
                 val showBounds = app.getInjectedField(APP_FIELD_SHOW_BOUNDS, false) ?: false
                 val forceClickable = app.getInjectedField(APP_FIELD_FORCE_CLICKABLE, false) ?: false
+                val force = forceClickable || EditMode.isEnabled()
                 contentView.drawLayoutBounds(showBounds, true)
                 contentView.setGlobalHookClick(
                     enabled = true,
                     traversalChildren = true,
-                    forceClickable
+                    force,
                 )
             }
         }
@@ -79,10 +82,17 @@ class ApplicationHooker : IHooker {
             val forceClickable = app.getInjectedField(APP_FIELD_FORCE_CLICKABLE, false) ?: false
             val decor = activity.window.decorView as ViewGroup
             decor.drawLayoutBounds(showBounds, true)
-            decor.setGlobalHookClick(enabled = true, traversalChildren = true, forceClickable)
+            // 编辑模式开启时强制 clickable，便于旧的 listener 包装路径覆盖更多视图
+            val force = forceClickable || EditMode.isEnabled()
+            decor.setGlobalHookClick(enabled = true, traversalChildren = true, force)
+            EditModeTouchInterceptor.refreshActivity(activity, forceClickable = force)
             decor.attachEditModeReentryGesture()
-            // 每次界面恢复都刷新通知（状态变化后同步；被划掉也会回来）
-            EditModeNotification.post(app)
+            // 向宿主报告当前前台目标，供本体通知栏控制
+            HostControlBridge.reportForeground(
+                context = app,
+                packageName = app.packageName,
+                editEnabled = EditMode.isEnabled(),
+            )
         }
 
         override fun onActivityPaused(activity: Activity) {

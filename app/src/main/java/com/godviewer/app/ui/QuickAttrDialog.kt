@@ -3,16 +3,15 @@ package com.godviewer.app.ui
 import android.app.AlertDialog
 import android.os.Bundle
 import android.text.SpannableString
-import android.view.LayoutInflater
 import android.view.View
 import androidx.core.view.drawToBitmap
 import androidx.core.view.isVisible
-import com.godviewer.app.IGNORE_HOOK
 import com.godviewer.app.R
 import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.databinding.LayoutQuickAttrDialogBinding
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
 import com.godviewer.app.util.EditMode
+import com.godviewer.app.util.ModuleDialogUi
 import com.godviewer.app.util.getAttachedActivityFromView
 
 /**
@@ -20,18 +19,18 @@ import com.godviewer.app.util.getAttachedActivityFromView
  *
  * 点击"高级"后通过 [editorFactory] 进入完整的 [BaseAttrDialog] 编辑界面
  * （尺寸/边距/内边距/父控件/子控件/全局开关等都在那边）。
+ *
+ * 使用 [ModuleDialogUi] 隔离目标应用主题。
  */
 class QuickAttrDialog(
     private val itemView: View,
     private val editorFactory: () -> BaseAttrDialog<*>
-) : AlertDialog(itemView.context) {
+) : AlertDialog(ModuleDialogUi.wrap(itemView.context)) {
 
     private val binding by lazy {
-        val layout = moduleRes.getLayout(R.layout.layout_quick_attr_dialog)
-        val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(layout, null)
-        view.tag = IGNORE_HOOK
-        LayoutQuickAttrDialogBinding.bind(view)
+        LayoutQuickAttrDialogBinding.bind(
+            ModuleDialogUi.inflate(context, R.layout.layout_quick_attr_dialog)
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,10 +40,16 @@ class QuickAttrDialog(
         setupButtons()
         renderPreview()
         setTitle(itemView::class.java.name)
+        ModuleDialogUi.normalizeTree(binding.root)
     }
 
     override fun setTitle(title: CharSequence?) {
         binding.title.text = SpannableString(title)
+    }
+
+    override fun show() {
+        super.show()
+        ModuleDialogUi.applyWindow(this, binding.root)
     }
 
     private fun setupText() {

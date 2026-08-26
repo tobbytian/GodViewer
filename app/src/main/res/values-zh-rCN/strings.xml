@@ -23,9 +23,9 @@
     <string name="guide_step_3_title">3. 勾选目标应用</string>
     <string name="guide_step_3_body">在模块作用域中加入需要审查的应用，然后强行停止这些应用（或重启），以便 hook 正确加载。</string>
     <string name="guide_step_4_title">4. 编辑视图</string>
-    <string name="guide_step_4_body">打开已勾选的应用，通过通知栏或入口开启编辑模式，点选视图，修改尺寸 / 边距 / 内边距 / 可见性 / 文本 / 图片后点「应用」。规则会保存在目标应用内，重启后自动回放。</string>
+    <string name="guide_step_4_body">打开已勾选的应用，下拉通知栏，使用「上帝视角」本体通知上的「开启 / 撤销 / 管理规则」。然后点选视图，修改尺寸 / 边距 / 内边距 / 可见性 / 文本 / 图片后点「应用」。规则会保存在目标应用内，重启后自动回放。</string>
     <string name="guide_tips_title">提示</string>
-    <string name="guide_tips_body">• 「规则」页中的同步记录是目标应用保存时推送的只读镜像。\n• 若希望镜像稳定到达，请尽量让本应用进程保持存活（例如留在最近任务中）。\n• 必须且仅需开启要编辑的目标应用的通知权限；上帝视角本体不申请通知权限。\n• 规则文件损坏会被安全忽略，不会导致目标应用崩溃。</string>
+    <string name="guide_tips_body">• 功能入口已统一为上帝视角本体的常驻通知，目标应用不再需要通知权限来开关编辑模式。\n• 请尽量让本应用进程保持存活（例如留在最近任务中），以便通知能控制最近前台的目标应用。\n• 「规则」页中的同步记录是目标应用保存时推送的只读镜像。\n• 规则文件损坏会被安全忽略，不会导致目标应用崩溃。</string>
     <string name="settings_language_title">语言</string>
     <string name="settings_language_system">跟随系统</string>
     <string name="settings_language_zh">中文</string>
@@ -41,6 +41,12 @@
     <string name="hidden_entry_channel_desc">隐藏桌面图标后用于重新打开上帝视角的常驻通知</string>
     <string name="hidden_entry_notification_title">上帝视角</string>
     <string name="hidden_entry_notification_text">点按打开 · 桌面图标已隐藏</string>
+    <string name="host_control_channel_name">上帝视角控制</string>
+    <string name="host_control_channel_desc">常驻入口：打开上帝视角，并控制最近目标应用的编辑模式</string>
+    <string name="host_control_notification_title">上帝视角</string>
+    <string name="host_control_no_target_text">尚无活动目标 · 请先打开已勾选的应用 · 点按打开上帝视角</string>
+    <string name="host_control_target_text">%1$s · 编辑模式%2$s · 点按打开上帝视角</string>
+    <string name="host_control_no_target">当前没有活动的目标应用，请先打开已勾选的应用。</string>
     <string name="settings_check_update_title">检查更新</string>
     <string name="settings_check_update_subtitle">打开 GitHub Releases</string>
     <string name="settings_check_update_subtitle_version">当前 %1$s (%2$d) · 打开 GitHub Releases</string>
@@ -53,7 +59,7 @@
     <string name="settings_changelog_subtitle">查看近期版本变化</string>
     <string name="settings_user_agreement_title">用户协议</string>
     <string name="settings_user_agreement_subtitle">许可与使用条款</string>
-    <string name="changelog_body">上帝视角 更新日志\n\n3.2.2\n• 捐赠页：微信 / 支付宝收款码\n• 二级页面顶栏与一级页标题对齐\n\n3.2.1 — 新 UI 版本\n• 宿主底部导航：主页 / 教程 / 规则 / 设置\n• 规则镜像列表（应用图标 + 详情页）\n• 设置：语言（跟随系统/中文/English）、隐藏桌面图标、检查更新、自动更新偏好、更新日志、用户协议\n• 全局水印与页签切换动画\n\n2.2.1\n• 限制预览图高度，大视图时编辑按钮仍可见\n\n2.2.0\n• 注入侧规则管理\n• 规则持久化，应用重启后自动回放</string>
+    <string name="changelog_body">上帝视角 更新日志\n\n3.3.2\n• 功能入口迁到上帝视角本体通知（开启 / 撤销 / 管理规则），目标应用不再需要通知权限\n• 编辑模式点击拦截更稳：Activity 触摸分发 + 强制可点刷新\n• 重新打开本体时清理过期目标应用状态\n• 注入弹窗隔离目标主题，配色与宿主 UI 统一；修复高级编辑页空白\n\n3.2.2\n• 捐赠页：微信 / 支付宝收款码\n• 二级页面顶栏与一级页标题对齐\n\n3.2.1 — 新 UI 版本\n• 宿主底部导航：主页 / 教程 / 规则 / 设置\n• 规则镜像列表（应用图标 + 详情页）\n• 设置：语言（跟随系统/中文/English）、隐藏桌面图标、检查更新、自动更新偏好、更新日志、用户协议\n• 全局水印与页签切换动画\n\n2.2.1\n• 限制预览图高度，大视图时编辑按钮仍可见\n\n2.2.0\n• 注入侧规则管理\n• 规则持久化，应用重启后自动回放</string>
     <string name="user_agreement_body">用户协议\n\n上帝视角（GodViewer）是基于 GNU 通用公共许可证第 3 版（GPL-3.0）发布的免费开源软件。\n\n1. 本软件仅供学习、研究与个人调试使用。\n2. 你须自行对使用方式负责，包括遵守当地法律以及目标应用的服务条款。\n3. 禁止利用本模块侵害他人、非法绕过付费功能或传播恶意软件。\n4. 本软件按「现状」提供，不作任何担保。作者不对因使用导致的数据丢失、账号封禁或设备异常承担责任。\n5. 请优先自行编译，或从官方 GitHub 仓库下载安装包，避免来源不明的 APK。\n6. 使用本软件即表示你同意 GPL-3.0 许可条款及上述注意事项。\n\n完整许可证：https://www.gnu.org/licenses/gpl-3.0.html\n源码：https://github.com/tobbytian/GodViewer</string>
     <string name="status_activated">已激活</string>
     <string name="status_not_activated">未激活</string>

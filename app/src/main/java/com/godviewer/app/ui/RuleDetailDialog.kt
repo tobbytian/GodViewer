@@ -4,17 +4,16 @@ import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.text.SpannableString
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import com.godviewer.app.IGNORE_HOOK
 import com.godviewer.app.R
 import com.godviewer.app.data.ViewAttrSnapshot
 import com.godviewer.app.data.ViewRule
 import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.databinding.LayoutRuleDetailDialogBinding
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
+import com.godviewer.app.util.ModuleDialogUi
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -23,15 +22,15 @@ import java.util.Locale
  * 规则详情弹窗（只读）：展示规则的标识信息、修改时间、修改值与该值对应的原始值。
  *
  * 由规则管理列表点击某行打开。所有文案通过 moduleRes 获取，视图带 IGNORE_HOOK 标签。
+ * 使用 [ModuleDialogUi] 隔离目标应用主题。
  */
-class RuleDetailDialog(context: Context, private val rule: ViewRule) : AlertDialog(context) {
+class RuleDetailDialog(context: Context, private val rule: ViewRule) :
+    AlertDialog(ModuleDialogUi.wrap(context)) {
 
     private val binding by lazy {
-        val layout = moduleRes.getLayout(R.layout.layout_rule_detail_dialog)
-        val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(layout, null)
-        view.tag = IGNORE_HOOK
-        LayoutRuleDetailDialogBinding.bind(view)
+        LayoutRuleDetailDialogBinding.bind(
+            ModuleDialogUi.inflate(this.context, R.layout.layout_rule_detail_dialog)
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +47,11 @@ class RuleDetailDialog(context: Context, private val rule: ViewRule) : AlertDial
             binding.detailThumb.isVisible = false
         }
         binding.detailText.text = SpannableString(buildDetail())
+    }
+
+    override fun show() {
+        super.show()
+        ModuleDialogUi.applyWindow(this, binding.root)
     }
 
     override fun setTitle(title: CharSequence?) {

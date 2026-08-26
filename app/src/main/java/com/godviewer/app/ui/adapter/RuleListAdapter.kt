@@ -2,7 +2,6 @@ package com.godviewer.app.ui.adapter
 
 import android.app.Activity
 import android.text.SpannableString
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.View.GONE
@@ -14,6 +13,7 @@ import com.godviewer.app.data.ViewRule
 import com.godviewer.app.data.ViewRuleManager
 import com.godviewer.app.databinding.LayoutRuleItemBinding
 import com.godviewer.app.hook.AnyHookZygote.Companion.moduleRes
+import com.godviewer.app.util.ModuleDialogUi
 import com.godviewer.app.util.findViewBestMatch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -44,9 +44,10 @@ class RuleListAdapter(
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val rule = rules[position]
         val itemView: View = if (convertView == null) {
-            val layout = moduleRes.getLayout(R.layout.layout_rule_item)
-            val inflater = LayoutInflater.from(parent?.context)
-            inflater.inflate(layout, parent, false)
+            ModuleDialogUi.inflate(
+                parent?.context ?: activity ?: error("no context for rule item"),
+                R.layout.layout_rule_item,
+            )
         } else {
             convertView
         }
@@ -76,6 +77,8 @@ class RuleListAdapter(
 
         binding.deleteButton.text = SpannableString(moduleRes.getString(R.string.delete))
         binding.deleteButton.setOnClickListener { onDelete(rule) }
+        // 文案就绪后再归一化样式（按钮主/危险色依赖 label）
+        ModuleDialogUi.normalizeTree(itemView)
         // 整行可点：打开规则详情（行带 IGNORE_HOOK 标签，不会被编辑模式点击拦截）
         itemView.setOnClickListener { onRowClick(rule) }
         return itemView

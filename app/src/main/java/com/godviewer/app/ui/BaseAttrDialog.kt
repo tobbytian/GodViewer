@@ -4,10 +4,8 @@ import android.app.AlertDialog
 import android.app.AndroidAppHelper
 import android.os.Bundle
 import android.text.SpannableString
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -18,7 +16,6 @@ import androidx.core.view.children
 import androidx.core.view.drawToBitmap
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import com.godviewer.app.IGNORE_HOOK
 import com.godviewer.app.R
 import com.godviewer.app.ViewClickWrapper
 import com.godviewer.app.ViewDispatcher
@@ -31,6 +28,7 @@ import com.godviewer.app.ui.adapter.ViewItemListAdapter
 import com.godviewer.app.util.APP_FIELD_FORCE_CLICKABLE
 import com.godviewer.app.util.APP_FIELD_SHOW_BOUNDS
 import com.godviewer.app.util.EditMode
+import com.godviewer.app.util.ModuleDialogUi
 import com.godviewer.app.util.dp
 import com.godviewer.app.util.drawLayoutBounds
 import com.godviewer.app.util.getInjectedField
@@ -43,15 +41,15 @@ import com.godviewer.app.util.setGlobalHookClick
  * @author hhvvg
  *
  * Base dialog for editing basic view attributes.
+ *
+ * 使用 [ModuleDialogUi] 隔离目标应用主题，避免在极简/残缺主题下样式崩坏。
  */
 abstract class BaseAttrDialog<T : BaseViewAttrData>(protected val itemView: View) :
-    AlertDialog(itemView.context) {
+    AlertDialog(ModuleDialogUi.wrap(itemView.context)) {
     private val binding by lazy {
-        val layout = moduleRes.getLayout(R.layout.layout_base_attr_dialog)
-        val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(layout, null)
-        view.tag = IGNORE_HOOK
-        LayoutBaseAttrDialogBinding.bind(view)
+        LayoutBaseAttrDialogBinding.bind(
+            ModuleDialogUi.inflate(context, R.layout.layout_base_attr_dialog)
+        )
     }
 
     /**
@@ -169,6 +167,8 @@ abstract class BaseAttrDialog<T : BaseViewAttrData>(protected val itemView: View
         setupChildrenParentSpinner()
         renderPreview()
         setTitle(itemView::class.java.name)
+        // 文案设置后再刷一遍按钮主/危险色
+        ModuleDialogUi.normalizeTree(binding.root)
     }
 
     protected fun renderPreview() {
@@ -190,7 +190,7 @@ abstract class BaseAttrDialog<T : BaseViewAttrData>(protected val itemView: View
         binding.childrenButton.setOnClickListener {
             val dialog = Builder(context)
                 .setTitle(moduleRes.getString(R.string.select_children))
-                .setAdapter(ViewItemListAdapter(children)) { d, which ->
+                .setAdapter(ViewItemListAdapter(children, context)) { d, which ->
                     d.dismiss()
                     val selected = children[which]
                     ViewDispatcher.dispatch(selected)
@@ -198,11 +198,12 @@ abstract class BaseAttrDialog<T : BaseViewAttrData>(protected val itemView: View
                 }
                 .create()
             dialog.show()
+            ModuleDialogUi.applyWindow(dialog)
         }
         binding.parentButton.setOnClickListener {
             val dialog = Builder(context)
                 .setTitle(moduleRes.getString(R.string.select_parent))
-                .setAdapter(ViewItemListAdapter(ancestors)) { d, which ->
+                .setAdapter(ViewItemListAdapter(ancestors, context)) { d, which ->
                     d.dismiss()
                     val selected = ancestors[which]
                     ViewDispatcher.dispatch(selected)
@@ -210,6 +211,7 @@ abstract class BaseAttrDialog<T : BaseViewAttrData>(protected val itemView: View
                 }
                 .create()
             dialog.show()
+            ModuleDialogUi.applyWindow(dialog)
         }
     }
 
@@ -516,19 +518,15 @@ abstract class BaseAttrDialog<T : BaseViewAttrData>(protected val itemView: View
     }
 
     protected fun appendAttrPanelView(@LayoutRes resId: Int): View {
-        val layout = moduleRes.getLayout(resId)
-        val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(layout, null, false)
+        val view = ModuleDialogUi.inflate(context, resId)
         appendAttrPanelView(view)
         return view
     }
 
     override fun show() {
         super.show()
-        window?.apply {
-            clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
-            setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-        }
+        // 高级编辑页：窗口 + binding.root 固定高度，ScrollView(weight) 才能显示内容
+        ModuleDialogUi.applyWindow(this, binding.root, preferMaxHeight = true)
     }
 }
 

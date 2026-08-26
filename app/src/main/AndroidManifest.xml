@@ -95,6 +95,19 @@
                 <action android:name="com.godviewer.app.ACTION_MIRROR_RULES" />
             </intent-filter>
         </receiver>
+
+        <!-- Host control: target foreground reports + notification action buttons. -->
+        <receiver
+            android:name=".data.HostControlReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.godviewer.app.ACTION_TARGET_FOREGROUND" />
+                <action android:name="com.godviewer.app.action.HOST_ENABLE_EDIT" />
+                <action android:name="com.godviewer.app.action.HOST_UNDO" />
+                <action android:name="com.godviewer.app.action.HOST_MANAGE_RULES" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

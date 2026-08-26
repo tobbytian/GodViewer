@@ -4,6 +4,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.PopupWindow
 import com.godviewer.app.hook.IHooker
+import com.godviewer.app.util.EditMode
 import com.godviewer.app.util.setGlobalHookClick
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
@@ -33,7 +34,13 @@ class PupupWindowHooker : IHooker {
             }
             val decorView =
                 XposedHelpers.getObjectField(param.thisObject, "mDecorView") as ViewGroup
-            decorView.setGlobalHookClick(enabled = false)
+            // Popup is a separate window: still wrap clicks so edit mode can reach menu items.
+            val force = EditMode.isEnabled()
+            decorView.setGlobalHookClick(
+                enabled = true,
+                traversalChildren = true,
+                forceClickable = force,
+            )
         }
     }
 }
