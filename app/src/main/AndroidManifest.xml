@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- libxposed/service(+interface) 库 minSdk 26，高于本模块声明的 23；能跑 LSPosed 的设备必然 ≥26 -->
+    <uses-sdk tools:overrideLibrary="io.github.libxposed.service,io.github.libxposed.service.interfaces" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Resolve mirrored app labels/icons on Android 11+ -->
@@ -12,29 +17,25 @@
     </queries>
 
     <application
-        android:name=".GodViewerApp"
+        android:name=".host.GodViewerApp"
         android:allowBackup="true"
+        android:description="@string/app_description"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <meta-data
-            android:name="xposedmodule"
-            android:value="true" />
-        <meta-data
-            android:name="xposeddescription"
-            android:value="Debug your app, change view attributes." />
-        <meta-data
-            android:name="xposedminversion"
-            android:value="53" />
+        <!--
+          libxposed API 102 模块：模块身份由 META-INF/xposed/module.prop + java_init.list 声明，
+          名称 / 描述来自 android:label / android:description，不再使用旧 xposedmodule metadata。
+        -->
         <!--
           Desktop icon is optional (LauncherAlias).
           MODULE_SETTINGS lets LSPosed open this UI from the module page
           even when the launcher alias is disabled.
         -->
         <activity
-            android:name=".MainActivity"
+            android:name=".host.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,7 +54,7 @@
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
-            android:targetActivity=".MainActivity">
+            android:targetActivity=".host.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -61,30 +62,30 @@
         </activity-alias>
 
         <activity
-            android:name=".ui.host.SimpleTextActivity"
+            android:name=".host.ui.SimpleTextActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".host.MainActivity" />
 
         <activity
-            android:name=".ui.host.DonateActivity"
+            android:name=".host.ui.DonateActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".host.MainActivity" />
 
 
         <activity
-            android:name=".RuleMirrorListActivity"
+            android:name=".host.RuleMirrorListActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".host.MainActivity" />
 
         <activity
-            android:name=".RuleMirrorDetailActivity"
+            android:name=".host.RuleMirrorDetailActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".host.MainActivity" />
 
         <activity
-            android:name=".RuleMirrorRuleDetailActivity"
+            android:name=".host.RuleMirrorRuleDetailActivity"
             android:exported="false"
-            android:parentActivityName=".RuleMirrorDetailActivity" />
+            android:parentActivityName=".host.RuleMirrorDetailActivity" />
 
         <!-- Explicit component from target processes; exported so other UIDs can deliver. -->
         <receiver
@@ -96,18 +97,27 @@
             </intent-filter>
         </receiver>
 
-        <!-- Host control: target foreground reports + notification action buttons. -->
+        <!-- Host control: target foreground reports + notification action buttons + crash dump. -->
         <receiver
             android:name=".data.HostControlReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.godviewer.app.ACTION_TARGET_FOREGROUND" />
+                <action android:name="com.godviewer.app.ACTION_TARGET_DIAG" />
+                <action android:name="com.godviewer.app.ACTION_TARGET_CRASH" />
                 <action android:name="com.godviewer.app.action.HOST_ENABLE_EDIT" />
                 <action android:name="com.godviewer.app.action.HOST_UNDO" />
                 <action android:name="com.godviewer.app.action.HOST_MANAGE_RULES" />
             </intent-filter>
         </receiver>
+
+        <!-- 目标进程读取入口模式等宿主设置（只读） -->
+        <provider
+            android:name=".data.HostPrefsProvider"
+            android:authorities="com.godviewer.app.hostprefs"
+            android:exported="true"
+            android:grantUriPermissions="false" />
     </application>
 
 </manifest>

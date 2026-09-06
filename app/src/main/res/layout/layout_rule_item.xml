@@ -8,6 +8,15 @@
     android:paddingBottom="8dp"
     android:tag="GODVIEWER_IGNORE_HOOK">
 
+    <CheckBox
+        android:id="@+id/rule_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="0dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="2dp"
+        android:tag="GODVIEWER_IGNORE_HOOK" />
+
     <ImageView
         android:id="@+id/rule_thumb"
         android:layout_width="48dp"

@@ -15,6 +15,49 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
+    <LinearLayout
+        android:id="@+id/selection_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:tag="GODVIEWER_IGNORE_HOOK"
+        android:visibility="gone">
+
+        <CheckBox
+            android:id="@+id/select_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:tag="GODVIEWER_IGNORE_HOOK"
+            android:text="Select all"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/selected_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="#888888"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/batch_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:tag="GODVIEWER_IGNORE_HOOK"
+            android:text="Delete selected"
+            android:visibility="gone" />
+    </LinearLayout>
+
     <ListView
         android:id="@+id/rule_list"
         android:layout_width="match_parent"

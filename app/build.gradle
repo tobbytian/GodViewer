@@ -4,6 +4,39 @@ plugins {
     id "org.jetbrains.kotlin.kapt"
 }
 
+// ---------- 版本 ----------
+// release：固定下面两个常量（发版时手动改）
+// debug：每次 assemble/install/bundle Debug 自动 +1，APK 与 BuildConfig 均为纯数字
+def RELEASE_VERSION_CODE = 11
+def RELEASE_VERSION_NAME = "4.3.2"
+
+def debugVersionFile = file("${projectDir}/debug-version.properties")
+def storedDebugCode = RELEASE_VERSION_CODE
+if (debugVersionFile.exists()) {
+    def props = new Properties()
+    debugVersionFile.withInputStream { props.load(it) }
+    storedDebugCode = (props.getProperty("VERSION_CODE", String.valueOf(RELEASE_VERSION_CODE)) as Integer)
+}
+// 至少不低于 release 基线，避免装不上更高 debug
+storedDebugCode = Math.max(storedDebugCode, RELEASE_VERSION_CODE)
+
+def isDebugBuildRequest = gradle.startParameter.taskNames.any { name ->
+    def n = name.toLowerCase()
+    n.contains("assembledebug") || n.contains("installdebug") || n.contains("bundledebug")
+}
+
+def debugVersionCode = storedDebugCode
+if (isDebugBuildRequest) {
+    debugVersionCode = storedDebugCode + 1
+    def props = new Properties()
+    props.setProperty("VERSION_CODE", String.valueOf(debugVersionCode))
+    debugVersionFile.parentFile.mkdirs()
+    debugVersionFile.withOutputStream {
+        props.store(it, "Auto-incremented on each debug build. Release uses RELEASE_* in build.gradle.")
+    }
+    println("[GodViewer] debug version -> ${debugVersionCode}")
+}
+
 android {
     namespace 'com.godviewer.app'
     compileSdk 35
@@ -12,8 +45,9 @@ android {
         applicationId "com.godviewer.app"
         minSdk 23
         targetSdk 35
-        versionCode 8
-        versionName "3.3.2"
+        // 默认 = release 基线；debug 在 buildTypes + outputs 覆盖
+        versionCode RELEASE_VERSION_CODE
+        versionName RELEASE_VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -32,8 +66,20 @@ android {
             minifyEnabled false
             shrinkResources false
             debuggable true
+            // 首页/设置页读 BuildConfig，须与 APK 递增号一致
+            buildConfigField("int", "VERSION_CODE", String.valueOf(debugVersionCode))
+            buildConfigField("String", "VERSION_NAME", "\"${debugVersionCode}\"")
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField("String", "PACKAGE_NAME", "\"com.godviewer.app\"")
+        }
+    }
+
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == "debug") {
+            variant.outputs.all { output ->
+                output.versionCodeOverride = debugVersionCode
+                output.versionNameOverride = String.valueOf(debugVersionCode)
+            }
         }
     }
     compileOptions {
@@ -48,11 +94,30 @@ android {
         viewBinding = true
         buildConfig = true
     }
+
+    // META-INF/xposed 元数据必须完整进 APK（java_init.list / module.prop / scope.list）
+    packagingOptions {
+        resources {
+            merges += 'META-INF/xposed/*'
+        }
+    }
+}
+
+// libxposed/service(101) 的 AAR 元数据要求 compileSdk 36，本机只有 platform 35；
+// 库仅使用 Android 16(API 36) 前就存在的稳定 API，目标设备 Android 16 运行时满足，跳过该检查
+tasks.matching { it.name.contains('AarMetadata') }.configureEach {
+    enabled = false
 }
 
 dependencies {
-    // Include libs as compile-only
-    compileOnly fileTree(dir: 'libs', include: ['*.jar'])
+    // libxposed API 102：框架运行时提供，绝不打进 APK（compileOnly）
+    compileOnly("io.github.libxposed:api:102.0.0")
+    // libxposed/service：宿主 App 侧与 LSPosed 管理器通信（激活状态直读），需打进 APK。
+    // 用 101.0.0：102.0.0 要求 compileSdk 37（本机只有 platform 35）；所需 API 两者一致。
+    // 库本体是纯 Java，排除其传递的 kotlin-stdlib 2.2（与项目 Kotlin 1.9.24 编译器冲突）
+    implementation("io.github.libxposed:service:101.0.0") {
+        exclude group: 'org.jetbrains.kotlin'
+    }
     implementation 'com.github.bumptech.glide:glide:4.13.1'
     kapt 'com.github.bumptech.glide:compiler:4.13.1'
     implementation 'com.google.code.gson:gson:2.10.1'

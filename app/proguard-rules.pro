@@ -20,19 +20,17 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class com.godviewer.app.hook.AnyHookPackage
--keep class com.godviewer.app.hook.AnyHookZygote
-
-# Host activation probe: Xposed hooks isActivated via app ClassLoader + reflection
--keep class com.godviewer.app.util.ModuleStatus { *; }
--keepclassmembers class com.godviewer.app.util.ModuleStatus {
-    public static boolean isActivated();
-    public static boolean check();
-}
-
-# Gson 反射序列化持久化规则
--keep class com.godviewer.app.data.** { *; }
-
+# 以下具体 -keep 已被底部 `com.godviewer.app.** { *; }` 全部覆盖，保留该条即可。
 # Xposed 模块自身代码全部保留：点击分发器通过 Class.newInstance() 反射创建 handler，
-# 弹窗 / 工具类经 XModuleResources 与 XposedHelpers 反射访问，混淆会破坏这些路径
+# 弹窗 / 工具类经反射访问，混淆会破坏这些路径
 -keep class com.godviewer.app.** { *; }
+
+# libxposed/service：Binder/AIDL + XposedProvider，防 R8 破坏跨进程接口
+-keep class io.github.libxposed.service.** { *; }
+
+# libxposed API 102（官方 README 规则）：保留入口类无参构造，并在入口类混淆时改写 java_init.list
+-dontwarn io.github.libxposed.annotation.**
+-adaptresourcefilecontents META-INF/xposed/java_init.list
+-keep,allowoptimization,allowobfuscation public class * extends io.github.libxposed.api.XposedModule {
+    public <init>();
+}

@@ -70,4 +70,8 @@
     <color name="home_nav_item_selected_bg">#F3E8FF</color>
     <color name="home_nav_item_unselected">#6B6B75</color>
     <color name="home_divider">#E0E2EA</color>
+
+    <!-- Edit-mode selected view highlight (injected overlay) -->
+    <color name="edit_selection_stroke">#1565C0</color>
+    <color name="edit_selection_fill">#331565C0</color>
 </resources>
