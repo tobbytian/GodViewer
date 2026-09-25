@@ -116,6 +116,7 @@
     <string name="enter_text">Enter text</string>
     <string name="text_content">Text Content</string>
     <string name="max_line">Max Line</string>
+    <string name="text_hint">Hint (Placeholder)</string>
     <string name="margin">Margin (dp)</string>
     <string name="padding">Padding (dp)</string>
     <string name="left">Left</string>

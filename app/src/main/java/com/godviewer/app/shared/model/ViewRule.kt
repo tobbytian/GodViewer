@@ -45,6 +45,8 @@ data class ViewRule(
     var changedVisibility: Boolean = false,
     @SerializedName("changed_text")
     var changedText: Boolean = false,
+    @SerializedName("changed_hint")
+    var changedHint: Boolean = false,
     @SerializedName("changed_image")
     var changedImage: Boolean = false,
     @SerializedName("timestamp")
@@ -75,6 +77,7 @@ data class ViewAttrSnapshot(
     @SerializedName("padding_bottom") val paddingBottom: Int,
     @SerializedName("visibility") val visibility: Int,
     @SerializedName("text") val text: String?,
+    @SerializedName("hint") val hint: String?,
     @SerializedName("max_lines") val maxLines: Int,
     @SerializedName("image_url") val imageUrl: String?,
     @SerializedName("scale_type") val scaleType: String?
