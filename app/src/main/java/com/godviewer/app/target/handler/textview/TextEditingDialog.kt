@@ -50,6 +50,10 @@ class TextEditingDialog(private val view: TextView) : BaseAttrDialog<TextViewAtt
 
     override fun onApply(data: TextViewAttrData) {
         super.onApply(data)
+        // 记录应用前的文本 / 最大行数，用于判断它们是否真的被改过。
+        // 只修改 hint 时不能让 changedText 变成 true：规则回放会持续把
+        // view.text 写回原值，用户之后输入的内容会被清空。
+        val textChanged = data.text != view.text?.toString() || data.maxLine != view.maxLines
         view.text = SpannableString(data.text)
         view.maxLines = data.maxLine
         view.hint = data.hint ?: ""
@@ -60,7 +64,8 @@ class TextEditingDialog(private val view: TextView) : BaseAttrDialog<TextViewAtt
                 maxLines = data.maxLine,
                 hint = data.hint
             )
-            rule.changedText = true
+            // 已置位的标记保持不变，避免编辑已有规则时把它清掉
+            rule.changedText = rule.changedText || textChanged
             rule.changedHint = true
         }
     }

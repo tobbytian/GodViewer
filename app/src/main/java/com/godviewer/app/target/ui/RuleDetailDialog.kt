@@ -106,6 +106,9 @@ class RuleDetailDialog(context: Context, private val rule: ViewRule) :
         if (rule.changedText) {
             lines += "  ${moduleRes.getString(R.string.text_content)}: ${snapshot.text ?: ""}"
         }
+        if (rule.changedHint) {
+            lines += "  ${moduleRes.getString(R.string.text_hint)}: ${snapshot.hint ?: ""}"
+        }
         if (rule.changedImage) {
             lines += "  ${moduleRes.getString(R.string.image_url)}: ${snapshot.imageUrl ?: ""}"
         }

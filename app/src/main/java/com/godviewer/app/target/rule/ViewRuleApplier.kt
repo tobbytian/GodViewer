@@ -105,7 +105,9 @@ internal object ViewRuleApplier {
             if (view is TextView) {
                 view.text = s.text ?: ""
                 view.maxLines = s.maxLines
-                view.hint = s.hint ?: ""
+                // 仅当规则确实修改过 hint 时才还原，否则旧规则（没有 hint 字段，
+                // 反序列化为 null）会把视图原本的 hint 清掉。
+                if (rule.changedHint) view.hint = s.hint ?: ""
             }
             if (view is ImageView) {
                 s.scaleType?.let { name ->
