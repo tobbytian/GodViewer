@@ -95,6 +95,9 @@ class RuleMirrorRuleDetailActivity : HostActivity() {
         if (rule.changedText) {
             lines += "  ${getString(R.string.text_content)}: ${snapshot.text ?: ""}"
         }
+        if (rule.changedHint) {
+            lines += "  ${getString(R.string.text_hint)}: ${snapshot.hint ?: ""}"
+        }
         if (rule.changedImage) {
             lines += "  ${getString(R.string.image_url)}: ${snapshot.imageUrl ?: ""}"
             snapshot.scaleType?.let {
