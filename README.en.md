@@ -1,11 +1,13 @@
 # GodViewer
 
+- **Telegram discussion group**: [t.me/GodViewer](https://t.me/GodViewer) — join us for feedback, questions and suggestions
+
 English | [中文](README.md)
 
 - A runtime view debugging tool with a "God's eye view", built on **Xposed / LSPosed**.
 - The module has been fully migrated to **libxposed API 102** (modern `META-INF/xposed` entry points, no legacy XposedBridge API); verified on Android 16 + LSPosed 2.1.0, **regression in progress**
 - No app restart, no system-wide scope — just **tap and restyle any UI in the target app exactly how you want it**, and it **persists**.
-- **Telegram discussion group**: [t.me/GodViewer](https://t.me/GodViewer) — join us for feedback, questions and suggestions
+
 
 ## What it can do
 
