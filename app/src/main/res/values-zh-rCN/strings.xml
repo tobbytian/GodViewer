@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">上帝视角</string>
-    <string name="app_description">运行时调试 Android 应用界面的 Xposed 模块（libxposed API 102）。</string>
+    <string name="app_description">你也相信上帝吗？\n开发者：tobbytian@github</string>
     <string name="home_tagline">尽情定制几乎所有Android应用</string>
     <string name="nav_home">主页</string>
-    <string name="nav_guide">教程</string>
-    <string name="nav_rules">规则</string>
+    <string name="nav_rules">应用</string>
     <string name="rules_sync_tip_title">关于规则同步</string>
     <string name="rules_sync_tip_message">同步规则请保证上帝视角本体在后台运行再进行修改操作。</string>
     <string name="rules_sync_tip_got_it">我知道了</string>
@@ -15,22 +14,12 @@
     <string name="home_info_device">设备型号</string>
     <string name="home_info_abi">系统架构</string>
     <string name="home_info_mirrored">已同步应用</string>
-    <string name="guide_title">教程</string>
-    <string name="guide_subtitle">按下面步骤启用上帝视角</string>
-    <string name="guide_step_1_title">1. 安装 LSPosed</string>
-    <string name="guide_step_1_body">设备需已 Root，并安装可用的 LSPosed（或兼容的 Xposed）框架。安装后请重启。</string>
-    <string name="guide_step_2_title">2. 启用模块</string>
-    <string name="guide_step_2_body">打开 LSPosed → 模块 → 启用「上帝视角」。只需勾选你要编辑的目标应用，宿主应用本身不必加入作用域。</string>
-    <string name="guide_step_3_title">3. 勾选目标应用</string>
-    <string name="guide_step_3_body">在模块作用域中加入需要审查的应用，然后强行停止这些应用（或重启），以便 hook 正确加载。</string>
-    <string name="guide_step_4_title">4. 编辑视图</string>
-    <string name="guide_step_4_body">打开已勾选的应用，下拉通知栏，使用编辑模式入口（默认：目标应用通知；可在设置改为本体通知）上的「开启 / 撤销 / 管理规则」。然后点选视图，修改尺寸 / 边距 / 内边距 / 可见性 / 文本 / 图片后点「应用」。规则会保存在目标应用内，重启后自动回放。</string>
-    <string name="guide_tips_title">提示</string>
-    <string name="guide_tips_body">• 默认入口是目标应用通知。如目标应用不申请通知权限，请选择本体通知入口（设置 → 编辑模式入口）。\n• 本体入口模式下请尽量让本应用进程保持存活，以便控制最近前台的目标应用。\n• 「规则」页中的同步记录是目标应用保存时推送的只读镜像。\n• 规则文件损坏会被安全忽略，不会导致目标应用崩溃。</string>
     <string name="settings_language_title">语言</string>
     <string name="settings_language_system">跟随系统</string>
     <string name="settings_language_zh">中文</string>
     <string name="settings_language_en">English</string>
+    <string name="settings_tutorial_title">教程</string>
+    <string name="settings_tutorial_subtitle">查看图文教程（酷安）</string>
     <string name="settings_entry_mode_title">编辑模式入口</string>
     <string name="settings_entry_mode_subtitle">如目标应用不申请通知权限，请选择本体通知入口</string>
     <string name="settings_entry_mode_target">目标应用通知</string>
@@ -39,16 +28,11 @@
     <string name="settings_entry_mode_host_toast">已使用上帝视角本体通知入口</string>
     <string name="settings_entry_mode_host_need_notification">本体入口需要通知权限，可在系统设置中授予。</string>
     <string name="settings_hide_icon_title">隐藏桌面图标</string>
-    <string name="settings_hide_icon_subtitle">移除启动器图标。之后可通过常驻通知、LSPosed 模块设置或系统应用列表重新打开。</string>
-    <string name="settings_hide_icon_confirm">确定隐藏桌面图标？\n\n之后可通过以下方式打开：\n• 常驻通知\n• LSPosed → 模块 → 上帝视角 → 设置/齿轮\n• 系统设置 → 应用</string>
+    <string name="settings_hide_icon_subtitle">移除启动器图标。之后可通过 LSPosed 模块设置或系统应用列表重新打开。</string>
+    <string name="settings_hide_icon_confirm">确定隐藏桌面图标？\n\n之后可通过以下方式打开：\n• LSPosed → 模块 → 上帝视角 → 设置/齿轮\n• 系统设置 → 应用</string>
     <string name="settings_hide_icon_confirm_ok">隐藏</string>
-    <string name="settings_hide_icon_hidden">桌面图标已隐藏。请用通知或 LSPosed 模块设置重新打开。</string>
-    <string name="settings_hide_icon_hidden_no_notification">桌面图标已隐藏。未授予通知权限，请从 LSPosed 模块设置或系统应用列表打开。</string>
+    <string name="settings_hide_icon_hidden">桌面图标已隐藏。请从 LSPosed 模块设置或系统应用列表重新打开。</string>
     <string name="settings_hide_icon_shown">桌面图标已恢复</string>
-    <string name="hidden_entry_channel_name">隐藏图标入口</string>
-    <string name="hidden_entry_channel_desc">隐藏桌面图标后用于重新打开上帝视角的常驻通知</string>
-    <string name="hidden_entry_notification_title">上帝视角</string>
-    <string name="hidden_entry_notification_text">点按打开 · 桌面图标已隐藏</string>
     <string name="host_control_channel_name">上帝视角控制</string>
     <string name="host_control_channel_desc">常驻入口：打开上帝视角，并控制最近目标应用的编辑模式</string>
     <string name="host_control_notification_title">上帝视角</string>
@@ -83,7 +67,9 @@
     <string name="settings_clear_diag_confirm">清空</string>
     <string name="settings_clear_diag_done">已清空</string>
     <string name="settings_clear_diag_failed">清空失败</string>
-    <string name="changelog_body">上帝视角 更新日志\n\n4.3.3\n• 测试版：验证应用内检查更新，无功能变化\n\n4.3.2\n• 新增本体通知入口，针对不申请通知权限的目标应用（设置可切换）\n• 点选控件实时高亮，修改目标一目了然\n• 规则管理支持批量编辑：全选 / 多选、批量删除；规则列表新增视图缩略图\n• 新增应用内检查更新与「复制 / 清空调试日志」\n• 重写触控拦截逻辑，修复部分应用 hook 后无法触摸；点击判定尺度更小，精细操作更容易\n• 重写弹窗样式，对目标应用代码依赖更小\n• 更换 hook 方式（迁移到 libxposed API 102），更安全稳定\n• 修复已知 bug，适配更多常用应用\n\n3.3.2\n• 功能入口迁到上帝视角本体通知（开启 / 撤销 / 管理规则），目标应用不再需要通知权限\n• 编辑模式点击拦截更稳：Activity 触摸分发 + 强制可点刷新\n• 重新打开本体时清理过期目标应用状态\n• 注入弹窗隔离目标主题，配色与宿主 UI 统一；修复高级编辑页空白\n\n3.2.2\n• 捐赠页：微信 / 支付宝收款码\n• 二级页面顶栏与一级页标题对齐\n\n3.2.1 — 新 UI 版本\n• 宿主底部导航：主页 / 教程 / 规则 / 设置\n• 规则镜像列表（应用图标 + 详情页）\n• 设置：语言（跟随系统/中文/English）、隐藏桌面图标、检查更新、自动更新偏好、更新日志、用户协议\n• 全局水印与页签切换动画\n\n2.2.1\n• 限制预览图高度，大视图时编辑按钮仍可见\n\n2.2.0\n• 注入侧规则管理\n• 规则持久化，应用重启后自动回放</string>
+    <string name="settings_info_title">更多</string>
+    <string name="settings_info_subtitle">更新日志、用户协议与调试日志</string>
+    <string name="changelog_body">上帝视角 更新日志\n\n4.4.2\n• 导航焕新：紧凑玻璃底栏、Tabler 图标、左右滑动切换页签\n• 宿主规则管理：镜像规则长按删除、多选批量删除；规则详情页改版，删除确认框统一样式\n• 支持按应用关闭本体通知（规则页内开关）\n• 支持编辑 TextView 提示文本（占位符）；浅色状态栏配深色图标\n\n4.3.3\n• 测试版：验证应用内检查更新，无功能变化\n\n4.3.2\n• 新增本体通知入口，针对不申请通知权限的目标应用（设置可切换）\n• 点选控件实时高亮，修改目标一目了然\n• 规则管理支持批量编辑：全选 / 多选、批量删除；规则列表新增视图缩略图\n• 新增应用内检查更新与「复制 / 清空调试日志」\n• 重写触控拦截逻辑，修复部分应用 hook 后无法触摸；点击判定尺度更小，精细操作更容易\n• 重写弹窗样式，对目标应用代码依赖更小\n• 更换 hook 方式（迁移到 libxposed API 102），更安全稳定\n• 修复已知 bug，适配更多常用应用\n\n3.3.2\n• 功能入口迁到上帝视角本体通知（开启 / 撤销 / 管理规则），目标应用不再需要通知权限\n• 编辑模式点击拦截更稳：Activity 触摸分发 + 强制可点刷新\n• 重新打开本体时清理过期目标应用状态\n• 注入弹窗隔离目标主题，配色与宿主 UI 统一；修复高级编辑页空白\n\n3.2.2\n• 捐赠页：微信 / 支付宝收款码\n• 二级页面顶栏与一级页标题对齐\n\n3.2.1 — 新 UI 版本\n• 宿主底部导航：主页 / 教程 / 规则 / 设置\n• 规则镜像列表（应用图标 + 详情页）\n• 设置：语言（跟随系统/中文/English）、隐藏桌面图标、检查更新、自动更新偏好、更新日志、用户协议\n• 全局水印与页签切换动画\n\n2.2.1\n• 限制预览图高度，大视图时编辑按钮仍可见\n\n2.2.0\n• 注入侧规则管理\n• 规则持久化，应用重启后自动回放</string>
     <string name="user_agreement_body">用户协议\n\n上帝视角（GodViewer）是基于 GNU 通用公共许可证第 3 版（GPL-3.0）发布的免费开源软件。\n\n1. 本软件仅供学习、研究与个人调试使用。\n2. 你须自行对使用方式负责，包括遵守当地法律以及目标应用的服务条款。\n3. 禁止利用本模块侵害他人、非法绕过付费功能或传播恶意软件。\n4. 本软件按「现状」提供，不作任何担保。作者不对因使用导致的数据丢失、账号封禁或设备异常承担责任。\n5. 请优先自行编译，或从官方 GitHub 仓库下载安装包，避免来源不明的 APK。\n6. 使用本软件即表示你同意 GPL-3.0 许可条款及上述注意事项。\n\n完整许可证：https://www.gnu.org/licenses/gpl-3.0.html\n源码：https://github.com/tobbytian/GodViewer</string>
     <string name="status_activated">已激活</string>
     <string name="status_not_activated">未激活</string>
@@ -91,9 +77,10 @@
     <string name="status_not_activated_hint">请在 LSPosed 启用本模块，然后强行停止并重新打开本应用</string>
     <string name="status_version_format">%1$s (%2$d)</string>
     <string name="link_github">GitHub</string>
+    <string name="link_telegram">Telegram</string>
     <string name="link_donate">捐赠</string>
     <string name="donate_title">捐赠</string>
-    <string name="donate_intro">如果上帝视角帮到了你，欢迎请作者喝杯咖啡。使用微信或支付宝扫描下方收款码即可，谢谢支持！</string>
+    <string name="donate_intro">如果上帝视角帮到了你，欢迎请作者喝杯咖啡。使用微信或支付宝扫描下方收款码即可，谢谢支持！捐赠大于等于 5 元可加入内测群。</string>
     <string name="donate_wechat">微信支付</string>
     <string name="donate_alipay">支付宝</string>
 
@@ -105,6 +92,9 @@
     <string name="mirror_list_empty">还没有同步记录。\n请先在已勾选的目标应用里改一次视图。</string>
     <string name="mirror_package_meta">%1$d 条规则 · %2$s</string>
     <string name="mirror_detail_empty">该镜像下暂无规则</string>
+    <string name="mirror_detail_notify_title">该应用本体通知</string>
+    <string name="mirror_detail_notify_subtitle">关闭后，该应用在前台时不显示本体通知</string>
+    <string name="mirror_detail_notify_disabled_hint">请先在首页打开「本体通知」开关</string>
     <string name="apply">应用</string>
     <string name="perform_origin_click">触发原点击</string>
     <string name="about">关于</string>
@@ -158,4 +148,36 @@
     <string name="visible">显示</string>
     <string name="size">尺寸</string>
     <string name="visibility">可见性</string>
+
+    <!-- 主页：本体通知开关（入口统一为本体通知） -->
+    <string name="home_host_notify_title">本体通知</string>
+    <string name="home_host_notify_subtitle">打开后显示常驻本体通知。</string>
+    <string name="home_host_notify_on">已开启本体通知</string>
+    <string name="home_host_notify_off">已关闭本体通知</string>
+    <string name="home_host_notify_need_permission">显示本体通知需要通知权限，可在系统设置中授予。</string>
+
+    <!-- 一键删除某个应用的全部规则 -->
+    <string name="delete_all_rules">删除全部规则</string>
+    <string name="delete_all">删除全部</string>
+    <string name="delete_all_rules_confirm_message">确定删除「%1$s」的全部 %2$d 条规则？相关视图将还原为原始状态。需要目标应用正在运行才会生效，删除后可在通知栏点「撤销」恢复。</string>
+    <string name="delete_all_rules_confirm_message_in_app">确定删除本应用的全部 %1$d 条规则？相关视图将还原为原始状态（可在通知栏点「撤销」恢复）。</string>
+    <string name="delete_all_rules_done">已删除 %1$d 条规则</string>
+    <string name="delete_all_rules_failed">未收到目标应用响应，规则未删除。请先打开该应用后重试。</string>
+
+    <!-- 宿主规则详情页删除单条规则 -->
+    <string name="delete_rule">删除规则</string>
+    <string name="delete_rule_done">规则已删除</string>
+    <string name="delete_rule_failed">未收到目标应用响应，该规则未删除。请先打开该应用后重试。</string>
+
+    <!-- 宿主规则列表多选批量删除 -->
+    <string name="select_multiple">多选</string>
+    <string name="delete_rules_done">已删除 %1$d 条规则</string>
+    <string name="delete_rules_failed">未收到目标应用响应，所选规则未删除。请先打开该应用后重试。</string>
+
+    <!-- 规则详情身份字段 -->
+    <string name="rule_field_resource">资源名</string>
+    <string name="rule_field_text">文本</string>
+    <string name="rule_field_desc">描述</string>
+    <string name="rule_field_depth">层级路径</string>
+    <string name="rule_field_package">应用包名</string>
 </resources>

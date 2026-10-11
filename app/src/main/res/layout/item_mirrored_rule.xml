@@ -23,6 +23,18 @@
         android:orientation="horizontal"
         android:padding="12dp">
 
+        <!-- 多选模式下可见（宿主规则列表批量删除） -->
+        <CheckBox
+            android:id="@+id/ruleCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="2dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
         <ImageView
             android:id="@+id/ruleThumb"
             android:layout_width="48dp"

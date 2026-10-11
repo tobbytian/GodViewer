@@ -1,31 +1,27 @@
 package com.godviewer.app.host.entry
 
 import android.content.Context
-import com.godviewer.app.host.control.HiddenEntryNotifier
 import com.godviewer.app.host.control.HostControlNotifier
-import com.godviewer.app.shared.entry.EntryMode
+import com.godviewer.app.host.prefs.HostPrefs
 
 /**
- * 宿主进程通知形态总控：
- * - 入口=本体通知：常驻 [HostControlNotifier]（打开应用 + 控制目标）
- * - 入口=目标通知：取消本体控制通知；若隐藏了桌面图标则只保留 [HiddenEntryNotifier]
+ * 宿主进程通知形态总控（入口统一为本体通知）：
+ * - 首页「本体通知」开关打开 → 常驻 [HostControlNotifier]（开启编辑 / 撤销 / 管理规则）
+ * - 开关关闭 → 取消常驻控制通知
  */
 object EntryControlUi {
     fun refresh(context: Context) {
         val app = context.applicationContext
-        if (EntryMode.isHostEntry(app)) {
-            // 本体控制通知已包含点开应用，不必再叠隐藏图标入口
-            HiddenEntryNotifier.cancel(app)
+        if (HostPrefs.isHostNotifyEnabled(app)) {
             HostControlNotifier.refresh(app)
         } else {
             HostControlNotifier.cancel(app)
-            HiddenEntryNotifier.refresh(app)
         }
     }
 
-    /** 改入口模式：持久化 + 推目标 + 刷新宿主通知形态。 */
-    fun setEntryMode(context: Context, mode: String) {
-        EntryMode.set(context, mode)
+    /** 首页开关：持久化「本体通知」开关并立即刷新通知形态。 */
+    fun setHostNotification(context: Context, enabled: Boolean) {
+        HostPrefs.setHostNotifyEnabled(context, enabled)
         refresh(context)
     }
 }

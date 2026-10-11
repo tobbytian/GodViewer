@@ -11,11 +11,13 @@ import android.os.Looper
 import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.control.HostControlBridge
 import com.godviewer.app.shared.entry.EntryMode
+import com.godviewer.app.shared.model.ViewRule
 import com.godviewer.app.target.edit.EditMode
 import com.godviewer.app.target.edit.EditModeNotification
 import com.godviewer.app.target.hook.hookers.ActivityLifecycleHooker
 import com.godviewer.app.target.rule.ViewRuleManager
 import com.godviewer.app.target.ui.RuleManagerDialog
+import com.google.gson.Gson
 
 /**
  * Target-process receiver:
@@ -61,6 +63,38 @@ object TargetControlReceiver {
                                 .onFailure { GvLog.e(TAG, "show rule manager failed", it) }
                         }
                     }
+                    HostControlBridge.ACTION_DELETE_ALL_RULES -> {
+                        // 权威规则在目标应用私有目录，只能在本进程删除；
+                        // 空规则落盘会连带推送空镜像，宿主镜像目录随之清除
+                        val removed = ViewRuleManager.deleteAllRules(
+                            ActivityLifecycleHooker.liveActivities(),
+                        )
+                        GvLog.i(TAG, "delete all rules received, removed=$removed")
+                    }
+                    HostControlBridge.ACTION_DELETE_RULES -> {
+                        // 宿主镜像可能滞后，仅信任 key：按 key 定位权威规则后批量删除，
+                        // 落盘会自动回推镜像供宿主回读校验
+                        val json = intent.getStringExtra(HostControlBridge.EXTRA_RULES_JSON)
+                        val incoming = runCatching {
+                            json?.let { Gson().fromJson(it, Array<ViewRule>::class.java) }
+                                ?.toList()
+                        }.getOrNull()
+                        if (incoming.isNullOrEmpty()) {
+                            GvLog.w(TAG, "delete rules: missing/bad rules json")
+                            return
+                        }
+                        val keys = incoming.map { it.key() }.toSet()
+                        val matched = ViewRuleManager.allRules().filter { it.key() in keys }
+                        if (matched.isEmpty()) {
+                            GvLog.d(TAG, "delete rules: none matched count=${keys.size}")
+                            return
+                        }
+                        val removed = ViewRuleManager.deleteRules(
+                            matched,
+                            ActivityLifecycleHooker.liveActivities(),
+                        )
+                        GvLog.i(TAG, "delete rules received, removed=$removed")
+                    }
                     EntryMode.ACTION_ENTRY_MODE_CHANGED -> {
                         val appCtx = appRef ?: context.applicationContext as? Application
                         if (appCtx == null) return
@@ -79,6 +113,8 @@ object TargetControlReceiver {
             addAction(HostControlBridge.ACTION_ENABLE_EDIT)
             addAction(HostControlBridge.ACTION_UNDO)
             addAction(HostControlBridge.ACTION_MANAGE_RULES)
+            addAction(HostControlBridge.ACTION_DELETE_ALL_RULES)
+            addAction(HostControlBridge.ACTION_DELETE_RULES)
             addAction(EntryMode.ACTION_ENTRY_MODE_CHANGED)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

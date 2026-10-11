@@ -42,7 +42,7 @@
             android:paddingStart="12dp"
             android:paddingTop="4dp"
             android:paddingEnd="12dp"
-            android:paddingBottom="16dp"
+            android:paddingBottom="104dp"
             tools:listitem="@layout/item_mirrored_package" />
 
         <TextView

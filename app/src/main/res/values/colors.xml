@@ -67,7 +67,8 @@
     <color name="home_title_text">#1C1B1F</color>
     <color name="home_subtitle_text">#5F5E63</color>
     <color name="home_nav_bar_background">@android:color/transparent</color>
-    <color name="home_nav_item_selected_bg">#F3E8FF</color>
+    <!-- dock 选中底片：中性灰 80% 不透明，内容可隐约透出 -->
+    <color name="home_nav_item_selected_bg">#CCE9E9EC</color>
     <color name="home_nav_item_unselected">#6B6B75</color>
     <color name="home_divider">#E0E2EA</color>
 

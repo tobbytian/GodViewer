@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/home_page_background"
-    android:orientation="vertical"
     tools:context=".host.MainActivity">
 
     <com.godviewer.app.host.ui.ContentFirstFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
 
-        <FrameLayout
+        <com.godviewer.app.host.ui.SwipeSwitchFrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -29,48 +27,60 @@
             android:src="@drawable/ic_launcher_foreground" />
     </com.godviewer.app.host.ui.ContentFirstFrameLayout>
 
-    <!-- wrap_content so icon + label are never clipped; margin lifts bar above home indicator. -->
-    <LinearLayout
+    <!-- 悬浮玻璃 dock：内容宽居中胶囊（对应 21st.dev bottom-menu 的
+         rounded-[18px] p-1 + gap-1 按钮），覆盖在内容之上；elevation 需要 margin 留阴影。
+         navHighlight 是全局选中底片，切 Tab 时平移到目标按钮下方。 -->
+    <FrameLayout
         android:id="@+id/bottomNavBar"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:background="@android:color/transparent"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/bg_bottom_nav_glass"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:gravity="center"
-        android:orientation="horizontal"
+        android:elevation="12dp"
         android:paddingStart="4dp"
         android:paddingTop="4dp"
         android:paddingEnd="4dp"
         android:paddingBottom="4dp">
 
-        <include
-            android:id="@+id/navHome"
-            layout="@layout/item_bottom_nav"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+        <View
+            android:id="@+id/navHighlight"
+            android:layout_width="64dp"
+            android:layout_height="56dp"
+            android:layout_gravity="start|top"
+            android:background="@drawable/bg_nav_icon_selected"
+            android:visibility="invisible" />
 
-        <include
-            android:id="@+id/navGuide"
-            layout="@layout/item_bottom_nav"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_gravity="start|top"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-        <include
-            android:id="@+id/navRules"
-            layout="@layout/item_bottom_nav"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            <include
+                android:id="@+id/navHome"
+                layout="@layout/item_bottom_nav"
+                android:layout_width="64dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="2dp" />
 
-        <include
-            android:id="@+id/navSettings"
-            layout="@layout/item_bottom_nav"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-    </LinearLayout>
-</LinearLayout>
+            <include
+                android:id="@+id/navRules"
+                layout="@layout/item_bottom_nav"
+                android:layout_width="64dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="4dp" />
+
+            <include
+                android:id="@+id/navSettings"
+                layout="@layout/item_bottom_nav"
+                android:layout_width="64dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="2dp" />
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>

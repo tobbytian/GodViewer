@@ -28,6 +28,9 @@
         <item name="colorPrimaryInverse">@color/md_theme_light_primaryInverse</item>
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!-- 全局浅色页面：状态栏与页面同底色，图标强制深色（windowLightStatusBar = API 23 = minSdk） -->
+        <item name="android:statusBarColor">@color/home_page_background</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="HostBottomNavText" parent="TextAppearance.MaterialComponents.Caption">
@@ -42,5 +45,17 @@
         <item name="android:paddingTop">32dp</item>
         <item name="titleTextColor">@color/home_title_text</item>
         <item name="navigationIcon">?attr/homeAsUpIndicator</item>
+        <item name="popupTheme">@style/ThemeOverlay.HostPopupMenu</item>
+    </style>
+
+    <!-- 溢出菜单（三个点）弹窗面板：白色 16dp 圆角 + 发丝描边 -->
+    <style name="Widget.Host.PopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_menu_popup</item>
+        <item name="android:popupElevation">8dp</item>
+    </style>
+
+    <style name="ThemeOverlay.HostPopupMenu" parent="ThemeOverlay.AppCompat">
+        <item name="popupMenuStyle">@style/Widget.Host.PopupMenu</item>
+        <item name="android:textColorPrimary">@color/home_title_text</item>
     </style>
 </resources>

@@ -1,55 +1,28 @@
 package com.godviewer.app.host.ui
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.godviewer.app.BuildConfig
 import com.godviewer.app.R
 import com.godviewer.app.host.LauncherIconHelper
 import com.godviewer.app.host.MainActivity
 import com.godviewer.app.host.UpdateChecker
-import com.godviewer.app.host.diag.HostDiag
 import com.godviewer.app.host.prefs.HostPrefs
 import com.godviewer.app.shared.AppLanguage
-import com.godviewer.app.host.entry.EntryControlUi
-import com.godviewer.app.shared.entry.EntryMode
+import com.godviewer.app.shared.TUTORIAL_URL
 import com.godviewer.app.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private var suppressHideIconCallback = false
-    private var pendingHideIconAfterPermission = false
-
-    private val notificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        if (pendingHideIconAfterPermission) {
-            pendingHideIconAfterPermission = false
-            applyHideIcon(true, notificationGranted = granted)
-        } else {
-            // 切换到本体入口：无论是否授予通知权限都写入偏好；无权限时提示去系统设置
-            EntryControlUi.setEntryMode(requireContext(), EntryMode.HOST)
-            refreshEntryModeValue()
-            val msg = if (granted) {
-                R.string.settings_entry_mode_host_toast
-            } else {
-                R.string.settings_entry_mode_host_need_notification
-            }
-            Toast.makeText(requireContext(), msg, if (granted) Toast.LENGTH_SHORT else Toast.LENGTH_LONG)
-                .show()
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,8 +40,8 @@ class SettingsFragment : Fragment() {
         refreshLanguageValue()
         binding.languageRow.setOnClickListener { showLanguagePicker() }
 
-        refreshEntryModeValue()
-        binding.entryModeRow.setOnClickListener { showEntryModePicker() }
+        // 教程：从底部导航移到设置页，点击打开酷安图文教程
+        binding.tutorialRow.setOnClickListener { openTutorial() }
 
         suppressHideIconCallback = true
         binding.hideIconSwitch.isChecked = LauncherIconHelper.isHidden(ctx)
@@ -101,41 +74,9 @@ class SettingsFragment : Fragment() {
             BuildConfig.VERSION_CODE,
         )
         binding.checkUpdateRow.setOnClickListener { checkUpdate() }
-        binding.changelogRow.setOnClickListener {
-            startActivity(
-                Intent(ctx, SimpleTextActivity::class.java)
-                    .putExtra(SimpleTextActivity.EXTRA_TITLE_RES, R.string.settings_changelog_title)
-                    .putExtra(SimpleTextActivity.EXTRA_BODY_RES, R.string.changelog_body),
-            )
-        }
-        binding.userAgreementRow.setOnClickListener {
-            startActivity(
-                Intent(ctx, SimpleTextActivity::class.java)
-                    .putExtra(SimpleTextActivity.EXTRA_TITLE_RES, R.string.settings_user_agreement_title)
-                    .putExtra(SimpleTextActivity.EXTRA_BODY_RES, R.string.user_agreement_body),
-            )
-        }
-        binding.copyDiagRow.setOnClickListener {
-            val ok = HostDiag.copyToClipboard(ctx)
-            Toast.makeText(
-                ctx,
-                if (ok) R.string.settings_copy_diag_done else R.string.settings_copy_diag_failed,
-                Toast.LENGTH_SHORT,
-            ).show()
-        }
-        binding.clearDiagRow.setOnClickListener {
-            AlertDialog.Builder(ctx)
-                .setTitle(R.string.settings_clear_diag_confirm_title)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.settings_clear_diag_confirm) { _, _ ->
-                    val ok = HostDiag.clearLogs(ctx)
-                    Toast.makeText(
-                        ctx,
-                        if (ok) R.string.settings_clear_diag_done else R.string.settings_clear_diag_failed,
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }
-                .show()
+        // 更新日志/用户协议/诊断日志合并进二级页「关于与诊断」
+        binding.infoRow.setOnClickListener {
+            startActivity(Intent(ctx, SettingsInfoActivity::class.java))
         }
     }
 
@@ -149,9 +90,14 @@ class SettingsFragment : Fragment() {
         binding.languageValue.setText(AppLanguage.labelRes(mode))
     }
 
-    private fun refreshEntryModeValue() {
-        val mode = EntryMode.current(requireContext())
-        binding.entryModeValue.setText(EntryMode.labelRes(mode))
+    /** 打开图文教程（酷安）；无浏览器时降级为 Toast 展示链接 */
+    private fun openTutorial() {
+        val ctx = requireContext()
+        runCatching {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(TUTORIAL_URL)))
+        }.onFailure {
+            Toast.makeText(ctx, TUTORIAL_URL, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showLanguagePicker() {
@@ -180,56 +126,6 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
-    private fun showEntryModePicker() {
-        val ctx = requireContext()
-        val modes = arrayOf(EntryMode.TARGET, EntryMode.HOST)
-        val labels = arrayOf(
-            getString(R.string.settings_entry_mode_target),
-            getString(R.string.settings_entry_mode_host),
-        )
-        val current = EntryMode.current(ctx)
-        val checked = modes.indexOf(current).coerceAtLeast(0)
-        AlertDialog.Builder(ctx)
-            .setTitle(R.string.settings_entry_mode_title)
-            .setSingleChoiceItems(labels, checked) { dialog, which ->
-                val selected = modes[which]
-                dialog.dismiss()
-                if (selected == current) return@setSingleChoiceItems
-                if (selected == EntryMode.HOST) {
-                    maybeRequestNotificationThenHostEntry()
-                } else {
-                    EntryControlUi.setEntryMode(ctx, EntryMode.TARGET)
-                    refreshEntryModeValue()
-                    Toast.makeText(ctx, R.string.settings_entry_mode_target_toast, Toast.LENGTH_SHORT)
-                        .show()
-                }
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
-    }
-
-    private fun maybeRequestNotificationThenHostEntry() {
-        val ctx = requireContext()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            EntryControlUi.setEntryMode(ctx, EntryMode.HOST)
-            refreshEntryModeValue()
-            Toast.makeText(ctx, R.string.settings_entry_mode_host_toast, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val granted = ContextCompat.checkSelfPermission(
-            ctx,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
-        if (granted) {
-            EntryControlUi.setEntryMode(ctx, EntryMode.HOST)
-            refreshEntryModeValue()
-            Toast.makeText(ctx, R.string.settings_entry_mode_host_toast, Toast.LENGTH_SHORT).show()
-        } else {
-            pendingHideIconAfterPermission = false
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-
     private fun recreateHost() {
         val activity = activity ?: return
         val intent = Intent(activity, MainActivity::class.java).apply {
@@ -254,41 +150,18 @@ class SettingsFragment : Fragment() {
             .setTitle(R.string.settings_hide_icon_title)
             .setMessage(R.string.settings_hide_icon_confirm)
             .setPositiveButton(R.string.settings_hide_icon_confirm_ok) { _, _ ->
-                maybeRequestNotificationThenHide()
+                applyHideIcon(true)
             }
             .setNegativeButton(R.string.cancel) { _, _ -> setHideIconChecked(false) }
             .setOnCancelListener { setHideIconChecked(false) }
             .show()
     }
 
-    private fun maybeRequestNotificationThenHide() {
-        val ctx = requireContext()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            applyHideIcon(true, notificationGranted = true)
-            return
-        }
-        val granted = ContextCompat.checkSelfPermission(
-            ctx,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
-        if (granted) {
-            applyHideIcon(true, notificationGranted = true)
-        } else {
-            pendingHideIconAfterPermission = true
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-
-    private fun applyHideIcon(hidden: Boolean, notificationGranted: Boolean) {
+    private fun applyHideIcon(hidden: Boolean) {
         val ctx = requireContext()
         LauncherIconHelper.setHidden(ctx, hidden)
         if (hidden) {
-            val msg = if (notificationGranted) {
-                R.string.settings_hide_icon_hidden
-            } else {
-                R.string.settings_hide_icon_hidden_no_notification
-            }
-            Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
+            Toast.makeText(ctx, R.string.settings_hide_icon_hidden, Toast.LENGTH_LONG).show()
         }
     }
 

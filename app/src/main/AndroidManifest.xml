@@ -71,6 +71,11 @@
             android:exported="false"
             android:parentActivityName=".host.MainActivity" />
 
+        <activity
+            android:name=".host.ui.SettingsInfoActivity"
+            android:exported="false"
+            android:parentActivityName=".host.MainActivity" />
+
 
         <activity
             android:name=".host.RuleMirrorListActivity"

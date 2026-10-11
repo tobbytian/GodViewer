@@ -1,47 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- dock 按钮：纯图标 56x56；选中底片是容器级 navHighlight（切 Tab 时平移动画滑入） -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:background="@android:color/transparent"
+    android:layout_width="64dp"
+    android:layout_height="56dp"
+    android:background="@drawable/bg_nav_item_press"
     android:clickable="true"
-    android:focusable="true"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:focusable="true">
 
-    <FrameLayout
-        android:layout_width="64dp"
-        android:layout_height="32dp"
-        android:layout_gravity="center_horizontal">
-
-        <View
-            android:id="@+id/iconHighlight"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_nav_icon_selected"
-            android:visibility="invisible" />
-
-        <ImageView
-            android:id="@+id/iconView"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_gravity="center"
-            android:contentDescription="@null"
-            tools:src="@drawable/ic_nav_home_24" />
-    </FrameLayout>
-
-    <TextView
-        android:id="@+id/labelView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:ellipsize="none"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:textColor="@color/home_nav_item_unselected"
-        android:textSize="11sp"
-        tools:text="主页" />
-</LinearLayout>
+    <ImageView
+        android:id="@+id/iconView"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:contentDescription="@null"
+        tools:src="@drawable/ic_nav_home_24" />
+</FrameLayout>

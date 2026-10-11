@@ -27,6 +27,10 @@ internal object ModuleDialogStyler {
     }
 
     private fun styleEditText(editText: EditText) {
+        // 先清掉主题（DeviceDefault / OEM ROM）注入的 backgroundTint：
+        // View.setBackground 会把残留 tint 以 SRC_IN 重新染到新 Drawable 上，
+        // 状态刷新（按压/焦点）时按 stateful tint 再次取色 → 控件「有时」整块变黑
+        editText.backgroundTintList = null
         val metrics = editText.resources.displayMetrics
         val radius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, metrics)
         val hPad = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12f, metrics).toInt()
@@ -47,6 +51,10 @@ internal object ModuleDialogStyler {
     }
 
     private fun styleButton(button: Button) {
+        // 先清掉主题（DeviceDefault / OEM ROM）注入的 backgroundTint：
+        // View.setBackground / refreshDrawableState 会把残留 tint 以 SRC_IN
+        // 重新染到我们的 GradientDrawable 上 → 按钮「有时」整颗变黑填充
+        button.backgroundTintList = null
         val label = button.text?.toString().orEmpty()
         val (bg, fg) = when {
             looksDanger(label) ->

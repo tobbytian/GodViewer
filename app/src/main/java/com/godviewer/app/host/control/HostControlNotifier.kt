@@ -10,15 +10,18 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.godviewer.app.R
 import com.godviewer.app.data.HostControlReceiver
+import com.godviewer.app.host.prefs.HostPrefs
 import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.control.HostControlBridge
-import com.godviewer.app.shared.entry.EntryMode
 import com.godviewer.app.shared.immutableFlag
 
 /**
- * 本体入口的常驻控制通知：
+ * 本体常驻控制通知（入口统一为本体通知，由首页开关控制是否发布）：
  * 点击通知体 /「开启」= 目标未开编辑则开启，已开则仅刷新状态（不跳转 GodViewer）；
  * 另有撤销、规则管理操作。
+ *
+ * 支持按应用单独关闭：规则管理页可把某个应用加入 `KEY_NOTIFY_DISABLED_PACKAGES`，
+ * 该应用前台时不发布本通知。
  */
 object HostControlNotifier {
     private const val TAG = "Control"
@@ -37,8 +40,8 @@ object HostControlNotifier {
     fun show(context: Context) {
         runCatching {
             val app = context.applicationContext
-            // 仅「本体通知」入口模式才发宿主控制通知
-            if (!EntryMode.isHostEntry(app)) {
+            // 首页「本体通知」开关关闭时不发布常驻控制通知
+            if (!HostPrefs.isHostNotifyEnabled(app)) {
                 cancel(app)
                 return
             }
@@ -49,6 +52,11 @@ object HostControlNotifier {
             ensureChannel(app)
 
             val target = HostControlBridge.currentTarget(app)
+            // 每应用通知开关：被单独关闭的应用在前台时不显示本体控制通知
+            if (target != null && HostPrefs.isAppNotifyDisabled(app, target.packageName)) {
+                cancel(app)
+                return
+            }
             val contentText = if (target == null) {
                 app.getString(R.string.host_control_no_target_text)
             } else {
@@ -74,17 +82,17 @@ object HostControlNotifier {
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .addAction(
-                    android.R.drawable.ic_menu_edit,
+                    R.drawable.ic_action_edit_24,
                     app.getString(R.string.edit_mode_enable),
                     enablePending,
                 )
                 .addAction(
-                    android.R.drawable.ic_menu_revert,
+                    R.drawable.ic_action_undo_24,
                     app.getString(R.string.undo),
                     undoPending,
                 )
                 .addAction(
-                    android.R.drawable.ic_menu_manage,
+                    R.drawable.ic_action_manage_24,
                     app.getString(R.string.manage_rules),
                     managePending,
                 )

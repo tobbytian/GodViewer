@@ -17,7 +17,7 @@
             android:paddingStart="24dp"
             android:paddingTop="48dp"
             android:paddingEnd="24dp"
-            android:paddingBottom="32dp">
+            android:paddingBottom="112dp">
 
             <TextView
                 android:id="@+id/homeTitle"
@@ -97,6 +97,56 @@
                             android:textColor="@color/home_activated_on_card"
                             android:textSize="12sp" />
                     </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 本体通知开关：打开后才显示常驻控制通知（默认关闭） -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/hostNotifyCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/home_card_background"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/home_host_notify_title"
+                            android:textColor="@color/home_title_text"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/hostNotifyHint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/home_host_notify_subtitle"
+                            android:textColor="@color/home_subtitle_text"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/hostNotifySwitch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -217,22 +267,55 @@
                         android:focusable="true"
                         android:gravity="center"
                         android:orientation="horizontal"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp">
+                        android:paddingStart="6dp"
+                        android:paddingEnd="6dp">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_github_24" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="4dp"
+                            android:singleLine="true"
                             android:text="@string/link_github"
                             android:textColor="@color/home_title_text"
-                            android:textSize="15sp"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/telegramButton"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_home_chip"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingStart="6dp"
+                        android:paddingEnd="6dp">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_telegram_24" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:singleLine="true"
+                            android:text="@string/link_telegram"
+                            android:textColor="@color/home_title_text"
+                            android:textSize="12sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 
@@ -240,29 +323,30 @@
                         android:id="@+id/donateButton"
                         android:layout_width="0dp"
                         android:layout_height="48dp"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="0dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_home_chip"
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center"
                         android:orientation="horizontal"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp">
+                        android:paddingStart="6dp"
+                        android:paddingEnd="6dp">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_donate_24" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="4dp"
+                            android:singleLine="true"
                             android:text="@string/link_donate"
                             android:textColor="@color/home_title_text"
-                            android:textSize="15sp"
+                            android:textSize="12sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>

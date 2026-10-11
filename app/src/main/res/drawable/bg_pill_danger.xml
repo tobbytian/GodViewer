@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 危险操作 pill 按钮底：error 红底 + 28dp 圆角 + 按压涟漪 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#33FFFFFF">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFB3261E" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+</ripple>

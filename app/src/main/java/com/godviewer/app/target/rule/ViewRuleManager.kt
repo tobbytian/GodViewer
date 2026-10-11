@@ -148,6 +148,68 @@ object ViewRuleManager {
         deleteRule(rule)
     }
 
+    /**
+     * 批量删除多条规则（宿主多选删除走此路径）：先在给定各 Activity 中还原关联视图，
+     * 一次压入撤销栈、一次落盘（避免逐条 save 反复推镜像）。
+     *
+     * @param restoreIn 需要还原视图的存活 Activity
+     * @return 实际删除的规则条数（仅按 key 匹配权威列表，[toDelete] 中不存在的忽略）
+     */
+    fun deleteRules(toDelete: Collection<ViewRule>, restoreIn: Collection<Activity>): Int {
+        if (toDelete.isEmpty()) return 0
+        val keys = toDelete.map { it.key() }.toSet()
+        val removed = rules.filter { it.key() in keys }
+        if (removed.isEmpty()) return 0
+        pushUndoState()
+        for (activity in restoreIn) {
+            for (rule in removed) {
+                findViewBestMatch(activity, rule)?.let { view ->
+                    ViewRuleApplier.restoreView(view, rule)
+                }
+            }
+        }
+        for (rule in removed) {
+            ViewRuleApplier.forgetAppliedImage(rule)
+            ViewRuleThumbnails.remove(rule)
+        }
+        rules = rules.filterNot { it.key() in keys }
+        store?.save(rules)
+        GvLog.i(TAG, "rules deleted count=${removed.size}")
+        return removed.size
+    }
+
+    /**
+     * 删除本进程（= 该应用）的全部规则：先在存活 Activity 中还原相关视图，
+     * 再清空规则与缩略图并落盘（空规则会连带推送空镜像，宿主镜像目录随之清除）。
+     *
+     * 与单条删除一致：压入撤销栈，误删可用「撤销」恢复。
+     *
+     * @param restoreIn 需要还原视图的存活 Activity
+     * @return 被删除的规则条数
+     */
+    fun deleteAllRules(restoreIn: Collection<Activity> = emptyList()): Int {
+        if (rules.isEmpty()) {
+            return 0
+        }
+        val removed = rules
+        pushUndoState()
+        for (activity in restoreIn) {
+            for (rule in removed) {
+                findViewBestMatch(activity, rule)?.let { view ->
+                    ViewRuleApplier.restoreView(view, rule)
+                }
+            }
+        }
+        ViewRuleApplier.clearAppliedImages()
+        for (rule in removed) {
+            ViewRuleThumbnails.remove(rule)
+        }
+        rules = emptyList()
+        store?.save(rules)
+        GvLog.i(TAG, "all rules deleted count=${removed.size}")
+        return removed.size
+    }
+
     /** 当前全部规则（规则管理列表使用） */
     fun allRules(): List<ViewRule> = rules
 

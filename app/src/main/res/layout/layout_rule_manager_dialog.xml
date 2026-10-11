@@ -56,6 +56,19 @@
             android:tag="GODVIEWER_IGNORE_HOOK"
             android:text="Delete selected"
             android:visibility="gone" />
+
+        <Button
+            android:id="@+id/delete_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:tag="GODVIEWER_IGNORE_HOOK"
+            android:text="Delete all"
+            android:visibility="gone" />
     </LinearLayout>
 
     <ListView

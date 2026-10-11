@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 溢出菜单（三个点）弹窗面板：白色 16dp 圆角 + 发丝描边 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFFFFFF" />
+    <corners android:radius="16dp" />
+    <stroke
+        android:width="1dp"
+        android:color="#14000000" />
+</shape>

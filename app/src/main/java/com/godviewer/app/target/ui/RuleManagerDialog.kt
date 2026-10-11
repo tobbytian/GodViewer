@@ -49,6 +49,8 @@ class RuleManagerDialog(context: Context) : AlertDialog(ModuleDialogUi.wrap(cont
         binding.selectAll.text = SpannableString(moduleRes.getString(R.string.select_all))
         binding.batchDelete.text = SpannableString(moduleRes.getString(R.string.delete_selected))
         binding.batchDelete.setOnClickListener { showBatchDeleteConfirm() }
+        binding.deleteAll.text = SpannableString(moduleRes.getString(R.string.delete_all))
+        binding.deleteAll.setOnClickListener { showDeleteAllConfirm() }
         refreshList()
     }
 
@@ -97,6 +99,44 @@ class RuleManagerDialog(context: Context) : AlertDialog(ModuleDialogUi.wrap(cont
         binding.selectedCount.text =
             SpannableString(moduleRes.getString(R.string.selected_count, selection.size))
         binding.batchDelete.isVisible = selection.isNotEmpty()
+        binding.deleteAll.isVisible = rules.isNotEmpty()
+    }
+
+    /**
+     * 一键删除该应用（= 本进程）的全部规则：先在存活 Activity 中还原视图，
+     * 再清空并落盘；与批量删除同样压入撤销栈，可用通知栏「撤销」恢复。
+     */
+    private fun showDeleteAllConfirm() {
+        val all = ViewRuleManager.allRules()
+        if (all.isEmpty()) return
+        val view = ModuleDialogUi.inflate(context, R.layout.layout_rule_delete_confirm)
+        val confirmBinding = LayoutRuleDeleteConfirmBinding.bind(view)
+        confirmBinding.confirmMessage.text = SpannableString(
+            moduleRes.getString(R.string.delete_all_rules_confirm_message, all.size)
+        )
+        confirmBinding.confirmCancel.text = SpannableString(moduleRes.getString(R.string.cancel))
+        confirmBinding.confirmDelete.text = SpannableString(moduleRes.getString(R.string.delete))
+
+        val confirmDialog = Builder(context)
+            .setView(view)
+            .setCancelable(true)
+            .create()
+        confirmBinding.confirmCancel.setOnClickListener { confirmDialog.dismiss() }
+        confirmBinding.confirmDelete.setOnClickListener {
+            confirmDialog.dismiss()
+            val removed = ViewRuleManager.deleteAllRules(
+                ActivityLifecycleHooker.liveActivities(),
+            )
+            GvLog.i(TAG, "delete all rules from dialog, removed=$removed")
+            selection.clear()
+            refreshList()
+        }
+        confirmDialog.setOnShowListener {
+            runCatching { confirmDialog.window?.decorView?.let { ModuleDialogUi.markIgnoreTree(it) } }
+        }
+        confirmDialog.show()
+        ModuleDialogUi.applyWindow(confirmDialog, view)
+        runCatching { confirmDialog.window?.decorView?.let { ModuleDialogUi.markIgnoreTree(it) } }
     }
 
     /** 批量删除确认框：与单条删除同样的还原 + 可撤销语义 */

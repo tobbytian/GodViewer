@@ -17,8 +17,18 @@ User preference: communicate in **中文** unless they write in English.
 - Prefer `assembleDebug` after feature work. **Do not commit unless the user asks.**
 - Requirements: **JDK 17**, Android SDK **platform 35**. `local.properties` (`sdk.dir`) is
   gitignored and must exist locally (this machine often uses `tools-Android/`).
-- Stack: Gradle 8.7 wrapper, AGP 8.5.2, Kotlin 1.9.24 (jvmTarget 1.8), minSdk 23 / targetSdk 35.
-- UI is **Views + XML + ViewBinding** (`viewBinding = true`), **not Compose**. No flavors, no CI,
+- Stack: Gradle 8.7 wrapper, AGP 8.5.2, Kotlin 1.9.24 (jvmTarget 1.8, **kapt** for Glide),
+  minSdk 23 / targetSdk 35, compileSdk 35.
+- Versioning: release constants live in `app/build.gradle` (`RELEASE_VERSION_CODE = 11`,
+  `RELEASE_VERSION_NAME = "4.3.2"`). Every `assembleDebug`/`installDebug` auto-bumps a local
+  counter in `app/debug-version.properties` (gitignored) and overrides the debug APK's
+  versionCode/Name to that pure number. Release APK is signed with the **debug keystore** (self-use).
+- Dep quirks (keep as-is): `io.github.libxposed:api:102.0.0` is `compileOnly` (never bundled);
+  `io.github.libxposed:service:101.0.0` is bundled but excludes kotlin-stdlib (conflicts with 1.9.24).
+  The service AAR demands compileSdk 36 — `android.suppressUnsupportedCompileSdk=35,36,37`
+  (gradle.properties) plus disabled `*AarMetadata` checks (app/build.gradle) keep the build green.
+  `packagingOptions` merges `META-INF/xposed/*` into the APK — don't remove.
+- UI is **Views + XML + ViewBinding** (`viewBinding = true`), **not** Compose. No flavors, no CI,
   no DI framework, no coroutines, no Room.
 - No real unit/instrumented tests; verify on device with LSPosed + logcat (`GvLog` / `GodViewer.*`).
 
@@ -35,6 +45,9 @@ Logical packages (phase-2):
 | `data/` | **Protocol-frozen FQCNs only**: thin stubs `RuleMirrorReceiver` / `HostControlReceiver` / `HostPrefsProvider` (subclass host `*Impl`) + `RuleMirror` facade API |
 | `util/` | **Protocol-frozen**: `ModuleStatus` stays at `com.godviewer.app.util.ModuleStatus` (Xposed string + reflection) |
 | root | `LegacyExports.kt` re-exports `IGNORE_HOOK` for historical imports |
+
+Diagnostics: `shared/diag` (protocol + ring buffer), `host/diag` (stores), `target/diag` (probe).
+Host activities extend `host.ui.HostActivity` (applies the `AppLanguage` locale override).
 
 Layers (conceptual): `target.hook` → `target.rule` / `shared` → `target.ui`/`handler` → host UI.
 No MVVM; singletons are Kotlin `object`s. Large types keep **thin facades**
@@ -54,7 +67,7 @@ Dialog/Activity/Hooker).
 |-------|--------|--------|
 | 1 | Same-package responsibility split of large classes (Mirror → Manager → BaseAttr → ModuleDialogUi); thin facades; GvLog on touched paths | **done** |
 | 2 | Move into `com.godviewer.app.host` / `.target` / `.shared`; relocate root Activities & util by role; freeze protocol FQCNs via `data/*` stubs + `util.ModuleStatus` | **done** |
-| 3 | Boundary hygiene: no `shared→host/target`, no `target→host`; `HostPrefsNames` shared keys; `EntryMode` self-contained + host `EntryControlUi.setEntryMode`; `HiddenEntryNotifier` on host only | **done** (assembleDebug OK) |
+| 3 | Boundary hygiene: no `shared→host/target`, no `target→host`; `HostPrefsNames` shared keys; `EntryMode` self-contained + host `EntryControlUi` owns notification shape (now `setHostNotification`) | **done** (assembleDebug OK) |
 | 4 | Optional: drop `data.RuleMirror` facade / more call-site cleanup once stable on device | pending |
 
 **Frozen FQCNs / strings (do not rename without compatibility):**
@@ -80,7 +93,8 @@ Backup before large moves: desktop `GodViewer-backup-pre-optimize-*` +
   provide the legacy bridge. Entry is `GodViewerModule : XposedModule()` (public no-arg ctor,
   `onModuleLoaded` + `onPackageReady`); hooking goes through the **transitional in-project
   shim** `target/hook/GvHook.kt` (`GvMethodHook` / `MethodHookParam` over
-  `hook(method).intercept { chain -> … }`). Migration notes live in `HANDOFF.md`.
+  `hook(method).intercept { chain -> … }`). Migration notes live in `HANDOFF.md`
+  (gitignored, local-only — may be absent on a fresh checkout).
 - **Injected UI** must use `ModuleRes.moduleRes` (created in `onModuleLoaded` from
   `getModuleApplicationInfo()`, no `XModuleResources`) via `target.dialog.ModuleDialogUi`
   for layouts/strings — **not** the host app’s `R` / target `Context.getResources()` alone.
@@ -110,9 +124,30 @@ Backup before large moves: desktop `GodViewer-backup-pre-optimize-*` +
 - Rule mirror is **broadcast-only** best-effort. Do **not** re-add Service/ContentProvider cold-start
   delivery unless the user explicitly asks (already tried and reverted). Soft token:
   `godviewer-rule-mirror-v1`.
-- Host entry/control: `EntryMode` (`target` vs `host`), `HostPrefs` + `HostPrefsProvider`
-  (`content://com.godviewer.app.hostprefs/...`), control token `godviewer-host-control-v1`
-  (soft guard, not crypto).
+- Host entry/control: **the entry is the host notification only** — the old target-app edit-mode
+  notification was removed (`EditModeNotification` is now just a legacy-cancel shell, no receiver).
+  `EntryMode` survives as a compatibility shell that always resolves to `host` (keeps the frozen
+  `ACTION_ENTRY_MODE_CHANGED` / Provider `entry_mode` protocol for older builds) and is force-written
+  once in `GodViewerApp.onCreate`. The Home tab switch
+  (`HostPrefsNames.KEY_HOST_NOTIFY_ENABLED` / `HostPrefs.isHostNotifyEnabled`, **default off**) gates
+  `HostControlNotifier` through `host.entry.EntryControlUi.refresh/setHostNotification`.
+  `HostPrefs` + `HostPrefsProvider` (`content://com.godviewer.app.hostprefs/...`) stay protocol-frozen;
+  control token `godviewer-host-control-v1` (soft guard, not crypto). The old hidden-icon reopen
+  notification (`HiddenEntryNotifier`) was removed — with the icon hidden the app reopens only via
+  LSPosed module settings or the system app list.
+- Per-app notification suppression: an app's rule page (host Rules/"Apps" tab → detail) has a
+  switch writing `HostPrefsNames.KEY_NOTIFY_DISABLED_PACKAGES` (via `HostPrefs.setAppNotifyDisabled`).
+  While a suppressed package is the last reported foreground target, `HostControlNotifier.show()`
+  cancels itself; the switch row is enabled only when the global Home switch is on.
+- **Delete all rules of one app** runs in the target process (rules are authoritative there):
+  host Rules page overflow → `HostControlBridge.dispatchToPackage(ACTION_DELETE_ALL_RULES)` →
+  `TargetControlReceiver` → `ViewRuleManager.deleteAllRules(liveActivities)` (restores live views,
+  clears thumbs, writes empty `rules.json` → empty mirror push removes the host mirror dir; undoable).
+  `dispatchToPackage` exists because `MainActivity.onResume` clears the "last target" state. The target
+  process must be alive (broadcasts to a dead process are silently dropped) — the host re-reads the
+  mirror ~1.2 s later and tells the user to open the app if nothing changed.
+- Bottom nav = **Home / Rules / Settings only** — the old Guide tab (`GuideFragment`,
+  `fragment_guide.xml`, `nav_guide`, `ic_nav_guide_24`) was removed; don't restore it.
 - Do **not** restore deleted AppList* UI (`AppListActivity` / adapters / layouts).
 - Keep load-bearing misspellings: `PupupWindowHooker.kt`, `VeiwUtil.kt`.
 - Logging: prefer `GvLog` (`GodViewer.<tag>`, forwarded to the framework log via the sink
@@ -126,4 +161,5 @@ Backup before large moves: desktop `GodViewer-backup-pre-optimize-*` +
 
 ## Before changing sensitive areas
 1. `README.md` — features, persistence design/limits, Android 16 + LSPosed checklist.
-2. `HANDOFF.md` — session constraints, reverted experiments, “don’t restore X” notes.
+2. `HANDOFF.md` (if present; gitignored/local) — session constraints, reverted experiments,
+   “don’t restore X” notes.

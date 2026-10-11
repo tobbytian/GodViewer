@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- 删除该条规则（权威规则在目标应用内，需目标进程存活） -->
+    <item
+        android:id="@+id/action_delete_rule"
+        android:title="@string/delete_rule"
+        app:showAsAction="never" />
+</menu>

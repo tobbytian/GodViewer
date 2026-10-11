@@ -1,10 +1,9 @@
 <resources>
     <string name="app_name">上帝视角</string>
-    <string name="app_description">Runtime view debugger for Android (Xposed / libxposed API 102 module).</string>
+    <string name="app_description">Do you believe in God too?\nDeveloper: tobbytian@github</string>
     <string name="home_tagline">尽情定制几乎所有Android应用</string>
     <string name="nav_home">Home</string>
-    <string name="nav_guide">Guide</string>
-    <string name="nav_rules">Rules</string>
+    <string name="nav_rules">Apps</string>
     <string name="rules_sync_tip_title">About rule sync</string>
     <string name="rules_sync_tip_message">To sync rules, keep GodViewer running in the background before you edit views in a target app.</string>
     <string name="rules_sync_tip_got_it">Got it</string>
@@ -14,22 +13,12 @@
     <string name="home_info_device">Device</string>
     <string name="home_info_abi">ABI</string>
     <string name="home_info_mirrored">Mirrored apps</string>
-    <string name="guide_title">Guide</string>
-    <string name="guide_subtitle">Get GodViewer working in a few steps</string>
-    <string name="guide_step_1_title">1. Install LSPosed</string>
-    <string name="guide_step_1_body">Root your device and install a working LSPosed (or compatible Xposed) framework. Reboot after installation.</string>
-    <string name="guide_step_2_title">2. Enable the module</string>
-    <string name="guide_step_2_body">Open LSPosed → Modules → enable GodViewer. You only need to scope the target apps you want to edit — the host app itself does not need to be in scope.</string>
-    <string name="guide_step_3_title">3. Scope target apps</string>
-    <string name="guide_step_3_body">Add the apps you want to inspect to the module scope, then force-stop those apps (or reboot) so hooks load cleanly.</string>
-    <string name="guide_step_4_title">4. Edit views</string>
-    <string name="guide_step_4_body">Open a scoped app, pull down the notification shade, and use the edit-mode entry (default: the target app\'s notification; optional: GodViewer host notification in Settings): Enable / Undo / Manage Rules. Then tap a view, adjust size / margin / padding / visibility / text / image, and Apply. Rules are saved inside the target app and replay after restart.</string>
-    <string name="guide_tips_title">Tips</string>
-    <string name="guide_tips_body">• Default entry is the target app notification. If the target app does not request notification permission, choose the host notification entry (Settings → Edit-mode entry).\n• Host entry mode: keep GodViewer alive in the background so it can control the last foreground target.\n• Synced rules on the Rules tab are read-only mirrors pushed when a target saves rules.\n• Corrupt rule files are ignored safely and will not crash the target app.</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_system">Follow system</string>
     <string name="settings_language_zh">中文</string>
     <string name="settings_language_en">English</string>
+    <string name="settings_tutorial_title">Tutorial</string>
+    <string name="settings_tutorial_subtitle">Open the illustrated tutorial (Coolapk)</string>
     <string name="settings_entry_mode_title">Edit-mode entry</string>
     <string name="settings_entry_mode_subtitle">If the target app does not request notification permission, choose the host notification entry</string>
     <string name="settings_entry_mode_target">Target app notification</string>
@@ -38,16 +27,11 @@
     <string name="settings_entry_mode_host_toast">Using GodViewer host notification entry</string>
     <string name="settings_entry_mode_host_need_notification">Notification permission is required for the host entry. You can grant it in system settings.</string>
     <string name="settings_hide_icon_title">Hide desktop icon</string>
-    <string name="settings_hide_icon_subtitle">Remove the launcher shortcut. Reopen via the persistent notification, LSPosed module settings, or the system app list.</string>
-    <string name="settings_hide_icon_confirm">Hide the desktop icon?\n\nAfterwards you can reopen GodViewer from:\n• The persistent notification\n• LSPosed → Modules → GodViewer → settings/gear\n• System settings → Apps</string>
+    <string name="settings_hide_icon_subtitle">Remove the launcher shortcut. Reopen via LSPosed module settings or the system app list.</string>
+    <string name="settings_hide_icon_confirm">Hide the desktop icon?\n\nAfterwards you can reopen GodViewer from:\n• LSPosed → Modules → GodViewer → settings/gear\n• System settings → Apps</string>
     <string name="settings_hide_icon_confirm_ok">Hide</string>
-    <string name="settings_hide_icon_hidden">Desktop icon hidden. Use the notification or LSPosed module settings to reopen.</string>
-    <string name="settings_hide_icon_hidden_no_notification">Desktop icon hidden. Notification permission denied — reopen from LSPosed module settings or system app list.</string>
+    <string name="settings_hide_icon_hidden">Desktop icon hidden. Reopen via LSPosed module settings or the system app list.</string>
     <string name="settings_hide_icon_shown">Desktop icon restored</string>
-    <string name="hidden_entry_channel_name">Hidden icon entry</string>
-    <string name="hidden_entry_channel_desc">Persistent shortcut to open GodViewer after the desktop icon is hidden</string>
-    <string name="hidden_entry_notification_title">GodViewer</string>
-    <string name="hidden_entry_notification_text">Tap to open · desktop icon is hidden</string>
     <string name="host_control_channel_name">GodViewer controls</string>
     <string name="host_control_channel_desc">Persistent entry: open GodViewer and control edit mode in the last target app</string>
     <string name="host_control_notification_title">GodViewer</string>
@@ -82,7 +66,9 @@
     <string name="settings_clear_diag_confirm">Clear</string>
     <string name="settings_clear_diag_done">Cleared</string>
     <string name="settings_clear_diag_failed">Clear failed</string>
-    <string name="changelog_body">GodViewer changelog\n\n4.3.3\n• Test release to verify the in-app update check; no functional changes\n\n4.3.2\n• New host-notification entry for target apps without notification permission (switchable in Settings)\n• Live highlight of the selected view\n• Batch rule editing: select all / multi-select and batch delete; view thumbnails in the rule list\n• In-app update check and copy / clear diagnostic logs\n• Rewritten touch interception fixes taps in some hooked apps; smaller click bounds for finer control\n• Rewritten dialog style with less dependence on target app code\n• New hook approach (migrated to libxposed API 102) for better stability\n• Bug fixes and support for more common apps\n\n3.3.2\n• Move edit-mode entry to GodViewer host notification (enable / undo / manage rules); targets no longer need notification permission\n• More stable edit intercept via Activity touch dispatch + force-clickable refresh\n• Clear stale target when reopening the host app\n• Isolate injected dialogs from target themes; unify palette with host UI; fix advanced editor blank content\n\n3.2.2\n• Donate page with WeChat Pay and Alipay QR codes\n• Align secondary page toolbars with primary tab titles\n\n3.2.1 — New UI version\n• Host bottom navigation: Home / Guide / Rules / Settings\n• Rule mirror list with app icons and detail pages\n• Settings: language (system/zh/en), hide desktop icon, check updates, auto-update preference, changelog, user agreement\n• Global watermark and tab fade animation\n\n2.2.1\n• Cap preview image height so edit buttons stay visible for large views\n\n2.2.0\n• Rule manager in the injected UI\n• Persist and replay view rules after app restart</string>
+    <string name="settings_info_title">More</string>
+    <string name="settings_info_subtitle">Changelog, user agreement and debug logs</string>
+    <string name="changelog_body">GodViewer changelog\n\n4.4.2\n• Redesigned navigation: compact glass dock, Tabler icon set, swipe to switch tabs\n• Host rule management: long-press a mirrored rule to delete it, multi-select batch delete; redesigned rule detail page with unified delete confirm dialogs\n• Per-app host-notification suppression from each app\'s rule page\n• Edit TextView hint (placeholder); light status bar with dark icons\n\n4.3.3\n• Test release to verify the in-app update check; no functional changes\n\n4.3.2\n• New host-notification entry for target apps without notification permission (switchable in Settings)\n• Live highlight of the selected view\n• Batch rule editing: select all / multi-select and batch delete; view thumbnails in the rule list\n• In-app update check and copy / clear diagnostic logs\n• Rewritten touch interception fixes taps in some hooked apps; smaller click bounds for finer control\n• Rewritten dialog style with less dependence on target app code\n• New hook approach (migrated to libxposed API 102) for better stability\n• Bug fixes and support for more common apps\n\n3.3.2\n• Move edit-mode entry to GodViewer host notification (enable / undo / manage rules); targets no longer need notification permission\n• More stable edit intercept via Activity touch dispatch + force-clickable refresh\n• Clear stale target when reopening the host app\n• Isolate injected dialogs from target themes; unify palette with host UI; fix advanced editor blank content\n\n3.2.2\n• Donate page with WeChat Pay and Alipay QR codes\n• Align secondary page toolbars with primary tab titles\n\n3.2.1 — New UI version\n• Host bottom navigation: Home / Guide / Rules / Settings\n• Rule mirror list with app icons and detail pages\n• Settings: language (system/zh/en), hide desktop icon, check updates, auto-update preference, changelog, user agreement\n• Global watermark and tab fade animation\n\n2.2.1\n• Cap preview image height so edit buttons stay visible for large views\n\n2.2.0\n• Rule manager in the injected UI\n• Persist and replay view rules after app restart</string>
     <string name="user_agreement_body">User agreement\n\nGodViewer is free and open-source software licensed under the GNU General Public License v3.0 (GPL-3.0).\n\n1. This software is provided for learning, research, and personal debugging only.\n2. You are solely responsible for how you use this module, including compliance with local laws and the terms of any target applications.\n3. Do not use GodViewer to tamper with apps in ways that harm others, bypass paid features illegally, or distribute malware.\n4. The software is provided \"AS IS\", without warranty of any kind. Authors are not liable for data loss, account bans, or device issues arising from use.\n5. Prefer installing builds you compile yourself or download from the official GitHub repository. Avoid unknown APK sources.\n6. By using this software you agree to the GPL-3.0 license terms and the cautions above.\n\nFull license text: https://www.gnu.org/licenses/gpl-3.0.html\nSource: https://github.com/tobbytian/GodViewer</string>
     <string name="status_activated">Activated</string>
     <string name="status_not_activated">Not activated</string>
@@ -90,9 +76,10 @@
     <string name="status_not_activated_hint">Enable this module in LSPosed, then force-stop and reopen this app</string>
     <string name="status_version_format">%1$s (%2$d)</string>
     <string name="link_github">GitHub</string>
+    <string name="link_telegram">Telegram</string>
     <string name="link_donate">Donate</string>
     <string name="donate_title">Donate</string>
-    <string name="donate_intro">If GodViewer helps you, a coffee is appreciated. Scan a QR code below with WeChat or Alipay. Thank you!</string>
+    <string name="donate_intro">If GodViewer helps you, a coffee is appreciated. Scan a QR code below with WeChat or Alipay. Thank you! Donate 5 CNY or more to join the beta tester group.</string>
     <string name="donate_wechat">WeChat Pay</string>
     <string name="donate_alipay">Alipay</string>
 
@@ -104,6 +91,9 @@
     <string name="mirror_list_empty">No mirrored rules yet.\nEdit a view in a scoped app first.</string>
     <string name="mirror_package_meta">%1$d rules · %2$s</string>
     <string name="mirror_detail_empty">No rules in this mirror</string>
+    <string name="mirror_detail_notify_title">Host notification for this app</string>
+    <string name="mirror_detail_notify_subtitle">When off, the host notification is hidden while this app is in the foreground</string>
+    <string name="mirror_detail_notify_disabled_hint">Turn on the host notification switch on the Home tab first</string>
     <string name="apply">Apply</string>
     <string name="perform_origin_click">Original Click</string>
     <string name="about">About</string>
@@ -157,4 +147,36 @@
     <string name="visible">Visible</string>
     <string name="size">Size</string>
     <string name="visibility">Visibility</string>
+
+    <!-- Home: host notification switch (entry is host-notification only) -->
+    <string name="home_host_notify_title">Host notification</string>
+    <string name="home_host_notify_subtitle">Turn on to show the persistent GodViewer notification.</string>
+    <string name="home_host_notify_on">Host notification enabled</string>
+    <string name="home_host_notify_off">Host notification disabled</string>
+    <string name="home_host_notify_need_permission">Notification permission is required to show the host notification. You can grant it in system settings.</string>
+
+    <!-- Delete every rule of one app -->
+    <string name="delete_all_rules">Delete all rules</string>
+    <string name="delete_all">Delete all</string>
+    <string name="delete_all_rules_confirm_message">Delete all %2$d rules of “%1$s”? Affected views are restored to their original state. The target app must be running for this to take effect; you can undo it from the notification.</string>
+    <string name="delete_all_rules_confirm_message_in_app">Delete all %1$d rules of this app? Affected views are restored to their original state (you can undo it later from the notification).</string>
+    <string name="delete_all_rules_done">Deleted %1$d rule(s)</string>
+    <string name="delete_all_rules_failed">No response from the target app — rules were not deleted. Open that app and try again.</string>
+
+    <!-- Delete a single rule from the host rule detail page -->
+    <string name="delete_rule">Delete rule</string>
+    <string name="delete_rule_done">Rule deleted</string>
+    <string name="delete_rule_failed">No response from the target app — the rule was not deleted. Open that app and try again.</string>
+
+    <!-- Multi-select delete in the host rule list -->
+    <string name="select_multiple">Multi-select</string>
+    <string name="delete_rules_done">Deleted %1$d rules</string>
+    <string name="delete_rules_failed">No response from the target app — the selected rules were not deleted. Open that app and try again.</string>
+
+    <!-- Rule detail identity fields -->
+    <string name="rule_field_resource">Resource</string>
+    <string name="rule_field_text">Text</string>
+    <string name="rule_field_desc">Description</string>
+    <string name="rule_field_depth">Depth path</string>
+    <string name="rule_field_package">Package</string>
 </resources>

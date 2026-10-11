@@ -140,13 +140,24 @@ object ModuleDialogUi {
         ModuleDialogWindow.apply(dialog, contentRoot, preferMaxHeight)
         // 系统 Alert 的 title / buttonBar / 取消按钮不在业务 layout 里，必须整窗打标，
         // 否则编辑模式下 setOnClickListener hook 会把「取消」当成目标控件打开属性编辑。
+        // 同时整树跑一遍色板归一化：系统按钮（如层级选择弹窗的「取消」）由
+        // AlertController 按主题 buttonBarButtonStyle 创建，不走业务 inflate，
+        // 在 DeviceDefault 被 OEM 覆盖的 ROM 上会呈现原生黑底按钮。
         runCatching {
-            dialog.window?.decorView?.let { markIgnoreTree(it) }
+            dialog.window?.decorView?.let {
+                markIgnoreTree(it)
+                ModuleDialogStyler.normalizeTree(it)
+            }
             contentRoot?.let { markIgnoreTree(it) }
         }
         // buttonBar 有时在 show 后一帧才挂上
         dialog.window?.decorView?.post {
-            runCatching { dialog.window?.decorView?.let { markIgnoreTree(it) } }
+            runCatching {
+                dialog.window?.decorView?.let {
+                    markIgnoreTree(it)
+                    ModuleDialogStyler.normalizeTree(it)
+                }
+            }
         }
     }
 

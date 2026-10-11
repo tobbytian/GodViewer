@@ -12,7 +12,6 @@ import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.control.HostControlBridge
 import com.godviewer.app.shared.diag.CrashReportProtocol
 import com.godviewer.app.shared.diag.DiagReportProtocol
-import com.godviewer.app.shared.entry.EntryMode
 
 /**
  * Host-side control receiver:
@@ -101,9 +100,7 @@ open class HostControlReceiverImpl : BroadcastReceiver() {
                 val label = intent.getStringExtra(HostControlBridge.EXTRA_LABEL).orEmpty()
                 val editEnabled = intent.getBooleanExtra(HostControlBridge.EXTRA_EDIT_ENABLED, false)
                 HostControlBridge.saveTargetState(app, pkg, label, editEnabled)
-                // 把当前入口模式推回目标，避免目标进程读不到 prefs 仍发自己的通知
-                EntryMode.pushToTarget(app, pkg)
-                // 仅本体入口展示控制通知；目标入口下 refresh 内部会 cancel
+                // 目标不再发布自己的编辑模式通知，这里只需按开关刷新本体控制通知
                 HostControlNotifier.refresh(app)
                 GvLog.d(TAG, "foreground pkg=$pkg edit=$editEnabled")
             }

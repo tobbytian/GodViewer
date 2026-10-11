@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 悬浮玻璃 dock 背景：半透明白色渐变 + 细描边 + 18dp 圆角（对齐 21st.dev bottom-menu 样式） -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:endColor="#99FFFFFF"
+        android:startColor="#D9FFFFFF" />
+    <corners android:radius="18dp" />
+    <stroke
+        android:width="1dp"
+        android:color="#1F000000" />
+</shape>

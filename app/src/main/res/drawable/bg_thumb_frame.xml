@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 规则缩略图圆角底：配合 clipToOutline 裁剪图片为 16dp 圆角 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#14000000" />
+    <corners android:radius="16dp" />
+</shape>

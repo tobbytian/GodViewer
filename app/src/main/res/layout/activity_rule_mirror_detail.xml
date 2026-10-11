@@ -13,6 +13,7 @@
         style="@style/HostSecondaryToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:popupTheme="@style/ThemeOverlay.HostPopupMenu"
         tools:title="Example App" />
 
     <LinearLayout
@@ -59,6 +60,48 @@
                 android:textSize="12sp"
                 tools:text="com.example.app" />
         </LinearLayout>
+    </LinearLayout>
+
+    <!-- 每应用通知开关：该应用前台时不显示本体控制通知（首页开关打开时可用） -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/mirror_detail_notify_title"
+                android:textColor="@color/home_title_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/appNotifyHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/mirror_detail_notify_subtitle"
+                android:textColor="@color/home_subtitle_text"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/appNotifySwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp" />
     </LinearLayout>
 
     <FrameLayout

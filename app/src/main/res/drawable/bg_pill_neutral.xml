@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 中性 pill 按钮底：链接 chip 灰底 + 28dp 圆角 + 按压涟漪 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#1F000000">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/home_link_chip_background" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+</ripple>
