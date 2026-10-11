@@ -1,9 +1,12 @@
 
 #  GodViewer 上帝视角
 
+[English](README.en.md) | 中文
+
 - 一款基于 **Xposed / LSPosed** 的「上帝视角」运行时视图调试工具。
 - 模块已全量迁移到 **libxposed API 102**（`META-INF/xposed` 现代入口，不再依赖旧 XposedBridge API）；目标设备 Android 16 + LSPosed 2.1.0，**回归验证进行中**
 - 不用重启应用、不用系统作用域，直接在目标应用上**点一点就能把它的 UI 改成你想要的样子**，并且具有**持久性**。
+- 💬 **Telegram 讨论群**：[t.me/GodViewer](https://t.me/GodViewer) —— 欢迎进群交流、反馈问题与提建议
 
 ##  能干什么
 
