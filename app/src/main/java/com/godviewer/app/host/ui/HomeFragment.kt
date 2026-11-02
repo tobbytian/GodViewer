@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.godviewer.app.BuildConfig
@@ -19,9 +20,10 @@ import com.godviewer.app.data.RuleMirror
 import com.godviewer.app.host.entry.EntryControlUi
 import com.godviewer.app.host.prefs.HostPrefs
 import com.godviewer.app.shared.GITHUB_PAGE_URL
+import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.TELEGRAM_GROUP_URL
+import com.godviewer.app.shared.control.HostControlBridge
 import com.godviewer.app.util.ModuleStatus
-import com.google.android.material.card.MaterialCardView
 import com.godviewer.app.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
@@ -30,6 +32,9 @@ class HomeFragment : Fragment() {
 
     /** 设置开关状态时抑制回调，避免程序化赋值触发通知刷新 */
     private var suppressNotifyCallback = false
+
+    /** 同上，作用于「强制弹窗拦截」开关 */
+    private var suppressPopupCallback = false
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -84,13 +89,37 @@ class HomeFragment : Fragment() {
             if (suppressNotifyCallback) return@setOnCheckedChangeListener
             onHostNotifyToggled(checked)
         }
+
+        // 弹窗拦截内测中：整行灰化、开关禁点，点击整行仅提示
+        binding.popupInterceptRow.alpha = 0.45f
+        binding.popupInterceptSwitch.isClickable = false
+        binding.popupInterceptRow.setOnClickListener {
+            Toast.makeText(requireContext(), R.string.feature_beta_toast, Toast.LENGTH_SHORT).show()
+        }
+
+        refreshPopupInterceptSwitch()
+        binding.popupInterceptSwitch.setOnCheckedChangeListener { _, checked ->
+            if (suppressPopupCallback) return@setOnCheckedChangeListener
+            onPopupInterceptToggled(checked)
+        }
     }
 
     override fun onResume() {
         super.onResume()
         refreshActivationStatus()
         refreshHostNotifySwitch()
-        binding.infoMirrored.text = RuleMirror.packageCount(requireContext()).toString()
+        refreshPopupInterceptSwitch()
+        refreshStats()
+    }
+
+    /** Tab 切换走 hide/show：从别的页滑回来时同步开关与统计 */
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden && _binding != null) {
+            refreshHostNotifySwitch()
+            refreshPopupInterceptSwitch()
+            refreshStats()
+        }
     }
 
     override fun onDestroyView() {
@@ -104,6 +133,54 @@ class HomeFragment : Fragment() {
         suppressNotifyCallback = true
         binding.hostNotifySwitch.isChecked = HostPrefs.isHostNotifyEnabled(requireContext())
         suppressNotifyCallback = false
+    }
+
+    private fun refreshPopupInterceptSwitch() {
+        suppressPopupCallback = true
+        binding.popupInterceptSwitch.isChecked =
+            HostPrefs.isPopupInterceptEnabled(requireContext())
+        suppressPopupCallback = false
+    }
+
+    /** 右侧统计卡：镜像应用数 / 规则总数（视图 + 弹窗）/ 累计拦截次数（弹窗 + 控件） */
+    private fun refreshStats() {
+        val ctx = requireContext()
+        val packages = RuleMirror.listPackages(ctx)
+        binding.statsApps.text = packages.size.toString()
+        binding.statsRules.text = packages.sumOf { it.ruleCount }.toString()
+        binding.statsBlocked.text = HostPrefs.totalInterceptCount(ctx).toString()
+    }
+
+    /**
+     * 首页「强制弹窗拦截」开关：写 HostPrefs 后向曾拉取过状态的目标推送最新状态
+     * （检测时长已按应用配置，逐包取值）；首次打开弹教程。
+     */
+    private fun onPopupInterceptToggled(enabled: Boolean) {
+        val ctx = requireContext()
+        HostPrefs.setPopupInterceptEnabled(ctx, enabled)
+        GvLog.i(TAG, "popup intercept toggle enabled=$enabled")
+        HostPrefs.popupInterceptWatchers(ctx).forEach { pkg ->
+            HostControlBridge.dispatchPopupInterceptState(
+                ctx, pkg, enabled, HostPrefs.getPopupWindowSecondsFor(ctx, pkg),
+            )
+        }
+        Toast.makeText(
+            ctx,
+            if (enabled) R.string.home_popup_intercept_on else R.string.home_popup_intercept_off,
+            Toast.LENGTH_SHORT,
+        ).show()
+        if (enabled && !HostPrefs.isPopupGuideShown(ctx)) {
+            HostPrefs.markPopupGuideShown(ctx)
+            showGuide()
+        }
+    }
+
+    private fun showGuide() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.popup_intercept_tutorial_title)
+            .setMessage(R.string.popup_intercept_tutorial_message)
+            .setPositiveButton(R.string.popup_intercept_tutorial_ok) { d, _ -> d.dismiss() }
+            .show()
     }
 
     /**
@@ -130,9 +207,9 @@ class HomeFragment : Fragment() {
     private fun refreshActivationStatus() {
         val ctx = requireContext()
         val activated = ModuleStatus.check()
-        val card: MaterialCardView = binding.statusCard
+        val card = binding.statusCard
         if (activated) {
-            card.setCardBackgroundColor(ContextCompat.getColor(ctx, R.color.home_activated_card))
+            card.setBackgroundResource(R.drawable.bg_status_activated)
             binding.statusIcon.setImageResource(R.drawable.ic_check_circle_24)
             binding.statusIcon.setColorFilter(
                 ContextCompat.getColor(ctx, R.color.home_activated_on_card),
@@ -149,7 +226,7 @@ class HomeFragment : Fragment() {
                 ContextCompat.getColor(ctx, R.color.home_activated_on_card),
             )
         } else {
-            card.setCardBackgroundColor(ContextCompat.getColor(ctx, R.color.home_deactivated_card))
+            card.setBackgroundResource(R.drawable.bg_status_deactivated)
             binding.statusIcon.setImageResource(R.drawable.ic_warning_24)
             binding.statusIcon.setColorFilter(
                 ContextCompat.getColor(ctx, R.color.home_deactivated_on_card),
@@ -200,5 +277,9 @@ class HomeFragment : Fragment() {
         }.onFailure {
             Toast.makeText(requireContext(), url, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    companion object {
+        private const val TAG = "Home"
     }
 }

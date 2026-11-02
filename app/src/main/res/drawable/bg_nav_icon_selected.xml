@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 选中按钮底片：中性灰 accent chip，16dp 圆角 -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="@color/home_nav_item_selected_bg" />
-    <corners android:radius="16dp" />
-</shape>
+<!-- dock 选中底片：激活 = 凹陷（内环左上暗、右下亮），面与 dock 同色 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#FFFFFF"
+                android:startColor="#C6CBD4" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/home_page_background" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+</layer-list>

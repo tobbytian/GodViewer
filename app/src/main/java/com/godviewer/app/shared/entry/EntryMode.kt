@@ -2,9 +2,9 @@ package com.godviewer.app.shared.entry
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.godviewer.app.BuildConfig
 import com.godviewer.app.R
+import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.HostPrefsNames
 import com.godviewer.app.shared.control.HostControlBridge
 
@@ -73,7 +73,7 @@ object EntryMode {
                 .putString(KEY_CACHED_MODE, HOST)
                 .commit()
         }
-        Log.d(TAG, "entry mode from host ignored=$mode, unified to=$HOST")
+        GvLog.d(TAG, "entry mode from host ignored=$mode, unified to=$HOST")
     }
 
     /** 目标进程当前入口：恒本体通知。 */
@@ -103,9 +103,9 @@ object EntryMode {
                 }
             }
             context.applicationContext.sendBroadcast(intent)
-            Log.d(TAG, "broadcast entry mode=$mode pkg=${targetPackage ?: "*"}")
+            GvLog.d(TAG, "broadcast entry mode=$mode pkg=${targetPackage ?: "*"}")
         }.onFailure {
-            Log.w(TAG, "broadcast entry mode failed", it)
+            GvLog.w(TAG, "broadcast entry mode failed", it)
         }
     }
 }

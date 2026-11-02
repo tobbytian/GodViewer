@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">上帝视角</string>
     <string name="app_description">Do you believe in God too?\nDeveloper: tobbytian@github</string>
-    <string name="home_tagline">尽情定制几乎所有Android应用</string>
     <string name="nav_home">Home</string>
     <string name="nav_rules">Apps</string>
     <string name="rules_sync_tip_title">About rule sync</string>
@@ -9,10 +8,18 @@
     <string name="rules_sync_tip_got_it">Got it</string>
     <string name="rules_sync_tip_dont_show">Don\'t show again</string>
     <string name="nav_settings">Settings</string>
-    <string name="home_info_android">Android version</string>
+    <string name="home_info_android">Android</string>
     <string name="home_info_device">Device</string>
     <string name="home_info_abi">ABI</string>
-    <string name="home_info_mirrored">Mirrored apps</string>
+
+    <!-- Home: stats card (apps / rules / interceptions) -->
+    <string name="home_stat_apps">Apps</string>
+    <string name="home_stat_rules">Rules</string>
+    <string name="home_stat_blocked">Blocked</string>
+
+    <!-- Home: dashboard card titles -->
+    <string name="home_card_device_title">Device info</string>
+    <string name="home_card_stats_title">Stats</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_system">Follow system</string>
     <string name="settings_language_zh">中文</string>
@@ -68,7 +75,7 @@
     <string name="settings_clear_diag_failed">Clear failed</string>
     <string name="settings_info_title">More</string>
     <string name="settings_info_subtitle">Changelog, user agreement and debug logs</string>
-    <string name="changelog_body">GodViewer changelog\n\n4.4.2\n• Redesigned navigation: compact glass dock, Tabler icon set, swipe to switch tabs\n• Host rule management: long-press a mirrored rule to delete it, multi-select batch delete; redesigned rule detail page with unified delete confirm dialogs\n• Per-app host-notification suppression from each app\'s rule page\n• Edit TextView hint (placeholder); light status bar with dark icons\n\n4.3.3\n• Test release to verify the in-app update check; no functional changes\n\n4.3.2\n• New host-notification entry for target apps without notification permission (switchable in Settings)\n• Live highlight of the selected view\n• Batch rule editing: select all / multi-select and batch delete; view thumbnails in the rule list\n• In-app update check and copy / clear diagnostic logs\n• Rewritten touch interception fixes taps in some hooked apps; smaller click bounds for finer control\n• Rewritten dialog style with less dependence on target app code\n• New hook approach (migrated to libxposed API 102) for better stability\n• Bug fixes and support for more common apps\n\n3.3.2\n• Move edit-mode entry to GodViewer host notification (enable / undo / manage rules); targets no longer need notification permission\n• More stable edit intercept via Activity touch dispatch + force-clickable refresh\n• Clear stale target when reopening the host app\n• Isolate injected dialogs from target themes; unify palette with host UI; fix advanced editor blank content\n\n3.2.2\n• Donate page with WeChat Pay and Alipay QR codes\n• Align secondary page toolbars with primary tab titles\n\n3.2.1 — New UI version\n• Host bottom navigation: Home / Guide / Rules / Settings\n• Rule mirror list with app icons and detail pages\n• Settings: language (system/zh/en), hide desktop icon, check updates, auto-update preference, changelog, user agreement\n• Global watermark and tab fade animation\n\n2.2.1\n• Cap preview image height so edit buttons stay visible for large views\n\n2.2.0\n• Rule manager in the injected UI\n• Persist and replay view rules after app restart</string>
+    <string name="changelog_body">GodViewer changelog\n\n4.4.3\n• Popup intercept is now in beta: the entries on the Home and Settings pages are greyed out and show “This feature is in beta. Stay tuned!” when tapped\n\n4.4.2\n• Redesigned navigation: compact glass dock, Tabler icon set, swipe to switch tabs\n• Host rule management: long-press a mirrored rule to delete it, multi-select batch delete; redesigned rule detail page with unified delete confirm dialogs\n• Per-app host-notification suppression from each app\'s rule page\n• Edit TextView hint (placeholder); light status bar with dark icons\n\n4.3.3\n• Test release to verify the in-app update check; no functional changes\n\n4.3.2\n• New host-notification entry for target apps without notification permission (switchable in Settings)\n• Live highlight of the selected view\n• Batch rule editing: select all / multi-select and batch delete; view thumbnails in the rule list\n• In-app update check and copy / clear diagnostic logs\n• Rewritten touch interception fixes taps in some hooked apps; smaller click bounds for finer control\n• Rewritten dialog style with less dependence on target app code\n• New hook approach (migrated to libxposed API 102) for better stability\n• Bug fixes and support for more common apps\n\n3.3.2\n• Move edit-mode entry to GodViewer host notification (enable / undo / manage rules); targets no longer need notification permission\n• More stable edit intercept via Activity touch dispatch + force-clickable refresh\n• Clear stale target when reopening the host app\n• Isolate injected dialogs from target themes; unify palette with host UI; fix advanced editor blank content\n\n3.2.2\n• Donate page with WeChat Pay and Alipay QR codes\n• Align secondary page toolbars with primary tab titles\n\n3.2.1 — New UI version\n• Host bottom navigation: Home / Guide / Rules / Settings\n• Rule mirror list with app icons and detail pages\n• Settings: language (system/zh/en), hide desktop icon, check updates, auto-update preference, changelog, user agreement\n• Global watermark and tab fade animation\n\n2.2.1\n• Cap preview image height so edit buttons stay visible for large views\n\n2.2.0\n• Rule manager in the injected UI\n• Persist and replay view rules after app restart</string>
     <string name="user_agreement_body">User agreement\n\nGodViewer is free and open-source software licensed under the GNU General Public License v3.0 (GPL-3.0).\n\n1. This software is provided for learning, research, and personal debugging only.\n2. You are solely responsible for how you use this module, including compliance with local laws and the terms of any target applications.\n3. Do not use GodViewer to tamper with apps in ways that harm others, bypass paid features illegally, or distribute malware.\n4. The software is provided \"AS IS\", without warranty of any kind. Authors are not liable for data loss, account bans, or device issues arising from use.\n5. Prefer installing builds you compile yourself or download from the official GitHub repository. Avoid unknown APK sources.\n6. By using this software you agree to the GPL-3.0 license terms and the cautions above.\n\nFull license text: https://www.gnu.org/licenses/gpl-3.0.html\nSource: https://github.com/tobbytian/GodViewer</string>
     <string name="status_activated">Activated</string>
     <string name="status_not_activated">Not activated</string>
@@ -118,6 +125,8 @@
     <string name="children">Children</string>
     <string name="select_parent">Select Parent</string>
     <string name="select_children">Select Children</string>
+    <string name="back">Back</string>
+    <string name="picker_empty">Nothing to pick here</string>
     <string name="show_global_layout_bounds">Show Global Layout Bounds</string>
     <string name="force_clickable">Force All Widgets Clickable</string>
     <string name="image_url">Image Url</string>
@@ -134,6 +143,21 @@
     <string name="reset">Reset Rule</string>
     <string name="undo">Undo</string>
     <string name="manage_rules">Manage Rules</string>
+    <string name="close_popups">Close popups</string>
+    <string name="close_popups_toast">Popups closed</string>
+    <string name="cancel_popups_toast">Dismissed</string>
+    <string name="popup_detected_title">Popup detected</string>
+    <string name="popup_detected_text">%1$s: “%2$s” — close it?</string>
+    <string name="popup_detect_channel_name">Popup detection</string>
+    <string name="popup_detect_channel_desc">Asks whether to close a popup detected in the target app</string>
+    <string name="dialog_rules_section">Dialog rules</string>
+    <string name="view_rules_section">View rules</string>
+    <string name="empty_view_rules">No view rules yet</string>
+    <string name="empty_dialog_rules">No dialog rules yet</string>
+    <string name="delete_dialog_rule">Delete dialog rule</string>
+    <string name="delete_dialog_rule_confirm_message">Delete this dialog rule? The popup will no longer be closed automatically the next time it appears.</string>
+    <string name="delete_dialog_rule_done">Dialog rule deleted</string>
+    <string name="delete_dialog_rule_failed">No response from the target app — the dialog rule was not deleted. Open that app and try again.</string>
     <string name="delete">Delete</string>
     <string name="delete_rule_confirm_message">Delete this rule? The view will be restored to its original state (undoable via the Undo button).</string>
     <string name="select_all">Select all</string>
@@ -150,16 +174,25 @@
 
     <!-- Home: host notification switch (entry is host-notification only) -->
     <string name="home_host_notify_title">Host notification</string>
-    <string name="home_host_notify_subtitle">Turn on to show the persistent GodViewer notification.</string>
+    <string name="home_host_notify_subtitle">Shows the edit entry in the notification bar</string>
     <string name="home_host_notify_on">Host notification enabled</string>
     <string name="home_host_notify_off">Host notification disabled</string>
     <string name="home_host_notify_need_permission">Notification permission is required to show the host notification. You can grant it in system settings.</string>
 
+    <!-- Home: popup intercept switch (default off) -->
+    <string name="home_popup_intercept_title">Popup intercept</string>
+    <string name="home_popup_intercept_subtitle">Automatically intercepts popups that can\'t be closed</string>
+    <string name="home_popup_intercept_on">Popup intercept enabled</string>
+    <string name="home_popup_intercept_off">Popup intercept disabled</string>
+    <string name="popup_intercept_tutorial_title">How popup intercept works</string>
+    <string name="popup_intercept_tutorial_message">1. Open the target app; when it shows a popup, GodViewer posts a notification asking whether to close it.\n\n2. Tap “Close popups” to dismiss it. The popup rule is saved, and the same popup is closed automatically whenever it appears again — even after the app updates.\n\n3. Tap “Cancel” to dismiss the notification without doing anything.\n\n4. Manage saved rules in Rules → app → Popup rules; tap a rule to edit, long-press to delete, or create one by hand from the menu.\n\nNote: the per-app detection window only limits the asking notification. Saved rules close matching popups at any time.</string>
+    <string name="popup_intercept_tutorial_ok">Got it</string>
+    <!-- 弹窗拦截内测期统一提示 -->
+    <string name="feature_beta_toast">This feature is in beta. Stay tuned!</string>
+
     <!-- Delete every rule of one app -->
     <string name="delete_all_rules">Delete all rules</string>
-    <string name="delete_all">Delete all</string>
     <string name="delete_all_rules_confirm_message">Delete all %2$d rules of “%1$s”? Affected views are restored to their original state. The target app must be running for this to take effect; you can undo it from the notification.</string>
-    <string name="delete_all_rules_confirm_message_in_app">Delete all %1$d rules of this app? Affected views are restored to their original state (you can undo it later from the notification).</string>
     <string name="delete_all_rules_done">Deleted %1$d rule(s)</string>
     <string name="delete_all_rules_failed">No response from the target app — rules were not deleted. Open that app and try again.</string>
 
@@ -179,4 +212,110 @@
     <string name="rule_field_desc">Description</string>
     <string name="rule_field_depth">Depth path</string>
     <string name="rule_field_package">Package</string>
+
+    <!-- Rule import / export / share (host envelope: godviewer-rules-bundle) -->
+    <string name="rules_import">Import</string>
+    <string name="rules_export">Export</string>
+    <string name="rules_export_all">Export all</string>
+    <string name="rules_import_title">Import rules</string>
+    <string name="rules_export_title">Export rules</string>
+    <string name="rules_export_file">Save as file</string>
+    <string name="rules_export_share">Share</string>
+    <string name="rules_export_copy">Copy JSON</string>
+    <string name="rules_import_file">From file</string>
+    <string name="rules_import_clipboard">From clipboard</string>
+    <string name="export_empty">Nothing to export (mirror is empty)</string>
+    <string name="export_done">Exported %2$d rules from %1$d app(s)</string>
+    <string name="export_save_failed">Export failed</string>
+    <string name="export_copy_done">Rule JSON copied to clipboard</string>
+    <string name="import_clipboard_empty">Clipboard is empty</string>
+    <string name="import_invalid">Import failed: %1$s</string>
+    <string name="import_none">No importable app in this file (format mismatch or app not installed)</string>
+    <string name="import_none_not_installed">All %1$d app(s) with rules in this file are not installed</string>
+    <string name="import_preview_title">Import into %1$d app(s)?</string>
+    <string name="import_preview_title_selected">Import %1$d of %2$d app(s)?</string>
+    <string name="import_preview_app_line">%1$s: %2$d view rule(s), %3$d popup rule(s)</string>
+    <string name="import_preview_skipped">Skipped %1$d rule(s) from apps not installed: %2$s</string>
+    <string name="import_overwrite_label">Overwrite mode: clear existing rules of these apps first</string>
+    <string name="rules_export_file_hint">Save to local storage</string>
+    <string name="rules_export_share_hint">Send via the system share sheet</string>
+    <string name="rules_export_copy_hint">Copy the rules JSON to the clipboard</string>
+    <string name="rules_import_file_hint">Pick a rules file (.json)</string>
+    <string name="rules_import_clipboard_hint">Paste rules JSON from the clipboard</string>
+    <string name="import_preview_counts">%1$d view rule(s) · %2$d popup rule(s)</string>
+    <string name="import_preview_skipped_header">Skipped — app not installed</string>
+    <string name="import_done">Imported %1$d rules into %2$d app(s) — synced</string>
+    <string name="import_waiting">Imported %1$d rules into %2$d app(s); waiting for %3$d app(s) to be opened to sync</string>
+    <string name="mirror_refresh">Refresh mirror</string>
+    <string name="mirror_refresh_requested">Mirror refresh requested from target</string>
+
+    <!-- Host-side rule edit (upsert dispatch + pending sync queue) -->
+    <string name="rule_edit">Edit rule</string>
+    <string name="rule_edit_intro">Switch a group on to make it apply; only modified values are editable — original values stay untouched.</string>
+    <string name="rule_edit_save">Save changes</string>
+    <string name="edit_dims_hint">left, top, right, bottom (px)</string>
+    <string name="edit_error_number">Enter an integer</string>
+    <string name="edit_error_dims">Enter 4 integers: left, top, right, bottom</string>
+    <string name="update_rule_done">Changes synced to target</string>
+    <string name="update_rule_queued">Saved — waiting for the target app to be opened to sync</string>
+    <string name="update_rule_failed">Save failed, please retry</string>
+    <string name="delete_queued">Delete saved — waiting for the target app to be opened to sync</string>
+    <string name="invisible">Invisible</string>
+    <!-- Popup intercept page -->
+    <string name="popup_page_title">Popup intercept</string>
+    <string name="popup_page_intro">Detect and close forced popups in target apps. Only popups shown shortly after the app opens are handled, so dialogs you open yourself are left alone.</string>
+    <string name="popup_detect_title">Popup detection</string>
+    <string name="popup_detect_subtitle">Ask by notification whether to close a detected popup</string>
+    <string name="popup_detect_on">Popup detection enabled</string>
+    <string name="popup_detect_off">Popup detection disabled</string>
+    <string name="popup_intercept_title">Popup intercept</string>
+    <string name="popup_intercept_subtitle">Close popups automatically once a rule is saved</string>
+    <string name="popup_intercept_on">Popup intercept enabled</string>
+    <string name="popup_intercept_off">Popup intercept disabled</string>
+    <string name="popup_window_title">Detection window</string>
+    <string name="popup_window_value">First %1$d s after the app opens</string>
+    <string name="popup_window_dialog_message">Only popups shown within this many seconds after the app opens are reported for asking (%1$d to %2$d s). Saved rules close matching popups at any time, not limited to this window.</string>
+    <string name="popup_window_invalid">Enter a number of seconds</string>
+    <string name="popup_save">Save</string>
+    <string name="popup_rules_title">Popup rules</string>
+    <string name="popup_rules_count">%1$d saved</string>
+    <string name="popup_rules_hint">Tap a rule to edit its text, long-press to delete.</string>
+    <string name="popup_rules_empty">No popup rules yet</string>
+    <string name="popup_rule_subtitle">%1$d texts · %2$s</string>
+    <string name="popup_rule_cross_version">Cross-version</string>
+    <string name="popup_rule_edit_title">Edit popup rule</string>
+    <string name="popup_rule_edit_message">One text per line. A popup is matched when most of these texts appear in it.</string>
+    <string name="popup_rule_edit_empty">At least one line of text is required</string>
+    <string name="popup_rule_edit_done">Rule updated</string>
+    <string name="popup_log_title">Intercept log</string>
+    <string name="popup_log_hint">The 20 most recent popups that were closed.</string>
+    <string name="popup_log_empty">Nothing closed yet</string>
+    <string name="popup_log_clear">Clear</string>
+    <string name="popup_log_count">%1$d recent</string>
+    <string name="popup_log_kind_auto">Auto</string>
+    <string name="popup_log_kind_manual">Manual</string>
+    <string name="popup_log_subtitle">%1$s · %2$s · %3$s</string>
+    <string name="popup_pending_sync">Pending sync</string>
+    <string name="popup_pending_delete">Delete pending</string>
+    <string name="popup_guide_row_title">How it works</string>
+    <string name="popup_guide_row_subtitle">Steps and limits of popup intercept</string>
+    <string name="popup_rule_create_title">New popup rule</string>
+    <string name="popup_rule_create_texts_hint">Popup text lines, one per line (required)</string>
+    <string name="popup_rule_create_class_hint">Dialog class (optional)</string>
+    <string name="popup_rule_create_activity_hint">Activity class (optional)</string>
+    <string name="popup_rule_create_done">Popup rule created</string>
+    <string name="popup_rule_create_queued">Saved — open the app once to sync</string>
+    <string name="popup_settings_title">Popup detection settings</string>
+    <string name="nav_popup">Popups</string>
+    <string name="flutter_node_title">Flutter widget</string>
+    <string name="flutter_field_kind">Kind</string>
+    <string name="flutter_field_label">Text</string>
+    <string name="flutter_field_value">Value</string>
+    <string name="flutter_field_identifier">Identifier</string>
+    <string name="flutter_field_rect">Rect</string>
+    <string name="flutter_action_hide">Hide this widget</string>
+    <string name="flutter_action_restore">Show again</string>
+    <string name="flutter_no_semantics">This widget has no semantics identity, cannot create a rule</string>
+    <string name="flutter_action_tap">Tap it</string>
+    <string name="repeatable_applied_toast">Rule applies to every matching item in this list</string>
 </resources>

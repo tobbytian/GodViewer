@@ -8,6 +8,7 @@ import com.godviewer.app.shared.mirror.MirroredPackage
 import com.godviewer.app.shared.mirror.RuleMirrorProtocol
 import com.godviewer.app.shared.mirror.mirrorThumbnailKey
 import com.godviewer.app.shared.mirror.sanitizeMirrorPackageName
+import com.godviewer.app.shared.model.DialogRule
 import com.godviewer.app.shared.model.ViewRule
 
 /**
@@ -44,6 +45,11 @@ object RuleMirror {
 
     fun loadRules(context: Context, packageName: String): List<ViewRule> {
         return com.godviewer.app.host.mirror.RuleMirrorStore.loadRules(context, packageName)
+    }
+
+    /** 弹窗规则（关闭弹窗功能）；旧镜像无此字段 → 空列表 */
+    fun loadDialogRules(context: Context, packageName: String): List<DialogRule> {
+        return com.godviewer.app.host.mirror.RuleMirrorStore.loadDialogRules(context, packageName)
     }
 
     fun loadAppLabel(context: Context, packageName: String): String {

@@ -3,14 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="20dp"
     android:tag="GODVIEWER_IGNORE_HOOK">
 
     <TextView
         android:id="@+id/title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="12dp"
+        android:ellipsize="middle"
+        android:letterSpacing="-0.01"
+        android:singleLine="true"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -18,44 +21,55 @@
         android:id="@+id/preview_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="16dp"
         android:adjustViewBounds="true"
         android:maxHeight="200dp"
+        android:clipToOutline="true"
         android:scaleType="fitCenter" />
 
+    <!-- 主操作：隐藏 / 高级编辑 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="end">
-
-        <Button
-            android:id="@+id/undo_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="1"
-            android:tag="GODVIEWER_IGNORE_HOOK" />
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/hide_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK" />
 
         <Button
             android:id="@+id/advanced_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:tag="GODVIEWER_IGNORE_HOOK" />
+    </LinearLayout>
+
+    <!-- 次要操作：撤销 / 取消 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/undo_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK" />
 
         <Button
             android:id="@+id/cancel_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK" />
     </LinearLayout>
@@ -64,6 +78,6 @@
         android:id="@+id/exit_edit_mode_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="12dp"
         android:tag="GODVIEWER_IGNORE_HOOK" />
 </LinearLayout>

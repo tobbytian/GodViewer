@@ -9,14 +9,32 @@
     android:padding="16dp"
     android:tag="GODVIEWER_IGNORE_HOOK">
 
-    <TextView
-        android:layout_marginBottom="10dp"
-        android:text="Title"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <!-- 标题行：back_arrow 仅在「精简 → 高级」链路存在时显示，点了回上一层 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:tag="GODVIEWER_IGNORE_HOOK">
+
+        <ImageView
+            android:id="@+id/back_arrow"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="6dp"
+            android:contentDescription="@null"
+            android:tag="GODVIEWER_IGNORE_HOOK"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_marginBottom="10dp"
+            android:text="Title"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <ScrollView
         android:scrollbars="none"
@@ -41,7 +59,8 @@
                 android:layout_marginBottom="10dp"
                 android:id="@+id/preview_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:clipToOutline="true" />
 
             <Switch
                 android:textSize="16sp"
@@ -58,55 +77,31 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
-            <FrameLayout
-                android:tag="GODVIEWER_IGNORE_HOOK"
-                android:id="@+id/parent_button"
+            <!-- 父/子控件：一排左右两个等宽按钮（与底部按钮行同栅格，8dp 列距） -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="0dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="10dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal"
+                android:tag="GODVIEWER_IGNORE_HOOK">
 
-                <TextView
-                    android:id="@+id/parent_spinner_title"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/parent_button"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/parent"
-                    android:textSize="16sp" />
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:tag="GODVIEWER_IGNORE_HOOK" />
 
-                <TextView
-                    android:layout_marginEnd="10dp"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/children_button"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end|center"
-                    android:text=">>" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:tag="GODVIEWER_IGNORE_HOOK"
-                android:id="@+id/children_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="0dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="10dp"
-                android:paddingBottom="10dp">
-
-                <TextView
-                    android:id="@+id/children_spinner_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/children"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:layout_marginEnd="10dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end|center"
-                    android:text=">>" />
-            </FrameLayout>
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:tag="GODVIEWER_IGNORE_HOOK" />
+            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -204,6 +199,7 @@
                             android:id="@+id/margin_left"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:inputType="number" />
 
@@ -211,6 +207,7 @@
                             android:id="@+id/margin_top"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:inputType="number" />
 
@@ -218,6 +215,7 @@
                             android:id="@+id/margin_right"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:inputType="number" />
 
@@ -267,6 +265,7 @@
                             android:id="@+id/padding_left"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:inputType="number" />
 
@@ -274,6 +273,7 @@
                             android:id="@+id/padding_top"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:inputType="number" />
 
@@ -281,6 +281,7 @@
                             android:id="@+id/padding_right"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:inputType="number" />
 
@@ -296,25 +297,26 @@
         </LinearLayout>
     </ScrollView>
 
+    <!-- 按钮行统一：等宽（0dp + weight）、列间距 16dp（每侧 8dp）、行间距 12dp -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
-        android:gravity="end"
+        android:layout_marginTop="12dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/hide_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK" />
 
         <Button
             android:id="@+id/reset_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK" />
     </LinearLayout>
@@ -322,28 +324,31 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="end">
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/origin_click_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK" />
 
         <Button
             android:id="@+id/cancel_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK" />
 
         <Button
             android:id="@+id/apply_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK" />
     </LinearLayout>
@@ -352,6 +357,6 @@
         android:id="@+id/exit_edit_mode_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="12dp"
         android:tag="GODVIEWER_IGNORE_HOOK" />
 </LinearLayout>

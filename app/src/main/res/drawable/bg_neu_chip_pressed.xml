@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  新拟物胶囊按钮「按下 → 凹陷」态（Extrude to Intrude，无位移）：
+  环方向翻转 = 内凹错觉（左上暗影、右下高光），腔体底色略深。
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#FFFFFF"
+                android:startColor="#C6CBD4" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#E1E5EC" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+</layer-list>

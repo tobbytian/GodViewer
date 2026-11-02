@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  shadcn 风格开关轨道 + 与卡片同语言的 2dp 渐变环（同 bg_neu_raised：左上白、
+  右下暗影，光源固定左上）。开启 = 主色实心面，关闭 = 浅灰实心面，状态看轨道色。
+  显式 <size> 供 SwitchMaterial 测量（44×24dp 取景框 = w-11 × (size-5 + 2×p-0.5)）。
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:angle="315"
+                        android:endColor="#C6CBD4"
+                        android:startColor="#FFFFFF" />
+                    <corners android:radius="24dp" />
+                    <size
+                        android:width="44dp"
+                        android:height="24dp" />
+                </shape>
+            </item>
+            <item
+                android:bottom="2dp"
+                android:left="2dp"
+                android:right="2dp"
+                android:top="2dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/home_accent" />
+                    <corners android:radius="22dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <gradient
+                        android:angle="315"
+                        android:endColor="#C6CBD4"
+                        android:startColor="#FFFFFF" />
+                    <corners android:radius="24dp" />
+                    <size
+                        android:width="44dp"
+                        android:height="24dp" />
+                </shape>
+            </item>
+            <item
+                android:bottom="2dp"
+                android:left="2dp"
+                android:right="2dp"
+                android:top="2dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="#DCE1E9" />
+                    <corners android:radius="22dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

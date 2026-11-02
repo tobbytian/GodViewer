@@ -10,346 +10,587 @@
     android:fillViewport="true"
     android:overScrollMode="ifContentScrolls">
 
+    <!--
+      新拟物（Neumorphism）试版：
+      页面与面板同为 #EAEEF4，分离感来自 bg_neu_raised 渐变环（左上白高光 / 右下暗影，
+      光源固定左上）；圆角 24dp（胶囊 20dp）；分隔线仅 1dp；无边框、无渐变面、无纯白底。
+      激活状态卡按用户要求保留蓝/橙实底（规范允许 accent 色 hero 区块）。
+      412dp 参考屏上内容宽 = 380（左右页边距 16）。
+    -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="48dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="112dp">
+
+        <TextView
+            android:id="@+id/homeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="@color/home_title_text"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <!-- 激活状态卡：蓝/橙实底 + 新拟物凸起环（与其他面板同边缘语言），状态换背景与文字色 -->
+        <LinearLayout
+            android:id="@+id/statusCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_status_activated">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/statusIcon"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_check_circle_24"
+                    app:tint="@color/home_activated_on_card" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/statusTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/status_activated"
+                        android:textColor="@color/home_activated_on_card"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/statusVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/home_activated_on_card"
+                        android:textSize="14sp"
+                        tools:text="4.4.2 (13)" />
+
+                    <TextView
+                        android:id="@+id/statusHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:alpha="0.9"
+                        android:text="@string/status_activated_hint"
+                        android:textColor="@color/home_activated_on_card"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 双卡行：左 182dp 固定 / 右拉伸占满，高均 220dp；新拟物凸起面 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="24dp"
-            android:paddingTop="48dp"
-            android:paddingEnd="24dp"
-            android:paddingBottom="112dp">
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/homeTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textColor="@color/home_title_text"
-                android:textSize="26sp"
-                android:textStyle="bold" />
+            <LinearLayout
+                android:id="@+id/deviceCard"
+                android:layout_width="182dp"
+                android:layout_height="220dp"
+                android:background="@drawable/bg_neu_raised"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="10dp">
 
-            <TextView
-                android:id="@+id/homeTagline"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/home_tagline"
-                android:textColor="@color/home_subtitle_text"
-                android:textSize="15sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:letterSpacing="0.06"
+                    android:singleLine="true"
+                    android:text="@string/home_card_device_title"
+                    android:textAllCaps="true"
+                    android:textColor="@color/home_accent"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/statusCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                app:cardBackgroundColor="@color/home_activated_card"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/home_neu_divider" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="20dp">
-
-                    <ImageView
-                        android:id="@+id/statusIcon"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_check_circle_24"
-                        app:tint="@color/home_activated_on_card" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/statusTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/status_activated"
-                            android:textColor="@color/home_activated_on_card"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/statusVersion"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="@color/home_activated_on_card"
-                            android:textSize="14sp"
-                            tools:text="2.2.1 (5)" />
-
-                        <TextView
-                            android:id="@+id/statusHint"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:alpha="0.9"
-                            android:text="@string/status_activated_hint"
-                            android:textColor="@color/home_activated_on_card"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 本体通知开关：打开后才显示常驻控制通知（默认关闭） -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/hostNotifyCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/home_card_background"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="20dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/home_host_notify_title"
-                            android:textColor="@color/home_title_text"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/hostNotifyHint"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/home_host_notify_subtitle"
-                            android:textColor="@color/home_subtitle_text"
-                            android:textSize="13sp" />
-                    </LinearLayout>
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/hostNotifySwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/infoCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/home_card_background"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:letterSpacing="0.04"
+                        android:singleLine="true"
                         android:text="@string/home_info_android"
-                        android:textColor="@color/home_title_text"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:textAllCaps="true"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="11sp" />
 
                     <TextView
                         android:id="@+id/infoAndroid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/home_subtitle_text"
-                        android:textSize="14sp"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="@color/home_title_text"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
                         tools:text="16 (API 36)" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/home_neu_divider" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
+                        android:ellipsize="end"
+                        android:letterSpacing="0.04"
+                        android:singleLine="true"
                         android:text="@string/home_info_device"
-                        android:textColor="@color/home_title_text"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:textAllCaps="true"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="11sp" />
 
                     <TextView
                         android:id="@+id/infoDevice"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/home_subtitle_text"
-                        android:textSize="14sp"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="@color/home_title_text"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
                         tools:text="Device model" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/home_neu_divider" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
+                        android:ellipsize="end"
+                        android:letterSpacing="0.04"
+                        android:singleLine="true"
                         android:text="@string/home_info_abi"
-                        android:textColor="@color/home_title_text"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:textAllCaps="true"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="11sp" />
 
                     <TextView
                         android:id="@+id/infoAbi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/home_subtitle_text"
-                        android:textSize="14sp"
-                        tools:text="arm64-v8a" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:text="@string/home_info_mirrored"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
                         android:textColor="@color/home_title_text"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/infoMirrored"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/home_subtitle_text"
-                        android:textSize="14sp"
-                        tools:text="0" />
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        tools:text="arm64-v8a" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/linksCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/home_link_chip_background"
-                app:strokeWidth="1dp">
+            <LinearLayout
+                android:id="@+id/statsCard"
+                android:layout_width="0dp"
+                android:layout_height="220dp"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_neu_raised"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:letterSpacing="0.06"
+                    android:singleLine="true"
+                    android:text="@string/home_card_stats_title"
+                    android:textAllCaps="true"
+                    android:textColor="@color/home_accent"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/home_neu_divider" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="12dp">
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/githubButton"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_home_chip"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:paddingStart="6dp"
-                        android:paddingEnd="6dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:letterSpacing="0.04"
+                        android:singleLine="true"
+                        android:text="@string/home_stat_apps"
+                        android:textAllCaps="true"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="11sp" />
 
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_github_24" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:singleLine="true"
-                            android:text="@string/link_github"
-                            android:textColor="@color/home_title_text"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/telegramButton"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="0dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_home_chip"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:paddingStart="6dp"
-                        android:paddingEnd="6dp">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_telegram_24" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:singleLine="true"
-                            android:text="@string/link_telegram"
-                            android:textColor="@color/home_title_text"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/donateButton"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="0dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_home_chip"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:paddingStart="6dp"
-                        android:paddingEnd="6dp">
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_donate_24" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:singleLine="true"
-                            android:text="@string/link_donate"
-                            android:textColor="@color/home_title_text"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/statsApps"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="@color/home_accent"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="12" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/home_neu_divider" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:letterSpacing="0.04"
+                        android:singleLine="true"
+                        android:text="@string/home_stat_rules"
+                        android:textAllCaps="true"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/statsRules"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="@color/home_accent"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="34" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/home_neu_divider" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:letterSpacing="0.04"
+                        android:singleLine="true"
+                        android:text="@string/home_stat_blocked"
+                        android:textAllCaps="true"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/statsBlocked"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="@color/home_accent"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="56" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
+
+        <!-- 开关容器框：本体通知 / 弹窗拦截 两行，中间发丝分隔线；默认均为关闭 -->
+        <LinearLayout
+            android:id="@+id/switchCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_neu_raised"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_host_notify_title"
+                        android:textColor="@color/home_title_text"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/hostNotifyHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/home_host_notify_subtitle"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/hostNotifySwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:thumb="@drawable/bg_switch_thumb_flat"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    app:track="@drawable/bg_switch_track_flat"
+                    app:thumbTint="@null"
+                    app:trackTint="@null"
+                    app:useMaterialThemeColors="false" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/home_neu_divider" />
+
+            <LinearLayout
+                android:id="@+id/popupInterceptRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_popup_intercept_title"
+                        android:textColor="@color/home_title_text"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/popupInterceptHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/home_popup_intercept_subtitle"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/popupInterceptSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:thumb="@drawable/bg_switch_thumb_flat"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    app:track="@drawable/bg_switch_track_flat"
+                    app:thumbTint="@null"
+                    app:trackTint="@null"
+                    app:useMaterialThemeColors="false" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 下部链接框：GitHub / Telegram / 捐赠；胶囊按钮默认凸起、按下凹陷 -->
+        <LinearLayout
+            android:id="@+id/linksCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_neu_raised"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:id="@+id/githubButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/bg_neu_chip"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_github_24" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:singleLine="true"
+                    android:text="@string/link_github"
+                    android:textColor="@color/home_title_text"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/telegramButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/bg_neu_chip"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_telegram_24" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:singleLine="true"
+                    android:text="@string/link_telegram"
+                    android:textColor="@color/home_title_text"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/donateButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_neu_chip"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_donate_24" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:singleLine="true"
+                    android:text="@string/link_donate"
+                    android:textColor="@color/home_title_text"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
 </androidx.core.widget.NestedScrollView>

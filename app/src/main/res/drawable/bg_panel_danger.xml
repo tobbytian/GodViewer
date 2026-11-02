@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 危险区面板：errorContainer 强调色平铺 + 24dp 圆角（规范：强调色面板可用，卡片 = bg + rounded） -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#F9DEDC" />
+    <corners android:radius="24dp" />
+</shape>

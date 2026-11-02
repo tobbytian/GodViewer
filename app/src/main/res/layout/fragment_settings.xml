@@ -8,7 +8,6 @@
     android:clipToPadding="false"
     android:fillViewport="true"
     tools:context=".ui.host.SettingsFragment">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +16,6 @@
         android:paddingTop="48dp"
         android:paddingEnd="24dp"
         android:paddingBottom="112dp">
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,21 +23,16 @@
             android:textColor="@color/home_title_text"
             android:textSize="28sp"
             android:textStyle="bold" />
-
-        <com.google.android.material.card.MaterialCardView
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/home_card_background"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp">
-
+            android:background="@drawable/bg_neu_raised"
+            >
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
                 <LinearLayout
                     android:id="@+id/tutorialRow"
                     android:layout_width="match_parent"
@@ -49,7 +42,6 @@
                     android:focusable="true"
                     android:orientation="vertical"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -57,7 +49,6 @@
                         android:textColor="@color/home_title_text"
                         android:textSize="16sp"
                         android:textStyle="bold" />
-
                     <TextView
                         android:id="@+id/tutorialValue"
                         android:layout_width="match_parent"
@@ -67,14 +58,12 @@
                         android:textColor="@color/home_subtitle_text"
                         android:textSize="13sp" />
                 </LinearLayout>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:background="@color/home_divider" />
-
                 <LinearLayout
                     android:id="@+id/languageRow"
                     android:layout_width="match_parent"
@@ -84,7 +73,6 @@
                     android:focusable="true"
                     android:orientation="vertical"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -92,7 +80,6 @@
                         android:textColor="@color/home_title_text"
                         android:textSize="16sp"
                         android:textStyle="bold" />
-
                     <TextView
                         android:id="@+id/languageValue"
                         android:layout_width="match_parent"
@@ -103,14 +90,12 @@
                         android:textSize="13sp"
                         tools:text="Follow system" />
                 </LinearLayout>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:background="@color/home_divider" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -120,7 +105,6 @@
                     android:paddingTop="8dp"
                     android:paddingEnd="12dp"
                     android:paddingBottom="8dp">
-
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -129,7 +113,6 @@
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
                         android:paddingEnd="12dp">
-
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -138,29 +121,32 @@
                             android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
-
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/hideIconSwitch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:thumb="@drawable/bg_switch_thumb_flat"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp"
+                        app:track="@drawable/bg_switch_track_flat"
+                        app:thumbTint="@null"
+                        app:trackTint="@null"
+                        app:useMaterialThemeColors="false" />
                 </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        </FrameLayout>
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/home_card_background"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp">
-
+            android:background="@drawable/bg_neu_raised"
+            >
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
                 <LinearLayout
                     android:id="@+id/checkUpdateRow"
                     android:layout_width="match_parent"
@@ -170,7 +156,6 @@
                     android:focusable="true"
                     android:orientation="vertical"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -178,7 +163,6 @@
                         android:textColor="@color/home_title_text"
                         android:textSize="16sp"
                         android:textStyle="bold" />
-
                     <TextView
                         android:id="@+id/checkUpdateSubtitle"
                         android:layout_width="match_parent"
@@ -188,14 +172,12 @@
                         android:textColor="@color/home_subtitle_text"
                         android:textSize="13sp" />
                 </LinearLayout>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:background="@color/home_divider" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -205,7 +187,6 @@
                     android:paddingTop="8dp"
                     android:paddingEnd="12dp"
                     android:paddingBottom="8dp">
-
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -214,7 +195,6 @@
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
                         android:paddingEnd="12dp">
-
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -223,30 +203,101 @@
                             android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
-
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/autoUpdateSwitch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:thumb="@drawable/bg_switch_thumb_flat"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp"
+                        app:track="@drawable/bg_switch_track_flat"
+                        app:thumbTint="@null"
+                        app:trackTint="@null"
+                        app:useMaterialThemeColors="false" />
                 </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- 更新日志/用户协议/诊断日志合并为二级页，这里只留入口 -->
-        <com.google.android.material.card.MaterialCardView
+        </FrameLayout>
+        <!-- 弹窗功能入口：拦截记录 / 使用说明（弹窗 Tab 已移除，入口分置设置与单应用页） -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/home_card_background"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp">
-
+            android:background="@drawable/bg_neu_raised"
+            >
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
+                <LinearLayout
+                    android:id="@+id/popupLogRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/popup_log_title"
+                        android:textColor="@color/home_title_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/popupLogValue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/popup_log_hint"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="13sp" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:background="@color/home_divider" />
+                <LinearLayout
+                    android:id="@+id/popupGuideRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/popup_guide_row_title"
+                        android:textColor="@color/home_title_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/popup_guide_row_subtitle"
+                        android:textColor="@color/home_subtitle_text"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
+        <!-- 更新日志/用户协议/诊断日志合并为二级页，这里只留入口 -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_neu_raised"
+            >
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
                 <LinearLayout
                     android:id="@+id/infoRow"
                     android:layout_width="match_parent"
@@ -256,7 +307,6 @@
                     android:focusable="true"
                     android:orientation="vertical"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -264,7 +314,6 @@
                         android:textColor="@color/home_title_text"
                         android:textSize="16sp"
                         android:textStyle="bold" />
-
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -274,6 +323,6 @@
                         android:textSize="13sp" />
                 </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 新拟物胶囊按钮「凸起」态：同 bg_neu_raised，圆角 20dp（按钮默认从表面隆起） -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#C6CBD4"
+                android:startColor="#FFFFFF" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/home_page_background" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+</layer-list>

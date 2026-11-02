@@ -155,8 +155,10 @@ object TargetCrashProbe {
                 append(tr.message ?: "")
             }.take(400)
             val stack = (tr.stackTraceToString()).take(CrashReportProtocol.MAX_STACK_CHARS)
-            val ring = DiagBuffer.snapshot(headerExtra = stateMap(app))
-                .take(CrashReportProtocol.MAX_RING_CHARS)
+            val ring = DiagBuffer.snapshotCapped(
+                headerExtra = stateMap(app),
+                maxChars = CrashReportProtocol.MAX_RING_CHARS,
+            )
             val process = DiagBuffer.processName().ifBlank { app.packageName }
             val intent = Intent(CrashReportProtocol.ACTION_TARGET_CRASH).apply {
                 component = ComponentName(BuildConfig.PACKAGE_NAME, HOST_RECEIVER)
@@ -199,9 +201,10 @@ object TargetCrashProbe {
             }
             val application = app.applicationContext
             val process = DiagBuffer.processName().ifBlank { application.packageName }
-            val body = DiagBuffer.snapshot(
+            val body = DiagBuffer.snapshotCapped(
                 headerExtra = stateMap(application) + mapOf("stage" to stage),
-            ).take(DiagReportProtocol.MAX_BODY_CHARS)
+                maxChars = DiagReportProtocol.MAX_BODY_CHARS,
+            )
             if (body.isBlank()) return
             val intent = Intent(DiagReportProtocol.ACTION_TARGET_DIAG).apply {
                 component = ComponentName(BuildConfig.PACKAGE_NAME, HOST_RECEIVER)

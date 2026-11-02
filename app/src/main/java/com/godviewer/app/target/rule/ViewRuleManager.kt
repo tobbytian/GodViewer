@@ -66,19 +66,35 @@ object ViewRuleManager {
     fun rulesForActivity(activityClass: String): List<ViewRule> =
         rules.filter { it.activityClass == activityClass }
 
+    /**
+     * 统一的规则键计算：视图在列表项内（RecyclerView/ListView 直接子项树中）时用
+     * repeatable 键（depth = 自 item 根的路径），否则用绝对 depth 键。
+     * [createRule] 与 [findRule] 共用，保证创建与查找的键一致。
+     *
+     * @return 键 + item 根（不在列表内时为 null）
+     */
+    private fun ruleKeyFor(activity: Activity, view: View): Pair<ViewRule.RuleKey, View?> {
+        val anchor = listItemAnchor(view)
+        val depth = if (anchor != null) {
+            pathWithin(view, anchor) ?: getViewHierarchyDepth(view)
+        } else {
+            getViewHierarchyDepth(view)
+        }
+        return ViewRule.RuleKey(activity.componentName.className, depth, view.javaClass.name) to anchor
+    }
+
     /** 查找已存在的规则（对话框打开时判断是否已有规则） */
     fun findRule(view: View): ViewRule? {
         val activity = getAttachedActivityFromView(view) ?: return null
-        val key = ViewRule.RuleKey(
-            activity.componentName.className,
-            getViewHierarchyDepth(view),
-            view.javaClass.name
-        )
+        val (key, _) = ruleKeyFor(activity, view)
         return rules.firstOrNull { it.key() == key }
     }
 
     /**
      * 为视图创建一个规则外壳（原始值 = 当前值，修改值 = 当前值，changed* 全 false）。
+     *
+     * 视图在列表项内时自动创建 repeatable 规则（对该 Activity 内所有同类项生效，
+     * depth 语义变为自 item 根的路径）；否则为普通规则。
      * 视图不在 Activity 窗口（如对话框 / Popup 内部）或找不到 Activity 时返回 null。
      */
     fun createRule(view: View): ViewRule? {
@@ -87,17 +103,20 @@ object ViewRuleManager {
             return null
         }
         val snapshot = ViewRuleApplier.captureSnapshot(view)
+        val (key, anchor) = ruleKeyFor(activity, view)
         val rule = ViewRule(
             packageName = activity.packageName,
             matchVersionCode = versionCode(activity),
             activityClass = activity.componentName.className,
             viewClass = view.javaClass.name,
-            depth = getViewHierarchyDepth(view),
+            depth = key.depth,
             resourceName = resourceNameOf(view),
             text = (view as? TextView)?.text?.toString(),
             description = view.contentDescription?.toString(),
             original = snapshot,
             modified = snapshot,
+            repeatable = anchor != null,
+            itemRootClass = anchor?.javaClass?.name,
             timestamp = System.currentTimeMillis()
         )
         // 视图此刻仍可见，截取缩略图供规则管理列表使用（与编辑弹窗预览一致），并持久化
@@ -111,8 +130,13 @@ object ViewRuleManager {
         ViewRuleThumbnails.capture(view, rule)
     }
 
-    /** 保存（或更新）一条规则 */
-    fun saveRule(rule: ViewRule) {
+    /**
+     * 保存（或更新）一条规则。
+     *
+     * @param applyIn repeatable 规则保存后立即在该 Activity 内对账生效
+     * （普通规则忽略此参数，维持"调用方自行 applyRuleToView"的旧流程）
+     */
+    fun saveRule(rule: ViewRule, applyIn: Activity? = null) {
         pushUndoState()
         rule.timestamp = System.currentTimeMillis()
         ViewRuleApplier.forgetAppliedImage(rule)
@@ -124,12 +148,17 @@ object ViewRuleManager {
         }
         store?.save(rules)
         GvLog.d(TAG, "rule saved: $rule")
+        if (rule.repeatable && applyIn != null) {
+            RepeatableRuleReconciler.reconcile(applyIn)
+        }
     }
 
     /** 删除一条规则 */
     fun deleteRule(rule: ViewRule) {
         pushUndoState()
         ViewRuleApplier.forgetAppliedImage(rule)
+        // repeatable 规则先按登记表还原全部同类项（findViewBestMatch 对 itemPath 无效）
+        RepeatableRuleReconciler.restoreRule(rule)
         ViewRuleThumbnails.remove(rule)
         rules = rules.filterNot { it.key() == rule.key() }
         store?.save(rules)
@@ -138,11 +167,19 @@ object ViewRuleManager {
 
     /**
      * 删除一条规则；先在给定各 Activity 中还原该规则关联的视图（找不到则跳过）。
+     * repeatable 规则按登记表还原后再对存活 Activity 对账一次，让其余规则接管空出的视图。
      */
     fun deleteRule(rule: ViewRule, restoreIn: Collection<Activity>) {
-        for (activity in restoreIn) {
-            findViewBestMatch(activity, rule)?.let { view ->
-                ViewRuleApplier.restoreView(view, rule)
+        if (rule.repeatable) {
+            RepeatableRuleReconciler.restoreRule(rule)
+            for (activity in restoreIn) {
+                RepeatableRuleReconciler.reconcile(activity)
+            }
+        } else {
+            for (activity in restoreIn) {
+                findViewBestMatch(activity, rule)?.let { view ->
+                    ViewRuleApplier.restoreView(view, rule)
+                }
             }
         }
         deleteRule(rule)
@@ -161,8 +198,14 @@ object ViewRuleManager {
         val removed = rules.filter { it.key() in keys }
         if (removed.isEmpty()) return 0
         pushUndoState()
+        for (rule in removed) {
+            if (rule.repeatable) {
+                RepeatableRuleReconciler.restoreRule(rule)
+            }
+        }
         for (activity in restoreIn) {
             for (rule in removed) {
+                if (rule.repeatable) continue
                 findViewBestMatch(activity, rule)?.let { view ->
                     ViewRuleApplier.restoreView(view, rule)
                 }
@@ -174,6 +217,11 @@ object ViewRuleManager {
         }
         rules = rules.filterNot { it.key() in keys }
         store?.save(rules)
+        if (removed.any { it.repeatable }) {
+            for (activity in restoreIn) {
+                RepeatableRuleReconciler.reconcile(activity)
+            }
+        }
         GvLog.i(TAG, "rules deleted count=${removed.size}")
         return removed.size
     }
@@ -193,8 +241,14 @@ object ViewRuleManager {
         }
         val removed = rules
         pushUndoState()
+        for (rule in removed) {
+            if (rule.repeatable) {
+                RepeatableRuleReconciler.restoreRule(rule)
+            }
+        }
         for (activity in restoreIn) {
             for (rule in removed) {
+                if (rule.repeatable) continue
                 findViewBestMatch(activity, rule)?.let { view ->
                     ViewRuleApplier.restoreView(view, rule)
                 }
@@ -206,8 +260,62 @@ object ViewRuleManager {
         }
         rules = emptyList()
         store?.save(rules)
+        if (removed.any { it.repeatable }) {
+            for (activity in restoreIn) {
+                RepeatableRuleReconciler.reconcile(activity)
+            }
+        }
         GvLog.i(TAG, "all rules deleted count=${removed.size}")
         return removed.size
+    }
+
+    /**
+     * 批量 upsert（宿主编辑 / 导入下发）：按 key 替换或新增。入参规则原样保存
+     * （不重写 timestamp，便于宿主回读镜像按全等确认）；对存活 Activity 先还原
+     * 旧规则再应用新值，即时生效。一次压撤销栈、一次落盘（单次镜像回推）。
+     *
+     * 幂等：重复下发同一批规则结果不变（待同步队列重发安全）。
+     *
+     * @param incoming 已由调用方过滤为本包的规则
+     * @param restoreIn 需要即时生效的存活 Activity
+     * @return 实际合并的规则条数
+     */
+    fun upsertRules(
+        incoming: List<ViewRule>,
+        restoreIn: Collection<Activity> = emptyList(),
+    ): Int {
+        if (incoming.isEmpty()) return 0
+        val oldByKey = rules.associateBy { it.key() }
+        pushUndoState()
+        val merged = rules.toMutableList()
+        for (rule in incoming) {
+            val index = merged.indexOfFirst { it.key() == rule.key() }
+            if (index >= 0) {
+                // 图片规则的应用态按旧实例记账，换新值前先作废
+                ViewRuleApplier.forgetAppliedImage(merged[index])
+                merged[index] = rule
+            } else {
+                merged.add(rule)
+            }
+        }
+        rules = merged
+        // repeatable 规则的换值/新增统一走对账（按每视图基线还原旧效果再应用新值）
+        if (incoming.any { it.repeatable }) {
+            for (activity in restoreIn) {
+                RepeatableRuleReconciler.reconcile(activity)
+            }
+        }
+        for (activity in restoreIn) {
+            for (rule in incoming) {
+                if (rule.repeatable) continue
+                val view = findViewBestMatch(activity, rule) ?: continue
+                oldByKey[rule.key()]?.let { ViewRuleApplier.restoreView(view, it) }
+                ViewRuleApplier.applyRuleToView(view, rule)
+            }
+        }
+        store?.save(rules)
+        GvLog.i(TAG, "rules upserted count=${incoming.size}")
+        return incoming.size
     }
 
     /** 当前全部规则（规则管理列表使用） */
@@ -238,19 +346,28 @@ object ViewRuleManager {
         rules = previous
         ViewRuleApplier.clearAppliedImages()
         store?.save(rules)
-        activity?.let { act ->
+        if (activity != null) {
+            val hasRepeatable = previous.any { it.repeatable } || current.any { it.repeatable }
             for (rule in previous) {
-                findViewBestMatch(act, rule)?.let { view ->
+                // repeatable 规则由对账统一处理（findViewBestMatch 对 itemPath 无效）
+                if (rule.repeatable) continue
+                findViewBestMatch(activity, rule)?.let { view ->
                     ViewRuleApplier.restoreView(view, rule)
                     ViewRuleApplier.applyRuleToView(view, rule)
                 }
             }
             for (rule in current) {
+                if (rule.repeatable) continue
                 if (previous.none { it.key() == rule.key() }) {
-                    findViewBestMatch(act, rule)?.let { view ->
+                    findViewBestMatch(activity, rule)?.let { view ->
                         ViewRuleApplier.restoreView(view, rule)
                     }
                 }
+            }
+            // 撤销涉及的 repeatable 规则：对账一轮即可同时完成
+            // "恢复回来的规则重新应用"与"被撤销规则的效果还原"
+            if (hasRepeatable) {
+                RepeatableRuleReconciler.reconcile(activity)
             }
         }
         GvLog.d(TAG, "rule undone: ${previous.size} rules restored")

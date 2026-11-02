@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 下拉框：凹陷（与输入框同语言），右侧 chevron 替代系统默认箭头 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#FFFFFF"
+                android:startColor="#C6CBD4" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/home_page_background" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    <item
+        android:width="20dp"
+        android:height="20dp"
+        android:drawable="@drawable/ic_chevron_down_24"
+        android:gravity="end|center_vertical"
+        android:right="12dp" />
+</layer-list>

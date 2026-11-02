@@ -9,8 +9,10 @@ import com.godviewer.app.shared.APP_FIELD_SHOW_BOUNDS
 import com.godviewer.app.shared.AndroidAppCompat
 import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.control.HostControlBridge
+import com.godviewer.app.shared.entry.PopupIntercept
 import com.godviewer.app.target.control.TargetControlReceiver
 import com.godviewer.app.target.diag.TargetCrashProbe
+import com.godviewer.app.target.flutter.FlutterRuleManager
 import com.godviewer.app.target.edit.EditMode
 import com.godviewer.app.target.edit.EditModeNotification
 import com.godviewer.app.target.edit.EditModeTouchInterceptor
@@ -20,6 +22,7 @@ import com.godviewer.app.target.hook.GvMethodHook
 import com.godviewer.app.target.hook.IHooker
 import com.godviewer.app.target.hook.MethodHookParam
 import com.godviewer.app.target.hook.ModuleRes
+import com.godviewer.app.target.rule.DialogRuleStore
 import com.godviewer.app.target.rule.ViewRuleManager
 import com.godviewer.app.target.util.drawLayoutBounds
 import com.godviewer.app.target.util.getInjectedField
@@ -54,17 +57,26 @@ class ApplicationHooker : IHooker {
                             "Application.onCreate pkg=${app.packageName} " +
                                 "moduleRes=${ModuleRes.isModuleResReady()}",
                         )
+                        PopupIntercept.markAppStart()
                         // 最先装崩溃探针，后续任一步异常也能落盘
                         runCatching { TargetCrashProbe.install(app) }
                             .onFailure { GvLog.e(TAG, "TargetCrashProbe.install failed", it) }
 
                         runCatching { ViewRuleManager.init(app) }
                             .onFailure { GvLog.e(TAG, "ViewRuleManager.init failed", it) }
+                        runCatching { DialogRuleStore.init(app) }
+                            .onFailure { GvLog.e(TAG, "DialogRuleStore.init failed", it) }
+                        runCatching { FlutterRuleManager.init(app) }
+                            .onFailure { GvLog.e(TAG, "FlutterRuleManager.init failed", it) }
                         runCatching { EditMode.init(app) }
                             .onFailure { GvLog.e(TAG, "EditMode.init failed", it) }
                         // 不在此处安装触摸/click hook
                         runCatching { TargetControlReceiver.init(app) }
                             .onFailure { GvLog.e(TAG, "TargetControlReceiver.init failed", it) }
+                        // 接收器就绪后拉一次弹窗拦截开关状态（宿主回 STATE 走该接收器；
+                        // 目标端查宿主 Provider 被包可见性挡住，状态同步只走广播）
+                        runCatching { PopupIntercept.bootstrap(app) }
+                            .onFailure { GvLog.e(TAG, "PopupIntercept.bootstrap failed", it) }
                         runCatching { EditModeNotification.init(app) }
                             .onFailure { GvLog.e(TAG, "EditModeNotification.init failed", it) }
                         runCatching {
@@ -127,7 +139,14 @@ class ApplicationHooker : IHooker {
         }
 
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-        override fun onActivityStarted(activity: Activity) {}
+        override fun onActivityStarted(activity: Activity) {
+            // 0 -> 1：应用从后台回到前台（或冷启动首个界面），弹窗检测窗口重新计时；
+            // 顺手刷新拦截开关缓存（30s 节流），避免刚开开关目标端还拿旧值拒绝重放
+            if (startedActivities.getAndIncrement() == 0) {
+                PopupIntercept.markAppStart()
+                runCatching { PopupIntercept.refreshOnForeground(activity.applicationContext) }
+            }
+        }
 
         override fun onActivityResumed(activity: Activity) {
             runCatching {
@@ -168,7 +187,9 @@ class ApplicationHooker : IHooker {
         }
 
         override fun onActivityPaused(activity: Activity) {}
-        override fun onActivityStopped(activity: Activity) {}
+        override fun onActivityStopped(activity: Activity) {
+            startedActivities.updateAndGet { (it - 1).coerceAtLeast(0) }
+        }
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
         override fun onActivityDestroyed(activity: Activity) {
             runCatching { SelectedViewHighlight.clearIfActivity(activity) }
@@ -183,5 +204,8 @@ class ApplicationHooker : IHooker {
 
         /** Application.onCreate 初始化只做一次（进程级）。 */
         private val appInitialized = AtomicBoolean(false)
+
+        /** 处于 started 状态的 Activity 数；降到 0 即应用进入后台 */
+        private val startedActivities = java.util.concurrent.atomic.AtomicInteger(0)
     }
 }

@@ -4,6 +4,7 @@ import android.app.Application
 import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.control.HostControlBridge
 import com.godviewer.app.target.diag.TargetCrashProbe
+import com.godviewer.app.target.flutter.FlutterBridge
 import com.godviewer.app.target.hook.hookers.ActivityLifecycleHooker
 
 /**
@@ -32,6 +33,16 @@ object EditMode {
         runCatching {
             val changed = enabled != value
             enabled = value
+            if (!changed && value) {
+                // 状态已开但界面可能已重建/hook 丢失：重新安装并包装当前 Activity
+                GvLog.d(TAG, "re-enable refresh (already on) pkg=${app?.packageName}")
+                runCatching {
+                    EditModeTouchInterceptor.refreshActivity(
+                        activity = ActivityLifecycleHooker.resumedActivity(),
+                        forceClickable = true,
+                    )
+                }.onFailure { GvLog.e(TAG, "re-enable refresh failed", it) }
+            }
             if (changed) {
                 GvLog.i(TAG, "edit mode -> $value pkg=${app?.packageName}")
                 if (value) {
@@ -48,6 +59,9 @@ object EditMode {
                         forceClickable = value,
                     )
                 }.onFailure { GvLog.e(TAG, "refreshActivity failed", it) }
+                // Flutter 语义树随编辑开关（有 flutter 规则时退出编辑仍保持开启）
+                runCatching { FlutterBridge.onEditModeChanged(value) }
+                    .onFailure { GvLog.e(TAG, "flutter onEditModeChanged failed", it) }
             }
             app?.let { a ->
                 runCatching { EditModeNotification.refresh(a) }

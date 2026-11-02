@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  注入弹窗整窗底板：与卡片/开关同款 2dp 渐变环 + 90% 面板色（#EAEEF4 × 0.9 = #E6）
+  圆角 24dp。原实现是纯色 GradientDrawable，无边与卡片语言不统一。
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#C6CBD4"
+                android:startColor="#FFFFFF" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#E6EAEEF4" />
+            <corners android:radius="22dp" />
+        </shape>
+    </item>
+</layer-list>

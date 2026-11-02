@@ -13,6 +13,7 @@ English | [中文](README.md)
 
 - **Tap to edit**: pick any view by touching the screen, smoother than F12
 - **Any attribute**: size / margin / padding / visibility, `TextView` text & max lines, `ImageView` image URL & scale type
+- **List-item rules**: a rule created on a view inside a `RecyclerView` / `ListView` item automatically applies to **every matching item** (including items appearing later while scrolling) — great for hiding repeated feed ad slots
 - **Hide & reset**: hide a view with one tap; restore modified views to original anytime
 - **Edits survive restarts**: changes are saved as rules and automatically replayed after the target app is restarted, killed, or the device reboots
 - **Host-notification entry**: the edit-mode entry is now unified as the **GodViewer host notification**, shown only after you enable the switch on the home page; tap **Enable / Undo / Manage rules** on the notification to control it

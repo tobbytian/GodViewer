@@ -16,14 +16,8 @@
         app:title="@string/mirror_list_title" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="8dp"
-        android:text="@string/mirror_list_subtitle"
-        android:textColor="@color/home_subtitle_text"
-        android:textSize="13sp" />
+        style="@style/HostPageHint"
+        android:text="@string/mirror_list_subtitle" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -43,13 +37,8 @@
 
         <TextView
             android:id="@+id/emptyView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="24dp"
+            style="@style/HostEmptyText"
             android:text="@string/mirror_list_empty"
-            android:textColor="@color/home_subtitle_text"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>

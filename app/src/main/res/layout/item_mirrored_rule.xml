@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,18 +11,14 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/home_card_background"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="0dp"
-    app:strokeWidth="0dp">
-
+    android:background="@drawable/bg_neu_raised"
+    >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="12dp">
-
         <!-- 多选模式下可见（宿主规则列表批量删除） -->
         <CheckBox
             android:id="@+id/ruleCheckbox"
@@ -34,23 +30,21 @@
             android:paddingEnd="2dp"
             android:visibility="gone"
             tools:visibility="visible" />
-
         <ImageView
             android:id="@+id/ruleThumb"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginEnd="12dp"
-            android:background="#14000000"
+            android:background="@drawable/bg_thumb_frame"
+            android:clipToOutline="true"
             android:contentDescription="@null"
             android:scaleType="centerCrop"
             tools:src="@mipmap/ic_launcher" />
-
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
-
             <TextView
                 android:id="@+id/ruleTitle"
                 android:layout_width="match_parent"
@@ -61,7 +55,6 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="TextView" />
-
             <TextView
                 android:id="@+id/ruleSubtitle"
                 android:layout_width="match_parent"
@@ -74,4 +67,4 @@
                 tools:text="12:30:01" />
         </LinearLayout>
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</FrameLayout>

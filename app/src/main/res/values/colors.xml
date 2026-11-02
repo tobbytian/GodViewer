@@ -56,21 +56,28 @@
     <color name="md_theme_dark_shadow">#000000</color>
     <color name="md_theme_dark_primaryInverse">#6750A4</color>
 
-    <!-- Host home screen -->
-    <color name="home_page_background">#F7F7FB</color>
-    <color name="home_card_background">#F0F1F6</color>
-    <color name="home_link_chip_background">#E8EAF0</color>
+    <!-- Host home screen（新拟物试版：主表面 = 浅灰白单色 #EAEEF4，元素与背景同色系） -->
+    <color name="home_page_background">#EAEEF4</color>
+    <color name="home_card_background">#F5F6FA</color>
+    <color name="home_link_chip_background">#F2F4F8</color>
     <color name="home_activated_card">#1565C0</color>
     <color name="home_activated_on_card">#FFFFFF</color>
     <color name="home_deactivated_card">#FFF3E0</color>
     <color name="home_deactivated_on_card">#E65100</color>
     <color name="home_title_text">#1C1B1F</color>
     <color name="home_subtitle_text">#5F5E63</color>
+    <!-- 看板强调色：面板标题 / 统计数字 / 激活状态着色 -->
+    <color name="home_accent">#1565C0</color>
+    <!-- 看板容器框：新拟物要求与页面同色（面与背景无缝一体，靠阴影环分离） -->
+    <color name="home_surface_container_high">#EAEEF4</color>
+    <!-- 新拟物面板内的发丝分隔线（比底色略深；禁粗边框，仅 1dp） -->
+    <color name="home_neu_divider">#DCE0E8</color>
     <color name="home_nav_bar_background">@android:color/transparent</color>
     <!-- dock 选中底片：中性灰 80% 不透明，内容可隐约透出 -->
     <color name="home_nav_item_selected_bg">#CCE9E9EC</color>
     <color name="home_nav_item_unselected">#6B6B75</color>
-    <color name="home_divider">#E0E2EA</color>
+    <!-- 新拟物面板发丝线：比 #EAEEF4 底略深才可见（仅 1dp，禁粗边框） -->
+    <color name="home_divider">#DCE0E8</color>
 
     <!-- Edit-mode selected view highlight (injected overlay) -->
     <color name="edit_selection_stroke">#1565C0</color>

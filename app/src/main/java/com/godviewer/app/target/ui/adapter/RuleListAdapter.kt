@@ -11,11 +11,13 @@ import com.godviewer.app.IGNORE_HOOK
 import com.godviewer.app.R
 import com.godviewer.app.shared.ViewSnapshot
 import com.godviewer.app.shared.model.ViewRule
+import com.godviewer.app.target.dialog.ModuleDialogPalette
 import com.godviewer.app.target.dialog.ModuleDialogUi
 import com.godviewer.app.target.dispatch.ViewClickWrapper
 import com.godviewer.app.target.hook.ModuleRes
 import com.godviewer.app.target.hook.ModuleRes.moduleRes
 import com.godviewer.app.target.rule.ViewRuleManager
+import com.godviewer.app.target.rule.findRepeatableMatches
 import com.godviewer.app.target.rule.findViewBestMatch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -59,6 +61,10 @@ class RuleListAdapter(
         }
         itemView.tag = IGNORE_HOOK
         val binding = LayoutRuleItemBinding.bind(itemView)
+        // 注入布局不得引用模块 @drawable/@color（会被目标资源表解析）：
+        // 卡片底与缩略图框改代码注入，文字色由 normalizeTree + 副标题回填覆盖
+        itemView.background = moduleRes.getDrawable(R.drawable.bg_neu_raised, null)
+        binding.ruleThumb.background = moduleRes.getDrawable(R.drawable.bg_thumb_frame, null)
 
         val hidden = rule.changedVisibility && rule.modified.visibility == GONE
         val prefix = if (hidden) moduleRes.getString(R.string.hidden_status) + " · " else ""
@@ -79,12 +85,15 @@ class RuleListAdapter(
         }
 
         // 缩略图：优先用规则创建时缓存的图（与编辑弹窗预览一致）；无缓存则尝试
-        // 当前 Activity 中的活视图直接绘制；都不行则用占位图标
+        // 当前 Activity 中的活视图直接绘制（repeatable 规则取首个同类项）；都不行则用占位图标
         val cachedThumb = ViewRuleManager.thumbnailFor(rule)
         if (cachedThumb != null) {
             binding.ruleThumb.setImageBitmap(cachedThumb)
         } else {
-            val liveView = activity?.let { findViewBestMatch(it, rule) }
+            val liveView = activity?.let {
+                if (rule.repeatable) findRepeatableMatches(it, rule).firstOrNull()
+                else findViewBestMatch(it, rule)
+            }
             val liveBmp = ViewSnapshot.capture(liveView, maxEdge = 128)
             if (liveBmp != null) {
                 binding.ruleThumb.setImageBitmap(liveBmp)
@@ -97,6 +106,8 @@ class RuleListAdapter(
         binding.deleteButton.setOnClickListener { onDelete(rule) }
         // 文案就绪后再归一化样式（按钮主/危险色依赖 label）
         ModuleDialogUi.normalizeTree(itemView)
+        // normalizeTree 把所有 TextView 刷成 dialogText，副标题需恢复次级灰
+        binding.ruleSubtitle.setTextColor(ModuleDialogPalette.dialogHint)
         // 整行可点：打开规则详情（行带 IGNORE_HOOK 标签，不会被编辑模式点击拦截）
         itemView.setOnClickListener { onRowClick(rule) }
         return itemView

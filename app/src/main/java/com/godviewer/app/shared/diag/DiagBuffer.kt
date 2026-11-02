@@ -74,19 +74,46 @@ object DiagBuffer {
     }
 
     fun snapshot(headerExtra: Map<String, String> = emptyMap()): String {
-        val header = buildString {
-            appendLine("=== GodViewer Diag ===")
-            appendLine("module=${BuildConfig.PACKAGE_NAME} vc=${BuildConfig.VERSION_CODE} vn=${BuildConfig.VERSION_NAME} debug=${BuildConfig.DEBUG}")
-            appendLine("pkg=$packageName process=$processName pid=${Process.myPid()} uid=${Process.myUid()}")
-            appendLine(
-                "device=${Build.MANUFACTURER} ${Build.MODEL} sdk=${Build.VERSION.SDK_INT} release=${Build.VERSION.RELEASE}",
-            )
-            headerExtra.forEach { (k, v) -> appendLine("$k=$v") }
-            lastCrashSummary?.let { appendLine("lastCrash=$it") }
-            appendLine("--- recent ---")
-        }
         val body = synchronized(lines) { lines.toList() }.joinToString("\n")
-        return header + body
+        return buildHeader(headerExtra) + body
+    }
+
+    /**
+     * 总长超过 [maxChars] 时**丢最旧行、保最新行**的快照（与 `String.take` 相反）。
+     * 诊断价值集中在最新行：ring 饱合后 `take()` 会把事故窗口整段砍掉。
+     * 未超限时输出与 [snapshot] 逐字节一致。
+     */
+    fun snapshotCapped(headerExtra: Map<String, String> = emptyMap(), maxChars: Int): String {
+        val header = buildHeader(headerExtra)
+        val budget = maxChars - header.length
+        // header 独占上限（实际 ~500 字符，max 为 28_000，不会发生）：宁可截断 header 也守住上限
+        if (budget <= 0) return header.take(maxChars)
+        val kept = ArrayList<String>()
+        var used = 0
+        synchronized(lines) {
+            val iter = lines.descendingIterator()
+            while (iter.hasNext()) {
+                val line = iter.next()
+                val cost = line.length + 1 // 预留换行符
+                if (used + cost > budget) break
+                used += cost
+                kept.add(line)
+            }
+        }
+        kept.reverse()
+        return header + kept.joinToString("\n")
+    }
+
+    private fun buildHeader(headerExtra: Map<String, String>): String = buildString {
+        appendLine("=== GodViewer Diag ===")
+        appendLine("module=${BuildConfig.PACKAGE_NAME} vc=${BuildConfig.VERSION_CODE} vn=${BuildConfig.VERSION_NAME} debug=${BuildConfig.DEBUG}")
+        appendLine("pkg=$packageName process=$processName pid=${Process.myPid()} uid=${Process.myUid()}")
+        appendLine(
+            "device=${Build.MANUFACTURER} ${Build.MODEL} sdk=${Build.VERSION.SDK_INT} release=${Build.VERSION.RELEASE}",
+        )
+        headerExtra.forEach { (k, v) -> appendLine("$k=$v") }
+        lastCrashSummary?.let { appendLine("lastCrash=$it") }
+        appendLine("--- recent ---")
     }
 
     fun clear() {

@@ -2,6 +2,7 @@ package com.godviewer.app.target.rule
 
 import android.content.Context
 import com.godviewer.app.data.RuleMirror
+import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.model.ViewRule
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -59,7 +60,8 @@ internal class RuleStore(private val context: Context) {
                     ?: context.packageName
                 RuleMirror.pushFromTarget(context, packageName, rules)
             } catch (e: Exception) {
-                // 持久化失败不影响目标应用运行
+                // 持久化失败不影响目标应用运行，但必须留痕（对齐 DialogRuleStore）
+                GvLog.w("Rule", "rules persist failed", e)
             }
         }
     }

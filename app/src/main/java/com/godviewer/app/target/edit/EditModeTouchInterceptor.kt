@@ -7,7 +7,11 @@ import android.view.ViewGroup
 import com.godviewer.app.shared.APP_FIELD_FORCE_CLICKABLE
 import com.godviewer.app.shared.AndroidAppCompat
 import com.godviewer.app.shared.GvLog
+import com.godviewer.app.shared.control.HostControlBridge
 import com.godviewer.app.target.dispatch.ViewDispatcher
+import com.godviewer.app.target.flutter.FlutterBridge
+import com.godviewer.app.target.flutter.FlutterEditCoordinator
+import com.godviewer.app.target.flutter.FlutterMaskController
 import com.godviewer.app.target.hook.GvHook
 import com.godviewer.app.target.hook.GvMethodHook
 import com.godviewer.app.target.hook.MethodHookParam
@@ -120,6 +124,8 @@ object EditModeTouchInterceptor {
         } else {
             runCatching { SelectedViewHighlight.update() }
         }
+        // Activity 切换后 decor 可能重建，flutter 遮罩需要在新 decor 上重挂
+        runCatching { FlutterMaskController.refresh() }
     }
 
     private fun handleEditTap(activity: Activity, event: MotionEvent): Boolean {
@@ -159,19 +165,58 @@ object EditModeTouchInterceptor {
                 ) {
                     return false
                 }
-                if (event.eventTime - down.downTime > 700L) return false
+                if (event.eventTime - down.downTime > 700L) {
+                    GvLog.d(
+                        TAG,
+                        "edit tap discarded: long press ${event.eventTime - down.downTime}ms",
+                    )
+                    return false
+                }
 
                 // 跳过 WaterMask 等穿透层，优先命中下方真实控件
                 val target = ViewHitUtil.findEditTarget(
                     root = activity.window.decorView,
                     rawX = event.getRawX(idx),
                     rawY = event.getRawY(idx),
-                ) ?: return false
+                ) ?: run {
+                    GvLog.d(
+                        TAG,
+                        "edit tap miss: no target at " +
+                            "${event.getRawX(idx)},${event.getRawY(idx)}",
+                    )
+                    return false
+                }
+
+                // Flutter 表面：原生树对 Flutter 只有一整块 Surface（命中 FlutterView 本身），
+                // 改走语义 hitTest → 节点操作弹窗。原生弹窗等覆盖层命中非 FlutterView，不进此分支。
+                if (FlutterBridge.engineCaptured && FlutterBridge.isFlutterSurface(target)) {
+                    val handled = runCatching {
+                        FlutterEditCoordinator.handleEditTap(
+                            activity,
+                            event.getRawX(idx),
+                            event.getRawY(idx),
+                        )
+                    }.onFailure {
+                        GvLog.e(TAG, "flutter edit tap failed", it)
+                    }.getOrDefault(false)
+                    if (handled) return true
+                    // 语义 hitTest 落空（该区域无语义节点）→ 不再走原生兜底：
+                    // 原生目标就是这块 Surface，dispatch 无意义
+                    GvLog.d(TAG, "flutter hitTest miss at ${event.getRawX(idx)},${event.getRawY(idx)}")
+                    return false
+                }
                 GvLog.d(
                     TAG,
                     "edit tap -> ${target.javaClass.name} ${target.width}x${target.height}",
                 )
-                return runCatching { ViewDispatcher.dispatch(target) }.getOrDefault(false)
+                val dispatched = runCatching {
+                    ViewDispatcher.dispatch(target)
+                }.getOrDefault(false)
+                if (dispatched) {
+                    // 触摸被消费 = 控件点击被拦截：上报宿主累计首页「已拦截次数」
+                    HostControlBridge.reportControlIntercepted(activity, activity.packageName)
+                }
+                return dispatched
             }
             MotionEvent.ACTION_CANCEL,
             MotionEvent.ACTION_POINTER_UP,

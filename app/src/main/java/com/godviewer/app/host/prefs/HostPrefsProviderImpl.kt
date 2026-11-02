@@ -7,12 +7,16 @@ import android.database.MatrixCursor
 import android.net.Uri
 import com.godviewer.app.BuildConfig
 import com.godviewer.app.host.prefs.HostPrefs
+import com.godviewer.app.shared.HostPrefsNames
 
 /**
- * 向被注入的目标进程暴露宿主设置（只读）。
+ * 宿主设置只读出口（authority 协议冻结）。
  *
- * 现代 Android 下直接读模块私有 prefs（旧 XSharedPreferences 那条路）常失败，
- * 导致入口模式回退默认「目标通知」、两边通知叠在一起。ContentProvider 跨 UID 可读。
+ * 注意：**目标进程查不到它** —— Android 11+ 包可见性要求查询方清单声明
+ * `<queries><provider authorities=…>`，而查询方是目标应用（清单不可控），
+ * query 拿不到 Provider 时静默返回 null（真机已验证该现象）。开关类状态已改
+ * 走广播同步（见 [com.godviewer.app.shared.entry.PopupIntercept]）；本 Provider
+ * 保留供宿主自身与 adb shell 调试读取。
  */
 open class HostPrefsProviderImpl : ContentProvider() {
 
@@ -33,12 +37,20 @@ open class HostPrefsProviderImpl : ContentProvider() {
                     addRow(arrayOf(mode))
                 }
             }
+            PATH_POPUP_INTERCEPT -> {
+                // 增量 path：目标端查「强制弹窗拦截」开关（默认关闭）
+                val enabled = HostPrefs.isPopupInterceptEnabled(ctx)
+                MatrixCursor(arrayOf(HostPrefsNames.COLUMN_POPUP_INTERCEPT)).apply {
+                    addRow(arrayOf(if (enabled) 1 else 0))
+                }
+            }
             else -> null
         }
     }
 
     override fun getType(uri: Uri): String? = when (uriMatcherPath(uri)) {
         PATH_ENTRY_MODE -> "vnd.android.cursor.item/vnd.$AUTHORITY.entry_mode"
+        PATH_POPUP_INTERCEPT -> "vnd.android.cursor.item/vnd.$AUTHORITY.popup_intercept"
         else -> null
     }
 
@@ -56,6 +68,7 @@ open class HostPrefsProviderImpl : ContentProvider() {
     companion object {
         const val AUTHORITY = "${BuildConfig.PACKAGE_NAME}.hostprefs"
         const val PATH_ENTRY_MODE = "entry_mode"
+        const val PATH_POPUP_INTERCEPT = "popup_intercept"
         const val COLUMN_MODE = "mode"
 
         val ENTRY_MODE_URI: Uri = Uri.parse("content://$AUTHORITY/$PATH_ENTRY_MODE")

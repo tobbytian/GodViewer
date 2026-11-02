@@ -2,32 +2,65 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- 一键删除该应用的全部规则（权威规则在目标应用内，需目标进程存活） -->
-    <item
-        android:id="@+id/action_delete_all"
-        android:icon="@drawable/ic_trash_24"
-        android:title="@string/delete_all_rules"
-        app:showAsAction="never" />
+    <!-- <group> 边界供溢出菜单画分组分割线：MenuAdapter 只在可见项 group 切换处
+         显示 abc_popup_menu_item_layout 里的 group_divider，且 MenuBuilder 的
+         mGroupDividerEnabled 默认关闭 —— 需在 inflateMenu 后调
+         setGroupDividerEnabled(true)（见 RuleMirrorDetailActivity）。 -->
 
-    <!-- 进入多选模式（普通模式可见） -->
-    <item
-        android:id="@+id/action_select_multiple"
-        android:icon="@drawable/ic_list_check_24"
-        android:title="@string/select_multiple"
-        app:showAsAction="never" />
+    <!-- 组 1：镜像传输 -->
+    <group android:id="@+id/group_transfer">
+        <!-- 导出该应用规则包（镜像只读副本 → JSON 信封） -->
+        <item
+            android:id="@+id/action_export"
+            android:title="@string/rules_export"
+            app:showAsAction="never" />
 
-    <!-- 多选模式可见：全选 / 删除所选 -->
-    <item
-        android:id="@+id/action_select_all"
-        android:icon="@drawable/ic_select_all_24"
-        android:title="@string/select_all"
-        android:visible="false"
-        app:showAsAction="never" />
+        <!-- 导入规则包合并到该应用（upsert，经待同步队列） -->
+        <item
+            android:id="@+id/action_import"
+            android:title="@string/rules_import"
+            app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_delete_selected"
-        android:icon="@drawable/ic_trash_24"
-        android:title="@string/delete_selected"
-        android:visible="false"
-        app:showAsAction="never" />
+        <!-- 请求目标应用补推镜像（镜像 best-effort 可能滞后） -->
+        <item
+            android:id="@+id/action_refresh_mirror"
+            android:title="@string/mirror_refresh"
+            app:showAsAction="never" />
+    </group>
+
+    <!-- 组 2：进入多选模式（普通模式可见） -->
+    <group android:id="@+id/group_select">
+        <item
+            android:id="@+id/action_select_multiple"
+            android:icon="@drawable/ic_list_check_24"
+            android:title="@string/select_multiple"
+            app:showAsAction="never" />
+    </group>
+
+    <!-- 组 3：危险操作 -->
+    <group android:id="@+id/group_danger">
+        <!-- 一键删除该应用的全部规则（权威规则在目标应用内，需目标进程存活） -->
+        <item
+            android:id="@+id/action_delete_all"
+            android:icon="@drawable/ic_trash_24"
+            android:title="@string/delete_all_rules"
+            app:showAsAction="never" />
+    </group>
+
+    <!-- 组 4：多选模式专属动作（默认隐藏，选中后显示） -->
+    <group android:id="@+id/group_selection">
+        <item
+            android:id="@+id/action_select_all"
+            android:icon="@drawable/ic_select_all_24"
+            android:title="@string/select_all"
+            android:visible="false"
+            app:showAsAction="never" />
+
+        <item
+            android:id="@+id/action_delete_selected"
+            android:icon="@drawable/ic_trash_24"
+            android:title="@string/delete_selected"
+            android:visible="false"
+            app:showAsAction="never" />
+    </group>
 </menu>

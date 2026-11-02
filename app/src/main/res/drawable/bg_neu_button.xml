@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 中性按钮状态：默认凸起，按下翻转凹陷（Extrude to Intrude，无位移） -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_neu_button_pressed" android:state_pressed="true" />
+    <item android:drawable="@drawable/bg_neu_button_raised" />
+</selector>

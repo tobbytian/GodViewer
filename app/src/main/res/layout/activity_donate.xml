@@ -7,21 +7,18 @@
     android:background="@color/home_page_background"
     android:orientation="vertical"
     tools:context=".ui.host.DonateActivity">
-
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         style="@style/HostSecondaryToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:title="@string/donate_title" />
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fillViewport="true"
         android:overScrollMode="ifContentScrolls">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,7 +27,6 @@
             android:paddingTop="8dp"
             android:paddingEnd="24dp"
             android:paddingBottom="32dp">
-
             <TextView
                 android:id="@+id/donateIntro"
                 android:layout_width="match_parent"
@@ -39,23 +35,18 @@
                 android:text="@string/donate_intro"
                 android:textColor="@color/home_subtitle_text"
                 android:textSize="15sp" />
-
-            <com.google.android.material.card.MaterialCardView
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                app:cardBackgroundColor="@color/home_card_background"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
+                android:background="@drawable/bg_neu_raised"
+                >
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -63,7 +54,6 @@
                         android:textColor="@color/home_title_text"
                         android:textSize="16sp"
                         android:textStyle="bold" />
-
                     <ImageView
                         android:id="@+id/wechatQr"
                         android:layout_width="match_parent"
@@ -75,24 +65,19 @@
                         android:scaleType="fitCenter"
                         android:src="@drawable/donate_wechat_qr" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
+            </FrameLayout>
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/home_card_background"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
+                android:background="@drawable/bg_neu_raised"
+                >
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
                     android:padding="20dp">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -100,7 +85,6 @@
                         android:textColor="@color/home_title_text"
                         android:textSize="16sp"
                         android:textStyle="bold" />
-
                     <ImageView
                         android:id="@+id/alipayQr"
                         android:layout_width="match_parent"
@@ -112,7 +96,7 @@
                         android:scaleType="fitCenter"
                         android:src="@drawable/donate_alipay_qr" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

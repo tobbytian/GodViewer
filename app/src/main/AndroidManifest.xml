@@ -8,6 +8,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- 判断镜像对应的应用是否仍已安装（已卸载的不再列出） -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
     <!-- Resolve mirrored app labels/icons on Android 11+ -->
     <queries>
         <intent>
@@ -78,6 +83,21 @@
 
 
         <activity
+            android:name=".host.ui.PopupLogActivity"
+            android:exported="false"
+            android:parentActivityName=".host.MainActivity" />
+
+        <activity
+            android:name=".host.ui.PopupSettingsActivity"
+            android:exported="false"
+            android:parentActivityName=".host.RuleMirrorDetailActivity" />
+
+        <activity
+            android:name=".host.ui.PopupRulesActivity"
+            android:exported="false"
+            android:parentActivityName=".host.MainActivity" />
+
+        <activity
             android:name=".host.RuleMirrorListActivity"
             android:exported="false"
             android:parentActivityName=".host.MainActivity" />
@@ -91,6 +111,25 @@
             android:name=".host.RuleMirrorRuleDetailActivity"
             android:exported="false"
             android:parentActivityName=".host.RuleMirrorDetailActivity" />
+
+        <activity
+            android:name=".host.RuleMirrorRuleEditActivity"
+            android:exported="false"
+            android:parentActivityName=".host.RuleMirrorRuleDetailActivity" />
+
+        <!--
+          规则导出分享：cache/godviewer-share 下的 JSON 经 FileProvider 授权给
+          ACTION_SEND 接收方（纯宿主侧新增组件，不涉及冻结的 3 个协议 FQCN）。
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.godviewer.app.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <!-- Explicit component from target processes; exported so other UIDs can deliver. -->
         <receiver
@@ -114,10 +153,20 @@
                 <action android:name="com.godviewer.app.action.HOST_ENABLE_EDIT" />
                 <action android:name="com.godviewer.app.action.HOST_UNDO" />
                 <action android:name="com.godviewer.app.action.HOST_MANAGE_RULES" />
+                <action android:name="com.godviewer.app.action.HOST_CLOSE_POPUPS" />
+                <action android:name="com.godviewer.app.action.HOST_POPUP_NOTIFY_DISMISS" />
+                <action android:name="com.godviewer.app.ACTION_POPUP_DETECTED" />
+                <action android:name="com.godviewer.app.ACTION_POPUP_INTERCEPTED" />
+                <action android:name="com.godviewer.app.ACTION_CONTROL_INTERCEPTED" />
+                <action android:name="com.godviewer.app.ACTION_POPUP_INTERCEPT_REQUEST" />
             </intent-filter>
         </receiver>
 
-        <!-- 目标进程读取入口模式等宿主设置（只读） -->
+        <!--
+          宿主设置只读出口（仅宿主自身/adb shell 可读）：目标进程因 Android 11+
+          包可见性查不到此 Provider（query 静默返回 null），开关状态已改走广播同步
+          （ACTION_POPUP_INTERCEPT_REQUEST/STATE），此 Provider 保留供调试。
+        -->
         <provider
             android:name=".data.HostPrefsProvider"
             android:authorities="com.godviewer.app.hostprefs"

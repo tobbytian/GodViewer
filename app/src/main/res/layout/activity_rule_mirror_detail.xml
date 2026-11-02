@@ -62,7 +62,15 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 每应用通知开关：该应用前台时不显示本体控制通知（首页开关打开时可用） -->
+    <!-- 本体通知（每应用）：包在新拟物卡片里，与下方弹窗设置入口同语言 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_neu_raised">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -101,7 +109,51 @@
             android:id="@+id/appNotifySwitch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp" />
+            android:layout_marginStart="12dp"
+            android:thumb="@drawable/bg_switch_thumb_flat"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            app:track="@drawable/bg_switch_track_flat"
+            app:thumbTint="@null"
+            app:trackTint="@null"
+            app:useMaterialThemeColors="false" />
+    </LinearLayout>
+    </FrameLayout>
+
+    <!-- 弹窗检测设置：二级菜单入口（开关 / 时长 / 规则在 PopupSettingsActivity 维护） -->
+    <LinearLayout
+        android:id="@+id/popupSettingsRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/bg_neu_raised"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/popup_settings_title"
+            android:textColor="@color/home_title_text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_arrow_forward_24" />
     </LinearLayout>
 
     <FrameLayout
@@ -122,13 +174,8 @@
 
         <TextView
             android:id="@+id/emptyView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="24dp"
+            style="@style/HostEmptyText"
             android:text="@string/mirror_detail_empty"
-            android:textColor="@color/home_subtitle_text"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>

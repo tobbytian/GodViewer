@@ -38,6 +38,8 @@ class RuleDetailDialog(context: Context, private val rule: ViewRule) :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        // 注入布局不得引用模块 @drawable：缩略图底框代码注入
+        binding.detailThumb.background = moduleRes.getDrawable(R.drawable.bg_thumb_frame, null)
         val hidden = rule.changedVisibility && rule.modified.visibility == View.GONE
         val prefix = if (hidden) moduleRes.getString(R.string.hidden_status) + " · " else ""
         setTitle(prefix + rule.viewClass.substringAfterLast('.'))

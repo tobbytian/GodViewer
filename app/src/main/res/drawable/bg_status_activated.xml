@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 激活状态卡（激活）：品牌蓝面 + 与全页一致的新拟物凸起环（左上白高光、右下暗影） -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#C6CBD4"
+                android:startColor="#FFFFFF" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/home_activated_card" />
+            <corners android:radius="22dp" />
+        </shape>
+    </item>
+</layer-list>

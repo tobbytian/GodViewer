@@ -1,10 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 确认对话框面板：白色圆角卡片 + 发丝描边（对齐宿主卡片风格） -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="#FFFFFFFF" />
-    <corners android:radius="28dp" />
-    <stroke
-        android:width="1dp"
-        android:color="#14000000" />
-</shape>
+<!-- 确认/预览等 AlertDialog 面板：新拟物凸起（环 r24 = 圆角 12-24 上限），面与页面同色 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#C6CBD4"
+                android:startColor="#FFFFFF" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/home_page_background" />
+            <corners android:radius="22dp" />
+            <padding
+                android:bottom="10dp"
+                android:left="10dp"
+                android:right="10dp"
+                android:top="10dp" />
+        </shape>
+    </item>
+</layer-list>

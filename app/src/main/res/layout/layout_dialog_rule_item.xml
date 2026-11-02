@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 弹窗规则卡片行（对齐本体规则列表风格）：每条规则独立 bg_neu_raised 卡片
+     （2dp 渐变环边），行距靠 4dp 外边距，行间不再画线。
+     标题 = 首条指纹文本（无文本回退弹窗类简名），副标题 = Activity 简名 · 时间；
+     行与按钮均带 IGNORE_HOOK 防编辑模式拦截 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:tag="GODVIEWER_IGNORE_HOOK">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/dialog_rule_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="Popup text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/dialog_rule_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="MainActivity · 12:00:00"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/delete_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:tag="GODVIEWER_IGNORE_HOOK"
+        android:text="Delete" />
+</LinearLayout>

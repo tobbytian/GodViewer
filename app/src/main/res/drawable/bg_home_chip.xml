@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="#1F000000">
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/home_link_chip_background" />
-            <corners android:radius="20dp" />
-        </shape>
-    </item>
-</ripple>
+<!-- 规则页胶囊按钮：与首页同套（默认凸起、按下凹陷） -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_neu_chip_pressed" android:state_pressed="true" />
+    <item android:drawable="@drawable/bg_neu_chip_raised" />
+</selector>

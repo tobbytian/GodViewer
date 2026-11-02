@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -29,6 +30,76 @@
         android:textColor="@color/home_subtitle_text"
         android:textSize="13sp" />
 
+    <!-- 导入 / 批量导出（规则包信封，与首页链接 chip 同款式） -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:id="@+id/importButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_home_chip"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_import_24"
+                app:tint="@color/home_title_text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:singleLine="true"
+                android:text="@string/rules_import"
+                android:textColor="@color/home_title_text"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/exportAllButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+            android:background="@drawable/bg_home_chip"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_export_24"
+                app:tint="@color/home_title_text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:singleLine="true"
+                android:text="@string/rules_export_all"
+                android:textColor="@color/home_title_text"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -47,13 +118,8 @@
 
         <TextView
             android:id="@+id/emptyView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="24dp"
+            style="@style/HostEmptyText"
             android:text="@string/mirror_list_empty"
-            android:textColor="@color/home_subtitle_text"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>

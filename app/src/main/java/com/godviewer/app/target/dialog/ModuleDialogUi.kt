@@ -48,17 +48,69 @@ object ModuleDialogUi {
      *
      * **必须尽量挂在 Activity 上**：部分控件 `view.context` 不是 Activity
      * （主题/插件 Context），否则 AlertDialog.show → BadTokenException。
+     *
+     * 登记返回的 Context：模块所有注入对话框都经此创建，
+     * [isModuleDialog] 据此在关闭外来弹窗时排除自身 UI。
      */
     fun wrap(base: Context): Context {
         val activity = activityOf(base)
         val tokenOwner = when {
             activity != null && !activity.isFinishing -> activity
-            else -> lastResumedActivity() ?: base
+            else -> {
+                // BadToken 的前兆：token 不在真实 Activity 上，记下回退来源
+                val fallback = lastResumedActivity() ?: base
+                GvLog.d(
+                    TAG,
+                    "wrap tokenOwner fallback=${fallback.javaClass.name} " +
+                        "base=${base.javaClass.name}",
+                )
+                fallback
+            }
         }
-        return ContextThemeWrapper(
+        val wrapped = ContextThemeWrapper(
             tokenOwner,
             android.R.style.Theme_DeviceDefault_Light_Dialog_Alert,
         )
+        moduleContexts.add(wrapped)
+        return wrapped
+    }
+
+    /** 模块注入对话框的 Context 登记表（weak，避免泄漏已关闭对话框） */
+    private val moduleContexts: MutableSet<Context> =
+        java.util.Collections.newSetFromMap(java.util.WeakHashMap())
+
+    /**
+     * 是否为模块自身的对话框：Context 在 [wrap] 登记表中，
+     * 或 decor 树已打 [IGNORE_HOOK] 标（兜底，applyWindow 之后才可判）。
+     * 关闭外来弹窗 / 自动重放时必须跳过自身 UI。
+     */
+    fun isModuleDialog(dialog: Dialog): Boolean {
+        runCatching {
+            val ctx = dialog.context
+            if (ctx != null && moduleContexts.contains(ctx)) return true
+            // AlertDialog 内部可能再包一层 ContextThemeWrapper，向上找 base 链
+            var current: Context? = ctx
+            var guard = 0
+            while (current is ContextWrapper && guard++ < 8) {
+                if (moduleContexts.contains(current)) return true
+                val base = current.baseContext
+                if (base === current) break
+                current = base
+            }
+            val decor = dialog.window?.decorView
+            if (decor != null && hasIgnoreTag(decor)) return true
+        }
+        return false
+    }
+
+    private fun hasIgnoreTag(view: View): Boolean {
+        if (view.tag == IGNORE_HOOK) return true
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                if (hasIgnoreTag(view.getChildAt(i))) return true
+            }
+        }
+        return false
     }
 
     /**

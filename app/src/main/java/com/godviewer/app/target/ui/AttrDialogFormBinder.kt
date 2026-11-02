@@ -201,8 +201,8 @@ internal object AttrDialogFormBinder {
         binding.paddingTop.hint = moduleRes.getString(R.string.top)
         binding.paddingRight.hint = moduleRes.getString(R.string.right)
         binding.paddingBottom.hint = moduleRes.getString(R.string.bottom)
-        binding.parentSpinnerTitle.text = SpannableString(moduleRes.getString(R.string.parent))
-        binding.childrenSpinnerTitle.text = SpannableString(moduleRes.getString(R.string.children))
+        binding.parentButton.text = SpannableString(moduleRes.getString(R.string.parent))
+        binding.childrenButton.text = SpannableString(moduleRes.getString(R.string.children))
     }
 
     private fun setIdenticalEditValues(container: ViewGroup, value: String) {

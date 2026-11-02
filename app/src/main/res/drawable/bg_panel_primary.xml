@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 主色面板（品牌蓝）：强调色平铺 + 24dp 圆角 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/home_activated_card" />
+    <corners android:radius="24dp" />
+</shape>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  shadcn 风格开关圆钮：恒白（状态由轨道颜色区分——开=蓝轨道，之前开=蓝钮叠
+  蓝轨道导致整个都蓝色）。SwitchCompat 的 draw() 把 thumb 高度拉满取景框
+  （minTouchTargetSize 48dp），裸 oval 会拉成竖椭圆：外层 item 上下各 inset 2dp
+  压回 20×20 正圆，取景框高度由 view paddingTop/Bottom=12dp 收到 24dp。
+  显式 <size> 供 intrinsic 测量，缺了画不出来。
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:bottom="2dp"
+        android:top="2dp">
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFF" />
+            <size
+                android:width="20dp"
+                android:height="20dp" />
+        </shape>
+    </item>
+</layer-list>

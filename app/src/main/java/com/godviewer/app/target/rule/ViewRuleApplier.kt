@@ -4,20 +4,37 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.godviewer.app.shared.GvLog
 import com.godviewer.app.shared.model.ViewAttrSnapshot
 import com.godviewer.app.shared.model.ViewRule
 import com.godviewer.app.target.glide.GlideApp
+import java.util.WeakHashMap
 
 /**
  * 把 [ViewRule] 的 original/modified 快照应用到具体 View（重放 / 重置）。
  *
  * 不含持久化；[appliedImages] 仅防止布局回调里对同一 URL 反复 Glide。
  * 第二阶段迁包时预期落入 `target`。
+ *
+ * repeatable 规则（列表项）走独立的 [applyRepeatable] / [restoreRepeatable] 路径：
+ * 每个视图应用前先记录**它自己**的基线（[repeatableBaselines]），还原时按各自基线
+ * 恢复——列表各项原文不同，用规则创建例的 original 还原会写坏其他项的内容。
  */
 internal object ViewRuleApplier {
 
+    private const val TAG = "Rule"
+
     /** 已应用图片的规则键 -> URL */
     private val appliedImages = HashMap<ViewRule.RuleKey, String>()
+
+    /** repeatable 已应用登记：视图 -> 规则键（弱引用，随视图回收自动清理） */
+    private val appliedRepeatable = WeakHashMap<View, ViewRule.RuleKey>()
+
+    /** repeatable 应用前各视图自身的基线快照 */
+    private val repeatableBaselines = WeakHashMap<View, ViewAttrSnapshot>()
+
+    /** repeatable 视图 -> 应用时的规则 timestamp（幂等与"换值重应用"判断） */
+    private val appliedTimestamps = WeakHashMap<View, Long>()
 
     /** 重放：把规则的修改值应用到视图。返回是否发生了布局变化。 */
     fun applyRuleToView(view: View, rule: ViewRule): Boolean {
@@ -75,6 +92,12 @@ internal object ViewRuleApplier {
                     if (!s.imageUrl.isNullOrEmpty()) {
                         // 部分目标进程 Glide/Context 在 onResume 早期不可用；失败只跳过图片
                         runCatching { GlideApp.with(view).load(s.imageUrl).into(view) }
+                            .onFailure {
+                                GvLog.d(
+                                    TAG,
+                                    "image load enqueue failed url=${s.imageUrl} err=$it",
+                                )
+                            }
                     }
                     s.scaleType?.let { name ->
                         runCatching { ImageView.ScaleType.valueOf(name) }
@@ -84,7 +107,11 @@ internal object ViewRuleApplier {
                 }
             }
             changed
-        }.getOrDefault(false)
+        }.getOrElse { tr ->
+            // 视图状态异常不能无声吞掉：这是"规则没生效"的关键证据
+            GvLog.w(TAG, "apply failed key=${rule.key()} view=${view.javaClass.name}", tr)
+            false
+        }
     }
 
     /** 恢复：把视图还原为规则创建前的原始状态（图片 URL 无法还原，仅还原 scaleType） */
@@ -117,6 +144,8 @@ internal object ViewRuleApplier {
                 }
             }
             appliedImages.remove(rule.key())
+        }.onFailure {
+            GvLog.w(TAG, "restore failed key=${rule.key()} view=${view.javaClass.name}", it)
         }
     }
 
@@ -142,6 +171,110 @@ internal object ViewRuleApplier {
             imageUrl = null,
             scaleType = (view as? ImageView)?.scaleType?.name
         )
+    }
+
+    /**
+     * 把 repeatable 规则应用到单个命中视图（效果与 [applyRuleToView] 相同，但按
+     * 每视图基线记账）。
+     *
+     * 幂等：同一规则同一 timestamp 已应用则跳过；规则换值（timestamp 变化）先还原
+     * 旧效果再应用新值；视图已被其他 repeatable 规则占用时跳过（先到先得）。
+     */
+    fun applyRepeatable(view: View, rule: ViewRule): Boolean {
+        return runCatching {
+            val key = rule.key()
+            val existing = appliedRepeatable[view]
+            if (existing != null && existing != key) {
+                return false
+            }
+            if (existing == key && appliedTimestamps[view] == rule.timestamp) {
+                return false
+            }
+            if (existing == key) {
+                // 同规则换值：先按基线还原旧效果，避免旧 modified 残留
+                restoreFromBaseline(view)
+            }
+            if (repeatableBaselines[view] == null) {
+                repeatableBaselines[view] = captureSnapshot(view)
+            }
+            appliedRepeatable[view] = key
+            appliedTimestamps[view] = rule.timestamp
+            // appliedImages 去重按规则键记账，repeatable 一键多视图会被去重误跳过，
+            // 图片规则逐视图强制重新 enqueue
+            if (rule.changedImage) {
+                appliedImages.remove(key)
+            }
+            applyRuleToView(view, rule)
+        }.getOrElse { tr ->
+            GvLog.w(TAG, "applyRepeatable failed key=${rule.key()} view=${view.javaClass.name}", tr)
+            false
+        }
+    }
+
+    /** 把 repeatable 规则在 [view] 上的效果按其自身基线还原（未登记时为 no-op） */
+    fun restoreRepeatable(view: View, ruleKey: ViewRule.RuleKey) {
+        runCatching {
+            if (appliedRepeatable[view] != ruleKey) return
+            restoreFromBaseline(view)
+        }.onFailure {
+            GvLog.w(TAG, "restoreRepeatable failed key=$ruleKey view=${view.javaClass.name}", it)
+        }
+    }
+
+    /** 当前登记在该规则键下的全部视图（快照，可安全边遍历边还原） */
+    fun appliedViewsOf(ruleKey: ViewRule.RuleKey): List<View> {
+        return synchronized(appliedRepeatable) {
+            appliedRepeatable.entries.filter { it.value == ruleKey }.map { it.key }
+        }
+    }
+
+    /** 全部 repeatable 登记项的快照（对账遍历用） */
+    fun appliedRepeatableEntries(): List<Pair<View, ViewRule.RuleKey>> {
+        return synchronized(appliedRepeatable) {
+            appliedRepeatable.entries.map { it.key to it.value }
+        }
+    }
+
+    /**
+     * 清空全部 repeatable 记账。注意：只应在"所有已应用效果都已被还原"之后调用
+     * （如进程级清理），否则基线丢失、已应用效果无法还原。
+     */
+    fun clearRepeatableState() {
+        synchronized(appliedRepeatable) {
+            appliedRepeatable.clear()
+            repeatableBaselines.clear()
+            appliedTimestamps.clear()
+        }
+    }
+
+    private fun restoreFromBaseline(view: View) {
+        val baseline = repeatableBaselines.remove(view)
+        appliedRepeatable.remove(view)
+        appliedTimestamps.remove(view)
+        if (baseline == null) return
+        val lp = view.layoutParams
+        if (lp != null) {
+            lp.width = baseline.width
+            lp.height = baseline.height
+            if (lp is ViewGroup.MarginLayoutParams) {
+                lp.setMargins(baseline.marginLeft, baseline.marginTop, baseline.marginRight, baseline.marginBottom)
+            }
+            view.layoutParams = lp
+        }
+        view.setPadding(baseline.paddingLeft, baseline.paddingTop, baseline.paddingRight, baseline.paddingBottom)
+        view.visibility = baseline.visibility
+        if (view is TextView) {
+            view.text = baseline.text ?: ""
+            view.maxLines = baseline.maxLines
+            view.hint = baseline.hint ?: ""
+        }
+        if (view is ImageView) {
+            baseline.scaleType?.let { name ->
+                runCatching { ImageView.ScaleType.valueOf(name) }
+                    .getOrNull()
+                    ?.let { view.scaleType = it }
+            }
+        }
     }
 
     fun forgetAppliedImage(rule: ViewRule) {

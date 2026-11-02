@@ -2,6 +2,7 @@ package com.godviewer.app.target.dispatch
 
 import android.view.View
 import com.godviewer.app.shared.GvLog
+import com.godviewer.app.shared.control.HostControlBridge
 import com.godviewer.app.target.edit.EditMode
 import com.godviewer.app.target.edit.ViewHitUtil
 
@@ -36,6 +37,9 @@ class ViewClickWrapper(
         if (!dispatched) {
             GvLog.w(TAG, "dispatch false, origin click ${v.javaClass.simpleName}")
             performOriginClick()
+        } else {
+            // 原点击未执行 = 控件点击被拦截：上报宿主累计首页「已拦截次数」
+            HostControlBridge.reportControlIntercepted(view.context, view.context.packageName)
         }
     }
 

@@ -31,6 +31,8 @@
         <!-- 全局浅色页面：状态栏与页面同底色，图标强制深色（windowLightStatusBar = API 23 = minSdk） -->
         <item name="android:statusBarColor">@color/home_page_background</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Host.AlertDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Host.AlertDialog</item>
     </style>
 
     <style name="HostBottomNavText" parent="TextAppearance.MaterialComponents.Caption">
@@ -44,18 +46,86 @@
         <item name="android:minHeight">?attr/actionBarSize</item>
         <item name="android:paddingTop">32dp</item>
         <item name="titleTextColor">@color/home_title_text</item>
+        <item name="titleTextAppearance">@style/HostToolbarTitle</item>
         <item name="navigationIcon">?attr/homeAsUpIndicator</item>
         <item name="popupTheme">@style/ThemeOverlay.HostPopupMenu</item>
     </style>
 
-    <!-- 溢出菜单（三个点）弹窗面板：白色 16dp 圆角 + 发丝描边 -->
+    <style name="HostToolbarTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <!-- 宿主 AlertDialog：面板与确认框同款（白色 28dp 圆角 + 发丝描边），标题加粗，按钮用主文字色 -->
+    <style name="ThemeOverlay.Host.AlertDialog" parent="ThemeOverlay.Material3.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_dialog_surface</item>
+        <item name="android:windowElevation">0dp</item>
+        <item name="android:colorBackground">@color/md_theme_light_surface</item>
+        <item name="colorPrimary">@color/home_title_text</item>
+        <item name="android:textColorPrimary">@color/home_title_text</item>
+        <item name="android:textColorSecondary">@color/home_subtitle_text</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Host.DialogButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Host.DialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Host.DialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Host.DialogButton</item>
+    </style>
+
+    <style name="Widget.Host.DialogButton" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/home_title_text</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!-- 溢出菜单（三个点）：白色圆角面板 + 发丝描边，贴在标题栏下方，不盖住页面标题。
+         Material3 主题里溢出按钮读的是 actionOverflowMenuStyle（不是 popupMenuStyle），两个都接上 -->
     <style name="Widget.Host.PopupMenu" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@drawable/bg_menu_popup</item>
         <item name="android:popupElevation">8dp</item>
     </style>
 
+    <style name="Widget.Host.PopupMenu.Overflow" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <item name="overlapAnchor">false</item>
+        <item name="android:popupBackground">@drawable/bg_menu_popup</item>
+        <item name="android:popupElevation">8dp</item>
+        <item name="android:dropDownVerticalOffset">-4dp</item>
+        <item name="android:dropDownHorizontalOffset">-8dp</item>
+    </style>
+
+    <style name="TextAppearance.Host.PopupMenuItem" parent="TextAppearance.AppCompat.Widget.PopupMenu.Large">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/home_title_text</item>
+    </style>
+
     <style name="ThemeOverlay.HostPopupMenu" parent="ThemeOverlay.AppCompat">
         <item name="popupMenuStyle">@style/Widget.Host.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.Host.PopupMenu.Overflow</item>
+        <item name="popupMenuBackground">@drawable/bg_menu_popup</item>
+        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Host.PopupMenuItem</item>
+        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Host.PopupMenuItem</item>
+        <item name="listPreferredItemHeightSmall">48dp</item>
+        <item name="listPreferredItemPaddingStart">20dp</item>
+        <item name="listPreferredItemPaddingEnd">20dp</item>
         <item name="android:textColorPrimary">@color/home_title_text</item>
+    </style>
+
+    <!-- 列表空状态文案 / 页面顶部提示：各页共用 -->
+    <style name="HostEmptyText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">24dp</item>
+        <item name="android:textColor">@color/home_subtitle_text</item>
+    </style>
+
+    <style name="HostPageHint">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textColor">@color/home_subtitle_text</item>
+        <item name="android:textSize">13sp</item>
     </style>
 </resources>

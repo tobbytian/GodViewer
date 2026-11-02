@@ -7,6 +7,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import com.godviewer.app.R
+import com.godviewer.app.shared.GvLog
 import com.godviewer.app.target.hook.ModuleRes
 import com.godviewer.app.target.hook.ModuleRes.moduleRes
 import com.godviewer.app.databinding.LayoutImageViewAttrBinding
@@ -72,7 +73,10 @@ class ImageViewAttrDialog(private val view: ImageView) : BaseAttrDialog<ImageVie
     override fun onApply(data: ImageViewAttrData) {
         super.onApply(data)
         if (data.imageUrl.isNotEmpty()) {
-            GlideApp.with(itemView).load(data.imageUrl).into(view)
+            runCatching { GlideApp.with(itemView).load(data.imageUrl).into(view) }
+                .onFailure {
+                    GvLog.d("UI", "image apply enqueue failed url=${data.imageUrl} err=$it")
+                }
         }
         // 写入持久化规则；URL 为空时保留原规则里的 URL（对话框语义：空 = 不改图片）
         pendingRule?.let { rule ->

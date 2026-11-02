@@ -3,8 +3,8 @@ package com.godviewer.app.host.mirror
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.godviewer.app.data.RuleMirror
+import com.godviewer.app.shared.GvLog
 
 /**
  * Host-side receiver: target processes push mirrored rules.json here via explicit Intent.
@@ -19,17 +19,17 @@ open class RuleMirrorReceiverImpl : BroadcastReceiver() {
         }
         val token = intent.getStringExtra(RuleMirror.EXTRA_TOKEN)
         if (token != RuleMirror.MIRROR_TOKEN) {
-            Log.w(TAG, "reject mirror: bad token")
+            GvLog.w(TAG, "reject mirror: bad token")
             return
         }
         val packageName = intent.getStringExtra(RuleMirror.EXTRA_PACKAGE)
         val json = intent.getStringExtra(RuleMirror.EXTRA_JSON)
         if (packageName.isNullOrBlank() || json.isNullOrBlank()) {
-            Log.w(TAG, "reject mirror: missing extras")
+            GvLog.w(TAG, "reject mirror: missing extras")
             return
         }
         val ok = RuleMirror.writeMirror(context.applicationContext, packageName, json)
-        Log.d(TAG, "mirror receive pkg=$packageName ok=$ok")
+        GvLog.d(TAG, "mirror receive pkg=$packageName ok=$ok")
     }
 
     companion object {

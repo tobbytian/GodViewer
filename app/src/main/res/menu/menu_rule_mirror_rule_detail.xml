@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- 编辑该条规则的修改值（下发 upsert，权威仍在目标应用内） -->
+    <item
+        android:id="@+id/action_edit_rule"
+        android:title="@string/rule_edit"
+        app:showAsAction="never" />
+
     <!-- 删除该条规则（权威规则在目标应用内，需目标进程存活） -->
     <item
         android:id="@+id/action_delete_rule"

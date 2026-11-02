@@ -41,7 +41,7 @@ object HostDiag {
         }
         val extra = linkedMapOf(
             "kind" to "host-feedback-full-debug",
-            "activated" to ModuleStatus.isActivated().toString(),
+            "activated" to ModuleStatus.check().toString(),
             "entryMode" to EntryMode.current(app),
             "hideIcon" to HostPrefs.isLauncherIconHidden(app).toString(),
             "autoUpdate" to HostPrefs.isAutoUpdateEnabled(app).toString(),

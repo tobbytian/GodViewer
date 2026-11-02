@@ -15,6 +15,44 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
+    <!-- 顶部类型切换：视图规则 / 弹窗规则（选中态胶囊底由代码切换） -->
+    <LinearLayout
+        android:id="@+id/tab_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal"
+        android:tag="GODVIEWER_IGNORE_HOOK">
+
+        <TextView
+            android:id="@+id/tab_view_rules"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:tag="GODVIEWER_IGNORE_HOOK"
+            android:text="View rules"
+            android:textColor="#1F1F1F"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tab_dialog_rules"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:tag="GODVIEWER_IGNORE_HOOK"
+            android:text="Dialog rules"
+            android:textColor="#888888"
+            android:textSize="14sp" />
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/selection_bar"
         android:layout_width="match_parent"
@@ -55,36 +93,32 @@
             android:paddingEnd="12dp"
             android:tag="GODVIEWER_IGNORE_HOOK"
             android:text="Delete selected"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/delete_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:minHeight="0dp"
-            android:minWidth="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:tag="GODVIEWER_IGNORE_HOOK"
-            android:text="Delete all"
-            android:visibility="gone" />
+            android:visibility="invisible" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/rule_list"
+    <!-- 列表恒为 320dp、空态文字叠加居中：切换类型/条数不改窗口高度，弹窗不再跳位 -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="320dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp" />
+        android:tag="GODVIEWER_IGNORE_HOOK">
 
-    <TextView
-        android:id="@+id/empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="center"
-        android:text="No rules yet"
-        android:textSize="16sp"
-        android:visibility="gone" />
+        <!-- 每条规则是独立卡片（bg_neu_raised），行距由卡片 4dp 外边距形成，
+             分割线不再画（透明 + 0 高，防止主题默认线） -->
+        <ListView
+            android:id="@+id/rule_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp" />
+
+        <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="No rules yet"
+            android:textSize="16sp"
+            android:visibility="gone" />
+    </FrameLayout>
 </LinearLayout>

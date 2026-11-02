@@ -13,6 +13,7 @@ import com.godviewer.app.shared.mirror.RuleMirrorCodec
 import com.godviewer.app.shared.mirror.RuleMirrorProtocol
 import com.godviewer.app.shared.mirror.mirrorThumbnailKey
 import com.godviewer.app.shared.mirror.sanitizeMirrorPackageName
+import com.godviewer.app.shared.model.DialogRule
 import com.godviewer.app.shared.model.ViewRule
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -38,10 +39,12 @@ internal object RuleMirrorStore {
         }.getOrNull() ?: return false
         val pkg = sanitizeMirrorPackageName(parsed.packageName ?: safePkg) ?: return false
         val rules = parsed.rules ?: emptyList()
+        val dialogRules = parsed.dialogRules ?: emptyList()
 
         return runCatching {
             val dir = packageDir(context, pkg)
-            if (rules.isEmpty()) {
+            // 视图规则与弹窗规则都为空才算镜像清空（空规则回推用于删除确认）
+            if (rules.isEmpty() && dialogRules.isEmpty()) {
                 if (dir.exists()) {
                     dir.deleteRecursively()
                 }
@@ -61,6 +64,7 @@ internal object RuleMirrorStore {
                 appIconPngBase64 = null,
                 thumbnails = null,
                 rules = rules,
+                dialogRules = dialogRules,
             )
             val file = File(dir, RuleMirrorProtocol.RULES_FILE)
             val tmp = File(dir, "${RuleMirrorProtocol.RULES_FILE}.tmp")
@@ -94,7 +98,11 @@ internal object RuleMirrorStore {
                 }
             }
 
-            GvLog.d(TAG, "mirror written: $pkg rules=${rules.size} label=${stored.appLabel}")
+            GvLog.d(
+                TAG,
+                "mirror written: $pkg rules=${rules.size} " +
+                    "dialogRules=${dialogRules.size} label=${stored.appLabel}",
+            )
             true
         }.getOrDefault(false)
     }
@@ -117,9 +125,13 @@ internal object RuleMirrorStore {
                     gson.fromJson(file.readText(), MirrorFile::class.java)
                 }.getOrNull()
                 val rules = mirror?.rules.orEmpty()
-                if (rules.isEmpty()) {
+                val dialogRules = mirror?.dialogRules.orEmpty()
+                if (rules.isEmpty() && dialogRules.isEmpty()) {
                     return@mapNotNull null
                 }
+                // 已卸载的应用：镜像目录残留，不再展示（需 QUERY_ALL_PACKAGES 才能看全）
+                val installed = runCatching { pm.getApplicationInfo(pkg, 0) }.isSuccess
+                if (!installed) return@mapNotNull null
                 val pmLabel = runCatching {
                     val ai = pm.getApplicationInfo(pkg, 0)
                     pm.getApplicationLabel(ai).toString()
@@ -137,7 +149,8 @@ internal object RuleMirrorStore {
                 MirroredPackage(
                     packageName = pkg,
                     label = label,
-                    ruleCount = rules.size,
+                    // 列表 meta 的「N 条规则」含弹窗规则，避免只存弹窗规则时显示 0
+                    ruleCount = rules.size + dialogRules.size,
                     updatedAt = mirror?.updatedAt
                         ?: rules.maxOfOrNull { it.timestamp }
                         ?: file.lastModified(),
@@ -157,6 +170,18 @@ internal object RuleMirrorStore {
         }
         return runCatching {
             gson.fromJson(file.readText(), MirrorFile::class.java)?.rules.orEmpty()
+        }.getOrDefault(emptyList())
+    }
+
+    /** 弹窗规则（关闭弹窗功能）；旧镜像无此字段 → 空列表 */
+    fun loadDialogRules(context: Context, packageName: String): List<DialogRule> {
+        val safePkg = sanitizeMirrorPackageName(packageName) ?: return emptyList()
+        val file = File(packageDir(context, safePkg), RuleMirrorProtocol.RULES_FILE)
+        if (!file.exists()) {
+            return emptyList()
+        }
+        return runCatching {
+            gson.fromJson(file.readText(), MirrorFile::class.java)?.dialogRules.orEmpty()
         }.getOrDefault(emptyList())
     }
 

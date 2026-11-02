@@ -44,6 +44,10 @@ class ViewDispatcher private constructor() {
 
     companion object {
         private const val TAG = "Dispatch"
+        private const val DEDUP_MS = 600L
+
+        @Volatile
+        private var lastDispatchAt = 0L
 
         @JvmStatic
         private val sRegistryHandler = arrayOf<KClass<*>>(
@@ -65,6 +69,13 @@ class ViewDispatcher private constructor() {
                 GvLog.d(TAG, "skip module ui ${view.javaClass.simpleName}")
                 return false
             }
+            // 去抖：触摸 hook 与 click wrapper 两条路径同一次点击都可能进来
+            val now = android.os.SystemClock.uptimeMillis()
+            if (now - lastDispatchAt < DEDUP_MS) {
+                GvLog.d(TAG, "skip duplicate dispatch ${view.javaClass.simpleName}")
+                return true
+            }
+            lastDispatchAt = now
             GvLog.d(
                 TAG,
                 "select ${view.javaClass.name} ${view.width}x${view.height} " +

@@ -12,6 +12,7 @@ import com.godviewer.app.shared.mirror.mirrorThumbnailKey
 import com.godviewer.app.shared.mirror.sanitizeMirrorPackageName
 import com.godviewer.app.shared.model.ViewRule
 import com.godviewer.app.shared.resolveAppLabel
+import com.godviewer.app.target.rule.DialogRuleStore
 import com.godviewer.app.target.rule.RuleStore
 import com.godviewer.app.target.rule.ViewRuleManager
 import com.google.gson.Gson
@@ -28,6 +29,8 @@ internal object RuleMirrorPush {
 
     /**
      * Best-effort sync from the injected target process. Never throws into the target app.
+     * 弹窗规则（dialog_rules）由 [DialogRuleStore] 一并携带：镜像是整文件覆盖，
+     * 任一 store 落盘后都推全量（视图规则 + 弹窗规则）。
      */
     fun pushFromTarget(context: Context, packageName: String, rules: List<ViewRule>) {
         runCatching {
@@ -36,6 +39,7 @@ internal object RuleMirrorPush {
             val label = resolveAppLabel(app, safePkg)
             val iconB64 = encodeAppIcon(app, safePkg)
             val thumbs = collectThumbnails(rules)
+            val dialogRules = runCatching { DialogRuleStore.all() }.getOrDefault(emptyList())
 
             var payload = MirrorFile(
                 schemaVersion = 1,
@@ -45,6 +49,7 @@ internal object RuleMirrorPush {
                 appIconPngBase64 = iconB64,
                 thumbnails = thumbs,
                 rules = rules,
+                dialogRules = dialogRules,
             )
             var json = gson.toJson(payload)
             // Drop heavy optional blobs if binder payload would be too large
@@ -75,7 +80,11 @@ internal object RuleMirrorPush {
                 putExtra(RuleMirrorProtocol.EXTRA_TOKEN, RuleMirrorProtocol.MIRROR_TOKEN)
             }
             app.sendBroadcast(intent)
-            GvLog.d(TAG, "mirror push sent: $safePkg rules=${rules.size} label=$label")
+            GvLog.d(
+                TAG,
+                "mirror push sent: $safePkg rules=${rules.size} " +
+                    "dialogRules=${dialogRules.size} label=$label",
+            )
         }.onFailure {
             GvLog.w(TAG, "mirror push failed", it)
         }

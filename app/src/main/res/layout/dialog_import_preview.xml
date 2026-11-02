@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  导入预览面板：可导入应用列表（行 = 名称 + 条数两行，行间发丝线），
+  未安装跳过单独一节（分隔线 + 小节头 + 灰字行），底部覆盖模式 CheckBox。
+  条目由 RuleTransferUi.showImportPreview 动态装入；整体可滚动（应用多时不超高）。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/preview_app_rows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <View
+            android:id="@+id/preview_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:background="@color/home_divider"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/preview_skipped_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="20dp"
+            android:letterSpacing="0.06"
+            android:singleLine="true"
+            android:text="@string/import_preview_skipped_header"
+            android:textAllCaps="true"
+            android:textColor="@color/home_subtitle_text"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/preview_skipped_rows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <CheckBox
+            android:id="@+id/preview_overwrite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:paddingEnd="20dp"
+            android:text="@string/import_overwrite_label"
+            android:textColor="@color/home_title_text"
+            android:textSize="14sp" />
+    </LinearLayout>
+</ScrollView>

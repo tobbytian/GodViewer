@@ -15,17 +15,21 @@ User preference: communicate in **中文** unless they write in English.
 - Debug APK: `./gradlew assembleDebug` → `app/build/outputs/apk/debug/app-debug.apk`
 - Release APK: `./gradlew assembleRelease` → `app/build/outputs/apk/release/app-release.apk`
 - Prefer `assembleDebug` after feature work. **Do not commit unless the user asks.**
-- Requirements: **JDK 17**, Android SDK **platform 35**. `local.properties` (`sdk.dir`) is
+- Requirements: **JDK 17**, Android SDK **platform 37.0**（已装；见下方 AGP 8.5.2 兼容备注）。 `local.properties` (`sdk.dir`) is
   gitignored and must exist locally (this machine often uses `tools-Android/`).
 - Stack: Gradle 8.7 wrapper, AGP 8.5.2, Kotlin 1.9.24 (jvmTarget 1.8, **kapt** for Glide),
-  minSdk 23 / targetSdk 35, compileSdk 35.
+  minSdk 23 / targetSdk 37, compileSdk 37（Android 17 适配，2026-10-12）。
+- SDK 37 平台为点分命名 `android-37.0`（ApiLevel=37.0），AGP 8.5.2 不认：本机已把
+  `platforms/android-37.0/source.properties` 与 `package.xml` 的 ApiLevel/api-level/
+  localPackage path 改成整数 `37` 并建 `platforms/android-37` junction。**sdkmanager
+  更新该平台后需重做这三处修改**，否则报 `Failed to find Platform SDK with path: platforms;android-37`。
 - Versioning: release constants live in `app/build.gradle` (`RELEASE_VERSION_CODE = 11`,
   `RELEASE_VERSION_NAME = "4.3.2"`). Every `assembleDebug`/`installDebug` auto-bumps a local
   counter in `app/debug-version.properties` (gitignored) and overrides the debug APK's
   versionCode/Name to that pure number. Release APK is signed with the **debug keystore** (self-use).
 - Dep quirks (keep as-is): `io.github.libxposed:api:102.0.0` is `compileOnly` (never bundled);
   `io.github.libxposed:service:101.0.0` is bundled but excludes kotlin-stdlib (conflicts with 1.9.24).
-  The service AAR demands compileSdk 36 — `android.suppressUnsupportedCompileSdk=35,36,37`
+  The service AAR demands compileSdk 36 — `android.suppressUnsupportedCompileSdk=35,36,37`（保留兜底）
   (gradle.properties) plus disabled `*AarMetadata` checks (app/build.gradle) keep the build green.
   `packagingOptions` merges `META-INF/xposed/*` into the APK — don't remove.
 - UI is **Views + XML + ViewBinding** (`viewBinding = true`), **not** Compose. No flavors, no CI,
@@ -40,7 +44,7 @@ Logical packages (phase-2):
 | Package | Role |
 |---------|------|
 | `host/` | Host app process only: `GodViewerApp`, `MainActivity`, mirror Activities, `host/ui/*` fragments, `host/mirror` store, `host/control` notifier + `*Impl` receivers, prefs/entry UI helpers |
-| `target/` | Injected into LSPosed-scoped apps: `target/hook` (entry `GodViewerModule`, META-INF/xposed), `target/rule`, `target/edit`, `target/ui` dialogs, `target/handler`, `target/dialog`, `target/dispatch`, `target/glide`, `target/mirror` push |
+| `target/` | Injected into LSPosed-scoped apps: `target/hook` (entry `GodViewerModule`, META-INF/xposed), `target/rule`, `target/edit`, `target/ui` dialogs, `target/handler`, `target/dialog`, `target/dispatch`, `target/glide`, `target/mirror` push, `target/flutter` (Flutter semantics bridge, branch `feature/flutter-semantics`) |
 | `shared/` | Both sides, no Dialog/Activity/Hooker: `shared/model` (`ViewRule`…), `shared/mirror` protocol/DTO/codec, `shared/control` bridge, `shared/entry` mode keys, `GvLog`/`Hash`/`VeiwUtil`/`ViewSnapshot`/constants |
 | `data/` | **Protocol-frozen FQCNs only**: thin stubs `RuleMirrorReceiver` / `HostControlReceiver` / `HostPrefsProvider` (subclass host `*Impl`) + `RuleMirror` facade API |
 | `util/` | **Protocol-frozen**: `ModuleStatus` stays at `com.godviewer.app.util.ModuleStatus` (Xposed string + reflection) |
@@ -99,6 +103,11 @@ Backup before large moves: desktop `GodViewer-backup-pre-optimize-*` +
   `getModuleApplicationInfo()`, no `XModuleResources`) via `target.dialog.ModuleDialogUi`
   for layouts/strings — **not** the host app’s `R` / target `Context.getResources()` alone.
   Tag module UI with `IGNORE_HOOK` (`GODVIEWER_IGNORE_HOOK`) or edit mode intercepts itself.
+- **注入（target 侧）布局严禁引用模块 `@drawable` / `@color` / `@mipmap`**（`@string` 可以，
+  它在 inflate 时直接经 parser 字符串池解码）：`ModuleDialogUi.inflate` 用目标 Context 的
+  LayoutInflater，@drawable/@color 会拿模块打包 ID 去目标资源表解析 → `NotFoundException`
+  （编辑弹窗静默失败 = "无法编辑"；adapter getView 内抛出无人捕获 = 目标 App 闪退）。
+  背景/图标一律代码里 `moduleRes.getDrawable(id, null)` 注入（2026-10-29 修复 110→139 回归）。
 - Host UI (`host.MainActivity`, mirror activities, `host.ui/`) uses normal `R` + ViewBinding.
 - All user-visible strings: keep **`res/values/strings.xml`** (EN) and
   **`res/values-zh-rCN/strings.xml`** (zh) in parallel.
@@ -120,7 +129,16 @@ Backup before large moves: desktop `GodViewer-backup-pre-optimize-*` +
   `View.mAttachInfo.mDebugLayout`, etc.) — stay API-safe. Corrupt `rules.json` → empty list;
   **never crash the target app**. ImageView original URL is not fully recoverable on reset.
 - Rule match: activityClass + hierarchy `depth[]` + viewClass, with resourceName/text fallbacks,
-  guarded by `matchVersionCode`.
+  guarded by `matchVersionCode`. Dual-anchor principle (borrowed from GodMode-Pro, 2026-11-03):
+  a depth hit must cross-validate `resourceName` when present (miss over mismatch), and named
+  rules never fall back to text. Misses carry diagnostic codes (`MatchMiss.*`) in the replay log.
+- Repeatable list-item rules (`ViewRule.repeatable` + `itemRootClass`; depth = item path within
+  the item root, dual-meaning field): created automatically when the picked view sits inside a
+  RecyclerView/ListView item; applied by layout-pass reconcile (`RepeatableRuleReconciler`), NO
+  adapter hooks. Per-view baselines (in-memory `WeakHashMap`) — never restore these views with
+  `rule.original`; all repeatable restore paths go through the applier registry, not
+  `findViewBestMatch`. Domain vocabulary: `CONTEXT.md` (committed, cross-session contract).
+  Boundary rules are enforced by `bash scripts/verify-architecture.sh`.
 - Rule mirror is **broadcast-only** best-effort. Do **not** re-add Service/ContentProvider cold-start
   delivery unless the user explicitly asks (already tried and reverted). Soft token:
   `godviewer-rule-mirror-v1`.
@@ -146,10 +164,17 @@ Backup before large moves: desktop `GodViewer-backup-pre-optimize-*` +
   `dispatchToPackage` exists because `MainActivity.onResume` clears the "last target" state. The target
   process must be alive (broadcasts to a dead process are silently dropped) — the host re-reads the
   mirror ~1.2 s later and tells the user to open the app if nothing changed.
-- Bottom nav = **Home / Rules / Settings only** — the old Guide tab (`GuideFragment`,
+- Bottom nav = **Home / Rules / Popups / Settings** (Popups = `host/ui/PopupFragment`: detect +
+  intercept switches, detection window seconds, rules/log/guide rows). The old Guide tab (`GuideFragment`,
   `fragment_guide.xml`, `nav_guide`, `ic_nav_guide_24`) was removed; don't restore it.
 - Do **not** restore deleted AppList* UI (`AppListActivity` / adapters / layouts).
 - Keep load-bearing misspellings: `PupupWindowHooker.kt`, `VeiwUtil.kt`.
+- Flutter apps（自绘 UI）走 `target/flutter` 语义桥：`FlutterJNI` 类名/JNI 方法名被引擎 C++
+  按名解析故 R8 必须保留；hook `setAccessibilityDelegate` 捕获引擎并类型扫描定位 FlutterView，
+  反射 `setSemanticsEnabled(true)` 强开语义树，`updateSemantics` 自行解析（布局核对自引擎
+  master + 目标 APK 反编译体，见 `FLUTTER_FEASIBILITY.md`）。隐藏 = 语义矩形遮罩挂 decorView
+  ViewOverlay（不改渲染树）；规则独立存 `flutter_rules.json`（勿并入冻结的 `rules.json` schema）。
+  改渲染文字/图片/尺寸原理上做不到；无 Semantics 的装饰 widget 选不到。
 - Logging: prefer `GvLog` (`GodViewer.<tag>`, forwarded to the framework log via the sink
   injected by `GodViewerModule`; host process falls back to logcat only).
 

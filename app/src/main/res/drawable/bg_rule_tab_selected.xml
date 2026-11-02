@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 规则管理弹窗类型切换：选中 tab = 凹陷（激活即 intrude），面与弹窗面板同色 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:endColor="#FFFFFF"
+                android:startColor="#C6CBD4" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/home_page_background" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+</layer-list>

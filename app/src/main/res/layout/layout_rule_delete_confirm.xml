@@ -16,30 +16,24 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:gravity="end"
+        android:layout_marginTop="16dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/confirm_cancel"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:minHeight="0dp"
-            android:minWidth="0dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK"
             android:text="Cancel" />
 
         <Button
             android:id="@+id/confirm_delete"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:minHeight="0dp"
-            android:minWidth="0dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
             android:tag="GODVIEWER_IGNORE_HOOK"
             android:text="Delete" />
     </LinearLayout>

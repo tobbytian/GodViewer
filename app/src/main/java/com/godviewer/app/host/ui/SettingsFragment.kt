@@ -14,6 +14,7 @@ import com.godviewer.app.R
 import com.godviewer.app.host.LauncherIconHelper
 import com.godviewer.app.host.MainActivity
 import com.godviewer.app.host.UpdateChecker
+import com.godviewer.app.host.control.PopupLogStore
 import com.godviewer.app.host.prefs.HostPrefs
 import com.godviewer.app.shared.AppLanguage
 import com.godviewer.app.shared.TUTORIAL_URL
@@ -78,6 +79,37 @@ class SettingsFragment : Fragment() {
         binding.infoRow.setOnClickListener {
             startActivity(Intent(ctx, SettingsInfoActivity::class.java))
         }
+
+        // 弹窗功能入口（原弹窗 Tab 撤销后移入设置）：拦截记录 / 使用说明
+        // 内测中：两行灰化，点击仅提示，不进入二级页
+        binding.popupLogRow.alpha = 0.45f
+        binding.popupGuideRow.alpha = 0.45f
+        binding.popupLogRow.setOnClickListener { showFeatureBeta() }
+        binding.popupGuideRow.setOnClickListener { showFeatureBeta() }
+        refreshPopupLogCount()
+    }
+
+    private fun showFeatureBeta() {
+        Toast.makeText(requireContext(), R.string.feature_beta_toast, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshPopupLogCount()
+    }
+
+    private fun refreshPopupLogCount() {
+        val ctx = context ?: return
+        binding.popupLogValue.text =
+            getString(R.string.popup_log_count, PopupLogStore.all(ctx).size)
+    }
+
+    private fun showPopupGuide() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.popup_intercept_tutorial_title)
+            .setMessage(R.string.popup_intercept_tutorial_message)
+            .setPositiveButton(R.string.popup_intercept_tutorial_ok) { d, _ -> d.dismiss() }
+            .show()
     }
 
     override fun onDestroyView() {

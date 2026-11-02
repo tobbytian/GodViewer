@@ -4,44 +4,47 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.GradientDrawable
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ListView
 import com.godviewer.app.R
+import com.godviewer.app.shared.GvLog
+import com.godviewer.app.target.hook.ModuleRes.moduleRes
 
 /**
  * 注入弹窗窗口外观：半透明圆角底板、宽度/最大高度、系统 Alert 列表 chrome 软化。
  */
 internal object ModuleDialogWindow {
 
+    private const val TAG = "UI"
+
+    /** 编辑界面整体不透明度：92%，微微透出被编辑的下层界面（dim 背景另行控制） */
+    private const val WINDOW_ALPHA = 0.92f
+
     fun apply(
         dialog: Dialog,
         contentRoot: View? = null,
         preferMaxHeight: Boolean = false,
     ) {
-        val window = dialog.window ?: return
+        val window = dialog.window ?: run {
+            GvLog.w(TAG, "window apply skipped: no window dialog=${dialog.javaClass.name}")
+            return
+        }
         val metrics = window.context.resources.displayMetrics
         val width = (metrics.widthPixels * 0.94f).toInt().coerceAtLeast(1)
         val maxHeight = (metrics.heightPixels * 0.88f).toInt().coerceAtLeast(1)
 
         val panelBg = ModuleDialogPalette.dialogPanelBg
-        val bg = GradientDrawable().apply {
-            shape = GradientDrawable.RECTANGLE
-            setColor(panelBg)
-            cornerRadius = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                24f,
-                metrics,
-            )
-        }
+        // 整窗与卡片/开关同语言：2dp 渐变环 + 90% 面板色圆角底
+        val bg = moduleRes.getDrawable(R.drawable.bg_dialog_panel, null)
         window.setFormat(PixelFormat.TRANSLUCENT)
         window.decorView.setBackgroundColor(Color.TRANSPARENT)
         window.setBackgroundDrawable(bg)
         window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         window.setDimAmount(0.18f)
+        // 整体 92% 不透明度（窗口级 alpha，含面板/文字/边框一起变透）
+        window.attributes = window.attributes.apply { alpha = WINDOW_ALPHA }
         window.clearFlags(
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,

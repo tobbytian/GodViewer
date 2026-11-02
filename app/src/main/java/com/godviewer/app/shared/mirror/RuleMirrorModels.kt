@@ -2,6 +2,7 @@ package com.godviewer.app.shared.mirror
 
 import android.graphics.drawable.Drawable
 import com.godviewer.app.BuildConfig
+import com.godviewer.app.shared.model.DialogRule
 import com.godviewer.app.shared.model.ViewRule
 import com.godviewer.app.shared.sha256
 import com.google.gson.annotations.SerializedName
@@ -46,6 +47,9 @@ data class MirrorFile(
     @SerializedName("app_icon_png_base64") val appIconPngBase64: String? = null,
     @SerializedName("thumbnails") val thumbnails: Map<String, String>? = null,
     @SerializedName("rules") val rules: List<ViewRule>? = emptyList(),
+    // 弹窗规则（关闭弹窗功能）：纯增量字段，schema_version 不变 —
+    // 旧宿主 Gson 解析时忽略，新宿主读旧镜像得 null
+    @SerializedName("dialog_rules") val dialogRules: List<DialogRule>? = null,
 )
 
 /** 宿主镜像包列表行。 */

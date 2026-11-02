@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 胶囊按钮状态：默认凸起，按下翻转为凹陷（无 translate 位移，过渡由系统默认 StateList 完成） -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_neu_chip_pressed" android:state_pressed="true" />
+    <item android:drawable="@drawable/bg_neu_chip_raised" />
+</selector>

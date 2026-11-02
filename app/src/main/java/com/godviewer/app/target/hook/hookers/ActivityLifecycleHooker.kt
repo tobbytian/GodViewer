@@ -9,8 +9,9 @@ import com.godviewer.app.target.hook.GvHook
 import com.godviewer.app.target.hook.GvMethodHook
 import com.godviewer.app.target.hook.IHooker
 import com.godviewer.app.target.hook.MethodHookParam
+import com.godviewer.app.target.rule.RepeatableRuleReconciler
 import com.godviewer.app.target.rule.ViewRuleManager
-import com.godviewer.app.target.rule.findViewBestMatch
+import com.godviewer.app.target.rule.findViewBestMatchAttempt
 import java.util.Collections
 import java.util.WeakHashMap
 
@@ -116,10 +117,27 @@ class ActivityLifecycleHooker : IHooker {
         val rules = runCatching { ViewRuleManager.rulesForActivity(activityClass) }
             .getOrDefault(emptyList())
         if (rules.isEmpty()) return
+        var applied = 0
         for (rule in rules) {
+            // repeatable（列表项）规则由尾部对账统一处理，depth 语义不同不能走绝对路径匹配
+            if (rule.repeatable) continue
             runCatching {
-                val view = findViewBestMatch(activity, rule) ?: return@runCatching
+                val attempt = findViewBestMatchAttempt(activity, rule)
+                val view = attempt.view
+                if (view == null) {
+                    // 布局监听每帧都会跑：仅 Activity 恢复路径记 miss，避免刷屏。
+                    // "重启后规则没生效"的第一嫌疑点就在这条日志里（reason 为诊断码）
+                    if (captureThumbs) {
+                        GvLog.d(
+                            TAG,
+                            "replay miss view key=${rule.key()} activity=$activityClass " +
+                                "reason=${attempt.reason}",
+                        )
+                    }
+                    return@runCatching
+                }
                 ViewRuleManager.applyRuleToView(view, rule)
+                applied++
                 if (captureThumbs) {
                     // 仅 Activity 恢复时补抓一次缩略图（已有则跳过）；布局过程中跳过，
                     // 避免地图类等高频重布局场景每帧重抓导致掉帧。
@@ -129,5 +147,11 @@ class ActivityLifecycleHooker : IHooker {
                 GvLog.e(TAG, "apply rule failed key=${rule.key()}", it)
             }
         }
+        if (captureThumbs) {
+            GvLog.d(TAG, "replay done activity=$activityClass applied=$applied/${rules.size}")
+        }
+        // repeatable（列表项）规则布局期对账：应用新命中的同类项、还原失效项。
+        // 无 repeatable 规则时其内部直接返回，逐帧零开销。
+        RepeatableRuleReconciler.reconcile(activity)
     }
 }

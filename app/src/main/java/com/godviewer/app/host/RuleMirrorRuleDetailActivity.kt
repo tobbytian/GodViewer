@@ -1,5 +1,6 @@
 package com.godviewer.app.host
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,11 +9,12 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import com.godviewer.app.R
 import com.godviewer.app.data.RuleMirror
 import com.godviewer.app.databinding.ItemDetailRowBinding
-import com.godviewer.app.shared.control.HostControlBridge
+import com.godviewer.app.host.control.PendingCommandStore
 import com.godviewer.app.shared.model.ViewAttrSnapshot
 import com.godviewer.app.shared.model.ViewRule
 import com.godviewer.app.host.ui.ConfirmDialog
@@ -25,8 +27,9 @@ import com.godviewer.app.databinding.ActivityRuleMirrorRuleDetailBinding
 
 /**
  * Host-side rule detail: identity card (thumb + fields) + modified/original value cards
- * + a prominent danger delete button. Values are read-only; delete is dispatched to the
- * target process (authority lives in the target's private dir).
+ * + a prominent danger delete button. Values are read-only here; tap the edit menu entry
+ * to change modified values (dispatched as upsert — authority lives in the target's
+ * private dir; queued when the target is not running). Delete likewise dispatches.
  */
 class RuleMirrorRuleDetailActivity : HostActivity() {
     private val binding by lazy { ActivityRuleMirrorRuleDetailBinding.inflate(layoutInflater) }
@@ -35,6 +38,31 @@ class RuleMirrorRuleDetailActivity : HostActivity() {
 
     /** 「删除规则」下发后校验结果用（目标进程可能已不存在，广播会被静默丢弃） */
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    /** 编辑页回传：乐观显示编辑值，稍后回读镜像确认（未确认 = 已入待同步队列） */
+    private val editLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        if (result.resultCode != RESULT_OK) return@registerForActivityResult
+        val json = result.data?.getStringExtra(RuleMirrorRuleEditActivity.EXTRA_RULE_JSON)
+        val edited = runCatching {
+            json?.let { Gson().fromJson(it, ViewRule::class.java) }
+        }.getOrNull() ?: return@registerForActivityResult
+        rule = edited
+        render()
+        mainHandler.postDelayed({
+            if (isFinishing || isDestroyed) return@postDelayed
+            val mirrored = RuleMirror.loadRules(this, packageName)
+                .firstOrNull { it.key() == rule.key() }
+            if (mirrored == rule) {
+                Toast.makeText(this, R.string.update_rule_done, Toast.LENGTH_SHORT).show()
+            } else {
+                // 目标不存活或镜像未及回推：命令已在待同步队列，打开目标即自动生效；
+                // 详情保持乐观显示编辑值，不回退成镜像旧值
+                Toast.makeText(this, R.string.update_rule_queued, Toast.LENGTH_LONG).show()
+            }
+        }, UPDATE_VERIFY_DELAY_MS)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,22 +79,52 @@ class RuleMirrorRuleDetailActivity : HostActivity() {
 
         setContentView(binding.root)
 
+        binding.toolbar.setNavigationOnClickListener { finish() }
+        // 右上角溢出菜单：编辑 / 删除入口（弹窗样式由 HostSecondaryToolbar 的 popupTheme 统一）
+        binding.toolbar.inflateMenu(R.menu.menu_rule_mirror_rule_detail)
+        tintMenuItemDanger(R.id.action_delete_rule)
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_edit_rule -> {
+                    launchEditor()
+                    true
+                }
+                R.id.action_delete_rule -> {
+                    confirmDeleteRule()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        render()
+        binding.deleteButton.setOnClickListener { confirmDeleteRule() }
+    }
+
+    /** 把溢出菜单里的破坏性选项标成红色，与普通项区分 */
+    private fun tintMenuItemDanger(itemId: Int) {
+        val item = binding.toolbar.menu.findItem(itemId) ?: return
+        val title = item.title?.toString() ?: return
+        item.title = android.text.SpannableString(title).apply {
+            setSpan(
+                android.text.style.ForegroundColorSpan(
+                    androidx.core.content.ContextCompat.getColor(
+                        this@RuleMirrorRuleDetailActivity, R.color.md_theme_light_error,
+                    ),
+                ),
+                0,
+                length,
+                android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+        }
+    }
+
+    /** 按当前 [rule] 重建整页（首次进入 / 编辑回传后调用） */
+    private fun render() {
         val hidden = rule.changedVisibility && rule.modified.visibility == View.GONE
         val prefix = if (hidden) getString(R.string.hidden_status) + " · " else ""
         val title = prefix + rule.viewClass.substringAfterLast('.')
         binding.toolbar.title = title
-        binding.toolbar.setNavigationOnClickListener { finish() }
-        // 右上角溢出菜单：删除入口（弹窗样式由 HostSecondaryToolbar 的 popupTheme 统一）
-        binding.toolbar.inflateMenu(R.menu.menu_rule_mirror_rule_detail)
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.action_delete_rule) {
-                confirmDeleteRule()
-                true
-            } else {
-                false
-            }
-        }
-
         binding.detailTitle.text = title
         binding.detailActivity.text = rule.activityClass
 
@@ -78,11 +136,20 @@ class RuleMirrorRuleDetailActivity : HostActivity() {
             binding.detailThumb.isVisible = false
         }
 
+        binding.identityRows.removeAllViews()
+        binding.modifiedRows.removeAllViews()
+        binding.originalRows.removeAllViews()
         fillIdentityRows()
         fillPropRows(binding.modifiedRows, rule.modified)
         fillPropRows(binding.originalRows, rule.original)
+    }
 
-        binding.deleteButton.setOnClickListener { confirmDeleteRule() }
+    private fun launchEditor() {
+        editLauncher.launch(
+            Intent(this, RuleMirrorRuleEditActivity::class.java)
+                .putExtra(RuleMirrorRuleEditActivity.EXTRA_PACKAGE, packageName)
+                .putExtra(RuleMirrorRuleEditActivity.EXTRA_RULE_JSON, Gson().toJson(rule)),
+        )
     }
 
     override fun onDestroy() {
@@ -182,21 +249,22 @@ class RuleMirrorRuleDetailActivity : HostActivity() {
     }
 
     private fun requestDeleteRule() {
-        val dispatched = HostControlBridge.dispatchRulesToPackage(this, packageName, listOf(rule))
-        if (!dispatched) {
+        val submitted = PendingCommandStore.submitDeleteRules(this, packageName, listOf(rule))
+        if (!submitted) {
             Toast.makeText(this, R.string.delete_rule_failed, Toast.LENGTH_LONG).show()
             return
         }
-        // 目标进程删除成功会推回镜像，稍后按 key 确认该规则已消失
+        // 目标进程删除成功会推回镜像，稍后按 key 确认该规则已消失；
+        // 目标不存活则命令留在待同步队列，打开应用自动同步删除
         mainHandler.postDelayed({
             if (isFinishing || isDestroyed) return@postDelayed
             val gone = !RuleMirror.loadRules(this, packageName).any { it.key() == rule.key() }
-            if (gone) {
-                Toast.makeText(this, R.string.delete_rule_done, Toast.LENGTH_SHORT).show()
-                finish()
-            } else {
-                Toast.makeText(this, R.string.delete_rule_failed, Toast.LENGTH_LONG).show()
-            }
+            Toast.makeText(
+                this,
+                if (gone) R.string.delete_rule_done else R.string.delete_queued,
+                if (gone) Toast.LENGTH_SHORT else Toast.LENGTH_LONG,
+            ).show()
+            finish()
         }, DELETE_VERIFY_DELAY_MS)
     }
 
@@ -206,5 +274,8 @@ class RuleMirrorRuleDetailActivity : HostActivity() {
 
         /** 下发「删除规则」后等待目标进程推回镜像的时间（ms） */
         private const val DELETE_VERIFY_DELAY_MS = 1_200L
+
+        /** 编辑回传后等待目标进程回推镜像确认的时间（ms） */
+        private const val UPDATE_VERIFY_DELAY_MS = 1_500L
     }
 }

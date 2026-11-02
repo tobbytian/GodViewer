@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 视图规则卡片行（对齐本体规则列表 item_mirrored_rule）：每条规则独立
+     bg_neu_raised 卡片（2dp 渐变环边），行距靠 4dp 外边距，行间不再画线；
+     标题加粗、副标题次级灰（运行时 normalizeTree 后由 adapter 恢复灰色）。
+     行与子控件均带 IGNORE_HOOK 防编辑模式点击拦截 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="4dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+    android:padding="12dp"
     android:tag="GODVIEWER_IGNORE_HOOK">
 
     <CheckBox
@@ -14,14 +18,15 @@
         android:layout_height="wrap_content"
         android:minWidth="0dp"
         android:paddingStart="0dp"
-        android:paddingEnd="2dp"
+        android:paddingEnd="0dp"
         android:tag="GODVIEWER_IGNORE_HOOK" />
 
     <ImageView
         android:id="@+id/rule_thumb"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="12dp"
+        android:clipToOutline="true"
         android:scaleType="centerCrop"
         android:tag="GODVIEWER_IGNORE_HOOK" />
 
@@ -38,16 +43,17 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:text="TextView"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/rule_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:singleLine="true"
             android:text="MainActivity · com.example:id/title"
-            android:textColor="#888888"
             android:textSize="12sp" />
     </LinearLayout>
 

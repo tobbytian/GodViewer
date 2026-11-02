@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 手动新建弹窗规则：文本指纹（必填，一行一条）+ 弹窗类名 / Activity（选填）。
+     包名与版本号由 PopupRulesActivity 带入，不在此表单 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="20dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="8dp">
+
+    <EditText
+        android:id="@+id/create_texts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_text_input"
+        android:gravity="top"
+        android:hint="@string/popup_rule_create_texts_hint"
+        android:inputType="textMultiLine"
+        android:minLines="3" />
+
+    <EditText
+        android:id="@+id/create_class"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_text_input"
+        android:hint="@string/popup_rule_create_class_hint"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/create_activity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_text_input"
+        android:hint="@string/popup_rule_create_activity_hint"
+        android:inputType="text" />
+</LinearLayout>

@@ -25,4 +25,51 @@ object HostPrefsNames {
     const val KEY_AUTO_UPDATE = "auto_update"
     const val KEY_RULES_SYNC_TIP_DISMISSED = "rules_sync_tip_dismissed"
     const val KEY_UPDATE_SKIP_TAG = "update_skip_tag"
+
+    /**
+     * 首页「强制弹窗拦截」开关（默认关闭）：打开后目标端才检测弹窗、
+     * 询问通知与规则自动重放；关闭则功能整体静默。
+     */
+    const val KEY_POPUP_INTERCEPT_ENABLED = "popup_intercept_enabled"
+
+    /** 「弹窗检测」开关（询问通知）；缺省时沿用旧的拦截开关值，升级后行为不变 */
+    const val KEY_POPUP_DETECT_ENABLED = "popup_detect_enabled"
+
+    /** 应用打开后检测/拦截弹窗的时间窗（秒） */
+    const val KEY_POPUP_WINDOW_SECONDS = "popup_window_seconds"
+
+    /**
+     * 每应用「弹窗检测通知」开关（前缀 + 包名，Boolean）：
+     * 单独设置过按该值，否则沿用全局 [KEY_POPUP_DETECT_ENABLED]。
+     */
+    const val KEY_POPUP_DETECT_PACKAGE_PREFIX = "popup_detect_enabled_"
+
+    /**
+     * 每应用「检测时长」（前缀 + 包名，Int 秒）：
+     * 单独设置过按该值，否则沿用全局 [KEY_POPUP_WINDOW_SECONDS]。
+     */
+    const val KEY_POPUP_WINDOW_PACKAGE_PREFIX = "popup_window_seconds_"
+
+    /**
+     * 拉取过拦截开关状态的目标包集合（StringSet，仅宿主读写）：
+     * 开关切换时把最新开关状态定向推送给这些包（目标端动态接收器）。
+     */
+    const val KEY_POPUP_INTERCEPT_WATCHERS = "popup_intercept_watchers"
+
+    /**
+     * 首页统计卡「已拦截次数」累计（仅宿主读写）：
+     * 弹窗关闭（规则自动重放 + 手动）与控件点击被拦截（编辑模式触摸消费）各计一份。
+     */
+    const val KEY_INTERCEPT_COUNT_POPUP = "intercept_count_popup"
+    const val KEY_INTERCEPT_COUNT_CONTROL = "intercept_count_control"
+
+    /**
+     * 开关状态的 Provider URI（authority 协议冻结）。**目标端因 Android 11+
+     * 包可见性查不到此 path（query 静默返回 null）**，状态同步已改为广播
+     * （ACTION_POPUP_INTERCEPT_REQUEST/STATE）；此 path 保留供 adb/shell 调试。
+     */
+    const val POPUP_INTERCEPT_URI = "content://com.godviewer.app.hostprefs/popup_intercept"
+
+    /** [POPUP_INTERCEPT_URI] 返回列名：1 = 开，0 = 关 */
+    const val COLUMN_POPUP_INTERCEPT = "enabled"
 }

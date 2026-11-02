@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="?attr/colorPrimary"/>
-    <padding android:bottom="10dp" android:left="10dp" android:right="10dp" android:top="10dp"/>
-    <corners android:radius="100pt"/>
-</shape>
+<!--
+  输入框：默认深凹陷（3dp 内环），聚焦时变浅（1dp 内环）——
+  对应规范「focus 减小内阴影 = 通道打开」，光源方向不变（左上暗、右下亮）。
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true" android:drawable="@drawable/bg_text_input_focused" />
+    <item android:drawable="@drawable/bg_text_input_default" />
+</selector>

@@ -24,7 +24,8 @@ import com.godviewer.app.shared.immutableFlag
  * 该应用前台时不发布本通知。
  */
 object HostControlNotifier {
-    private const val TAG = "Control"
+    /** 区分宿主/目标/通知三个进程侧的 Control 日志（原同名 tag 在 logcat 撞车） */
+    private const val TAG = "Control.Notify"
     private const val CHANNEL_ID = "godviewer_host_control"
     private const val NOTIFICATION_ID = 41001
 
@@ -32,6 +33,13 @@ object HostControlNotifier {
     const val ACTION_ENABLE = "com.godviewer.app.action.HOST_ENABLE_EDIT"
     const val ACTION_UNDO = "com.godviewer.app.action.HOST_UNDO"
     const val ACTION_MANAGE_RULES = "com.godviewer.app.action.HOST_MANAGE_RULES"
+
+    /** 关闭目标当前 showing 的外来弹窗（现仅「检测到弹窗」询问通知携带包名调用；
+     *  常驻控制通知上的「关闭弹窗」按钮已移除，保留 action 供接收端与旧 PendingIntent 兼容） */
+    const val ACTION_CLOSE_POPUPS = "com.godviewer.app.action.HOST_CLOSE_POPUPS"
+
+    /** 「检测到弹窗」询问通知的「取消」动作：仅收起该通知，不下发命令 */
+    const val ACTION_POPUP_NOTIFY_DISMISS = "com.godviewer.app.action.HOST_POPUP_NOTIFY_DISMISS"
 
     fun refresh(context: Context) {
         show(context)
@@ -96,6 +104,8 @@ object HostControlNotifier {
                     app.getString(R.string.manage_rules),
                     managePending,
                 )
+            // 「关闭弹窗」按钮已移除：关闭只走「检测到弹窗」询问通知
+            // （PopupDetectNotifier 带包名定向关闭），不再依赖「最近目标」
 
             NotificationManagerCompat.from(app).notify(NOTIFICATION_ID, builder.build())
             GvLog.d(TAG, "host control notification posted target=${target?.packageName}")

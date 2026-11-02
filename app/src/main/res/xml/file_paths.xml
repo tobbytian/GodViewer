@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider 暴露路径：仅规则导出分享的 cache 临时文件 -->
+<paths>
+    <cache-path
+        name="godviewer_share"
+        path="godviewer-share/" />
+</paths>
