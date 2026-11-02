@@ -81,16 +81,11 @@ class SettingsFragment : Fragment() {
         }
 
         // 弹窗功能入口（原弹窗 Tab 撤销后移入设置）：拦截记录 / 使用说明
-        // 内测中：两行灰化，点击仅提示，不进入二级页
-        binding.popupLogRow.alpha = 0.45f
-        binding.popupGuideRow.alpha = 0.45f
-        binding.popupLogRow.setOnClickListener { showFeatureBeta() }
-        binding.popupGuideRow.setOnClickListener { showFeatureBeta() }
+        binding.popupLogRow.setOnClickListener {
+            startActivity(Intent(ctx, PopupLogActivity::class.java))
+        }
+        binding.popupGuideRow.setOnClickListener { showPopupGuide() }
         refreshPopupLogCount()
-    }
-
-    private fun showFeatureBeta() {
-        Toast.makeText(requireContext(), R.string.feature_beta_toast, Toast.LENGTH_SHORT).show()
     }
 
     override fun onResume() {

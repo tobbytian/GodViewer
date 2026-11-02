@@ -226,13 +226,13 @@ fun findViewBestMatchAttempt(activity: Activity, rule: ViewRule): MatchAttempt {
 
 // ---------- repeatable（列表项规则）匹配 ----------
 
-/** 单条 repeatable 规则在一次对账里的最大命中数，防极端列表整帧卡顿 */
+/** 单条 repeatable 规则在一次对账/预览里的最大命中数，防极端列表整帧卡顿 */
 private const val MAX_REPEATABLE_MATCHES = 300
 
 /** (RecyclerView, AbsListView) 按目标 ClassLoader 缓存；RecyclerView 不存在时为 null */
 private val listContainerClasses = HashMap<ClassLoader, Pair<Class<*>?, Class<*>?>>()
 
-private fun listContainerClassesOf(view: View): Pair<Class<*>?, Class<*>?> {
+internal fun listContainerClassesOf(view: View): Pair<Class<*>?, Class<*>?> {
     val loader = view.javaClass.classLoader ?: return null to android.widget.AbsListView::class.java
     return synchronized(listContainerClasses) {
         listContainerClasses.getOrPut(loader) {
@@ -266,6 +266,39 @@ fun listItemAnchor(view: View): View? {
 }
 
 /**
+ * 捕获侧：[anchor]（item 根）在 RecyclerView 中的 adapter viewType，
+ * bind 路径按它过滤混类型列表的同类项。ListView 或反射失败一律返回 0
+ * （= [ViewRule.viewType] 不过滤，向后兼容）。
+ */
+fun itemViewTypeOf(anchor: View): Int {
+    val (recyclerViewClass, _) = listContainerClassesOf(anchor)
+    val container = anchor.parent as? ViewGroup ?: return 0
+    if (recyclerViewClass == null || !recyclerViewClass.isInstance(container)) return 0
+    return runCatching {
+        val position = container.javaClass
+            .getMethod("getChildAdapterPosition", View::class.java)
+            .invoke(container, anchor) as? Int ?: return 0
+        if (position < 0) return 0
+        val adapter = container.javaClass.getMethod("getAdapter")
+            .invoke(container) ?: return 0
+        adapter.javaClass
+            .getMethod("getItemViewType", Int::class.javaPrimitiveType)
+            .invoke(adapter, position) as? Int ?: 0
+    }.getOrDefault(0)
+}
+
+/**
+ * repeatable 安全锚检查：text 或 resourceName 至少一个非空。
+ * 两者皆无的规则会命中列表里**所有**同路径视图（混合 item 类型时即错杀）——
+ * 错杀零容忍：创建侧据此拒绝 repeatable（降级普通规则），匹配侧据此刻底
+ * （防宿主编辑 / 导入产出此类规则）。
+ */
+fun hasRepeatableAnchor(view: View): Boolean {
+    if (!resourceNameOf(view).isNullOrEmpty()) return true
+    return (view as? TextView)?.text?.isNotEmpty() == true
+}
+
+/**
  * 单视图是否命中 repeatable 规则：自 [view] 上溯 [ViewRule.depth]（itemPath）锚定
  * item 根并校验 [ViewRule.itemRootClass]，再 AND 校验 viewClass / resourceName /
  * text（按 textMatchMode）。所有非空字段必须全部匹配。
@@ -273,6 +306,9 @@ fun listItemAnchor(view: View): View? {
 fun matchRepeatableView(rule: ViewRule, view: View): Boolean {
     if (!rule.repeatable) return false
     val rootClass = rule.itemRootClass ?: return false
+    // 错杀零容忍：无任何区分锚的规则不参与匹配（创建侧已拦截，这里兜底
+    // 宿主编辑 / 导入下发的规则）
+    if (rule.text.isNullOrEmpty() && rule.resourceName.isNullOrEmpty()) return false
     if (view.javaClass.name != rule.viewClass) return false
     var v: View = view
     for (i in rule.depth.indices.reversed()) {
@@ -281,6 +317,13 @@ fun matchRepeatableView(rule: ViewRule, view: View): Boolean {
         v = parent
     }
     if (v.javaClass.name != rootClass) return false
+    // viewType 判别（对账路径）：bind 路径由 viewTypeMatches 过滤；hook 未激活
+    // 由对账器覆盖 RecyclerView 时同样要防混类型错杀。候选类型读不到（≤0）
+    // 视为不匹配——宁漏勿错。
+    if (rule.viewType > 0) {
+        val candidateType = itemViewTypeOf(v)
+        if (candidateType <= 0 || candidateType != rule.viewType) return false
+    }
     if (!rule.resourceName.isNullOrEmpty() && resourceNameOf(view) != rule.resourceName) {
         return false
     }
@@ -290,6 +333,50 @@ fun matchRepeatableView(rule: ViewRule, view: View): Boolean {
         return false
     }
     return true
+}
+
+/**
+ * bind 路径（[RecyclerBindingHooker]）专用：自 item 根按 [ViewRule.depth]
+ * （itemPath 语义）向下导航到目标视图并做 AND 校验。
+ *
+ * 与逐候选上溯验证的 [matchRepeatableView] 相反：这是"从 item 根往下走"的
+ * 精确管线（借鉴 GodMode-Pro navigateAndValidate）——导航本身就是主校验
+ * （逐级 childIndex），终点再验 viewClass / resourceName / text。
+ * 本规则 schema 未存逐级类名，故不做类名链回退（布局期对账兜底漏应用）。
+ *
+ * @return 验证通过的目标视图；导航失败或校验失败返回 null
+ */
+fun findTargetInItem(itemRoot: View, rule: ViewRule): View? {
+    if (!rule.repeatable) return null
+    // 错杀零容忍：无任何区分锚的规则不参与 bind 路径应用（同 matchRepeatableView）
+    if (rule.text.isNullOrEmpty() && rule.resourceName.isNullOrEmpty()) return null
+    if (rule.itemRootClass != null && itemRoot.javaClass.name != rule.itemRootClass) {
+        return null
+    }
+    var v: View = itemRoot
+    for (index in rule.depth) {
+        v = if (v is ViewGroup && index in 0 until v.childCount) {
+            v.getChildAt(index)
+        } else {
+            return null
+        }
+    }
+    if (v.javaClass.name != rule.viewClass) return null
+    if (!rule.resourceName.isNullOrEmpty() && resourceNameOf(v) != rule.resourceName) {
+        return null
+    }
+    if (!rule.text.isNullOrEmpty() &&
+        !textMatches((v as? TextView)?.text?.toString(), rule.text, rule.textMatchMode)
+    ) {
+        return null
+    }
+    return v
+}
+
+/** [viewType] 过滤：规则未记录（0）不过滤；否则必须与当前 item 的 viewType 一致
+ * （候选类型未知也视为不匹配——错杀零容忍，宁漏勿错） */
+fun viewTypeMatches(rule: ViewRule, boundViewType: Int): Boolean {
+    return rule.viewType <= 0 || rule.viewType == boundViewType
 }
 
 /** 在 Activity 中收集 repeatable 规则命中的全部视图（上限 [MAX_REPEATABLE_MATCHES]） */

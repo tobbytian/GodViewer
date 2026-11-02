@@ -66,15 +66,21 @@ object ViewRuleManager {
     fun rulesForActivity(activityClass: String): List<ViewRule> =
         rules.filter { it.activityClass == activityClass }
 
+    /** 是否存在任意 repeatable（列表项）规则（bind hook 安装门控，热路径用） */
+    fun hasRepeatableRules(): Boolean = rules.any { it.repeatable }
+
     /**
      * 统一的规则键计算：视图在列表项内（RecyclerView/ListView 直接子项树中）时用
      * repeatable 键（depth = 自 item 根的路径），否则用绝对 depth 键。
      * [createRule] 与 [findRule] 共用，保证创建与查找的键一致。
      *
-     * @return 键 + item 根（不在列表内时为 null）
+     * 错杀零容忍：列表项视图但缺 text/resourceName 区分锚时按普通规则处理
+     * （repeatable 会命中所有同路径视图）。
+     *
+     * @return 键 + item 根（不在列表内或缺安全锚时为 null）
      */
     private fun ruleKeyFor(activity: Activity, view: View): Pair<ViewRule.RuleKey, View?> {
-        val anchor = listItemAnchor(view)
+        val anchor = listItemAnchor(view)?.takeIf { hasRepeatableAnchor(view) }
         val depth = if (anchor != null) {
             pathWithin(view, anchor) ?: getViewHierarchyDepth(view)
         } else {
@@ -94,7 +100,8 @@ object ViewRuleManager {
      * 为视图创建一个规则外壳（原始值 = 当前值，修改值 = 当前值，changed* 全 false）。
      *
      * 视图在列表项内时自动创建 repeatable 规则（对该 Activity 内所有同类项生效，
-     * depth 语义变为自 item 根的路径）；否则为普通规则。
+     * depth 语义变为自 item 根的路径）；缺 text/resourceName 区分锚时降级普通规则
+     * （错杀零容忍，见 [ruleKeyFor]）；否则为普通规则。
      * 视图不在 Activity 窗口（如对话框 / Popup 内部）或找不到 Activity 时返回 null。
      */
     fun createRule(view: View): ViewRule? {
@@ -103,6 +110,13 @@ object ViewRuleManager {
             return null
         }
         val snapshot = ViewRuleApplier.captureSnapshot(view)
+        if (listItemAnchor(view) != null && !hasRepeatableAnchor(view)) {
+            GvLog.w(
+                TAG,
+                "repeatable downgraded to normal rule: " +
+                    "no text/resourceName anchor view=${view.javaClass.name}",
+            )
+        }
         val (key, anchor) = ruleKeyFor(activity, view)
         val rule = ViewRule(
             packageName = activity.packageName,
@@ -117,6 +131,7 @@ object ViewRuleManager {
             modified = snapshot,
             repeatable = anchor != null,
             itemRootClass = anchor?.javaClass?.name,
+            viewType = if (anchor != null) itemViewTypeOf(anchor) else 0,
             timestamp = System.currentTimeMillis()
         )
         // 视图此刻仍可见，截取缩略图供规则管理列表使用（与编辑弹窗预览一致），并持久化
@@ -149,7 +164,7 @@ object ViewRuleManager {
         store?.save(rules)
         GvLog.d(TAG, "rule saved: $rule")
         if (rule.repeatable && applyIn != null) {
-            RepeatableRuleReconciler.reconcile(applyIn)
+            reconcileImmediately(applyIn)
         }
     }
 
@@ -173,7 +188,7 @@ object ViewRuleManager {
         if (rule.repeatable) {
             RepeatableRuleReconciler.restoreRule(rule)
             for (activity in restoreIn) {
-                RepeatableRuleReconciler.reconcile(activity)
+                reconcileImmediately(activity)
             }
         } else {
             for (activity in restoreIn) {
@@ -219,7 +234,7 @@ object ViewRuleManager {
         store?.save(rules)
         if (removed.any { it.repeatable }) {
             for (activity in restoreIn) {
-                RepeatableRuleReconciler.reconcile(activity)
+                reconcileImmediately(activity)
             }
         }
         GvLog.i(TAG, "rules deleted count=${removed.size}")
@@ -262,7 +277,7 @@ object ViewRuleManager {
         store?.save(rules)
         if (removed.any { it.repeatable }) {
             for (activity in restoreIn) {
-                RepeatableRuleReconciler.reconcile(activity)
+                reconcileImmediately(activity)
             }
         }
         GvLog.i(TAG, "all rules deleted count=${removed.size}")
@@ -302,7 +317,7 @@ object ViewRuleManager {
         // repeatable 规则的换值/新增统一走对账（按每视图基线还原旧效果再应用新值）
         if (incoming.any { it.repeatable }) {
             for (activity in restoreIn) {
-                RepeatableRuleReconciler.reconcile(activity)
+                reconcileImmediately(activity)
             }
         }
         for (activity in restoreIn) {
@@ -367,7 +382,7 @@ object ViewRuleManager {
             // 撤销涉及的 repeatable 规则：对账一轮即可同时完成
             // "恢复回来的规则重新应用"与"被撤销规则的效果还原"
             if (hasRepeatable) {
-                RepeatableRuleReconciler.reconcile(activity)
+                reconcileImmediately(activity)
             }
         }
         GvLog.d(TAG, "rule undone: ${previous.size} rules restored")
@@ -379,5 +394,16 @@ object ViewRuleManager {
 
     fun restoreView(view: View, rule: ViewRule) {
         ViewRuleApplier.restoreView(view, rule)
+    }
+
+    /**
+     * 规则变更后的立即生效：布局期对账（ListView 等 hook 覆盖不到的场景）+
+     * bind hook 管辖的已绑定可见 item 经 [ViewRuleApplier.boundItemRefresher]
+     * 立即重应用（新规则 / 换值不必等下一次 rebind，对账器已让位 RecyclerView 子树）。
+     */
+    private fun reconcileImmediately(activity: Activity) {
+        RepeatableRuleReconciler.reconcile(activity)
+        runCatching { ViewRuleApplier.boundItemRefresher?.invoke(activity) }
+            .onFailure { GvLog.w(TAG, "bound item refresh failed", it) }
     }
 }

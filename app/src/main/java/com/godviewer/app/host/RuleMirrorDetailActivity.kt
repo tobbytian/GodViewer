@@ -34,6 +34,7 @@ import com.godviewer.app.databinding.ItemMirroredRuleBinding
 import com.godviewer.app.databinding.ItemSectionHeaderBinding
 import com.godviewer.app.host.ui.ConfirmDialog
 import com.godviewer.app.host.ui.HostActivity
+import com.godviewer.app.host.ui.PopupSettingsActivity
 
 /**
  * Host-side package rule list, styled like the in-target [com.godviewer.app.target.ui.RuleManagerDialog] rows.
@@ -187,10 +188,12 @@ class RuleMirrorDetailActivity : HostActivity() {
             HostControlNotifier.refresh(this)
         }
 
-        // 弹窗检测设置：内测中，整行灰化、点击仅提示，不进入二级页
-        binding.popupSettingsRow.alpha = 0.45f
+        // 弹窗检测设置：进入该应用的二级设置页（检测开关 / 时长 / 弹窗规则）
         binding.popupSettingsRow.setOnClickListener {
-            Toast.makeText(this, R.string.feature_beta_toast, Toast.LENGTH_SHORT).show()
+            startActivity(
+                Intent(this, PopupSettingsActivity::class.java)
+                    .putExtra(PopupSettingsActivity.EXTRA_PACKAGE, packageName),
+            )
         }
     }
 

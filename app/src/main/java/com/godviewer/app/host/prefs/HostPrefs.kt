@@ -96,13 +96,14 @@ object HostPrefs {
     }
 
     /**
-     * 首页「强制弹窗拦截」开关（默认关闭）：打开后目标端才检测弹窗、
-     * 发询问通知并按规则自动重放关闭；关闭则整体静默（手动关闭按钮不受影响）。
+     * 首页「强制弹窗拦截」开关（**默认开启**，内测期免配置；用户显式关过则尊重
+     * 存储值）：打开后目标端才检测弹窗、发询问通知并按规则自动重放关闭；
+     * 关闭则整体静默（手动关闭按钮不受影响）。
      * 目标进程查不到宿主 Provider（包可见性），状态经广播同步，见
      * [com.godviewer.app.shared.entry.PopupIntercept]。
      */
     fun isPopupInterceptEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(HostPrefsNames.KEY_POPUP_INTERCEPT_ENABLED, false)
+        prefs(context).getBoolean(HostPrefsNames.KEY_POPUP_INTERCEPT_ENABLED, true)
 
     fun setPopupInterceptEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit()

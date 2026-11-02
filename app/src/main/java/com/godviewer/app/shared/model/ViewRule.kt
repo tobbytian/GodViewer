@@ -43,6 +43,12 @@ data class ViewRule(
     /** item 根（RecyclerView/ListView 直接子项）的运行时类名；非空即 repeatable */
     @SerializedName("item_root_class")
     val itemRootClass: String? = null,
+    /**
+     * 捕获时 item 的 adapter viewType（`Adapter.getItemViewType(position)`），
+     * bind 路径按它过滤同类项（0 = 不过滤，向后兼容旧规则与 ListView 规则）。
+     */
+    @SerializedName("view_type")
+    val viewType: Int = 0,
     /** [text] 的匹配方式（[MATCH_MODE_EXACT] 等），null 等价 exact */
     @SerializedName("text_match_mode")
     var textMatchMode: String? = null,

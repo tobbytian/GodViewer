@@ -132,13 +132,22 @@ Backup before large moves: desktop `GodViewer-backup-pre-optimize-*` +
   guarded by `matchVersionCode`. Dual-anchor principle (borrowed from GodMode-Pro, 2026-11-03):
   a depth hit must cross-validate `resourceName` when present (miss over mismatch), and named
   rules never fall back to text. Misses carry diagnostic codes (`MatchMiss.*`) in the replay log.
-- Repeatable list-item rules (`ViewRule.repeatable` + `itemRootClass`; depth = item path within
-  the item root, dual-meaning field): created automatically when the picked view sits inside a
-  RecyclerView/ListView item; applied by layout-pass reconcile (`RepeatableRuleReconciler`), NO
-  adapter hooks. Per-view baselines (in-memory `WeakHashMap`) — never restore these views with
-  `rule.original`; all repeatable restore paths go through the applier registry, not
-  `findViewBestMatch`. Domain vocabulary: `CONTEXT.md` (committed, cross-session contract).
-  Boundary rules are enforced by `bash scripts/verify-architecture.sh`.
+- Repeatable list-item rules (`ViewRule.repeatable` + `itemRootClass` + `viewType`; depth = item
+  path within the item root, dual-meaning field): created automatically when the picked view sits
+  inside a RecyclerView/ListView item. Two apply paths (2026-11-03): bind-time precise apply via
+  `RecyclerBindingHooker` (hooks final `RecyclerView$Adapter.bindViewHolder` before/after +
+  `onViewRecycled`; epoch-tokened, discard-on-rebind / revoke-on-recycle; active flag
+  `ViewRuleApplier.bindHookActive`) and layout-pass reconcile (`RepeatableRuleReconciler`, yields
+  RecyclerView subtrees while the hook is active). Rule-save immediate effect goes through
+  `ViewRuleApplier.boundItemRefresher` (neutral callback — never import target.hook from
+  target.rule). SAFETY (错杀零容忍, non-negotiable): a repeatable rule needs a text or
+  resourceName anchor — creation downgrades to a normal rule without one (`hasRepeatableAnchor`),
+  match/bind paths refuse anchor-less rules, viewType checked on both paths; restore only touches
+  attrs the rule declared (changed-mask), never rewrites host-owned content. Per-view baselines
+  (in-memory `WeakHashMap`) — never restore these views with `rule.original`; all repeatable
+  restore paths go through the applier registry, not `findViewBestMatch`. Domain vocabulary:
+  `CONTEXT.md` (committed, cross-session contract). Boundary rules are enforced by
+  `bash scripts/verify-architecture.sh`.
 - Rule mirror is **broadcast-only** best-effort. Do **not** re-add Service/ContentProvider cold-start
   delivery unless the user explicitly asks (already tried and reverted). Soft token:
   `godviewer-rule-mirror-v1`.

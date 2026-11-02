@@ -36,6 +36,64 @@ internal object ViewRuleApplier {
     /** repeatable 视图 -> 应用时的规则 timestamp（幂等与"换值重应用"判断） */
     private val appliedTimestamps = WeakHashMap<View, Long>()
 
+    // ---------- 错杀防线：还原只碰规则声明过（changed*）的属性 ----------
+    // 列表项会被宿主持续重写内容：还原若把整个基线盖回去，会把基线里的旧文本
+    // 覆盖到宿主刚绑定的新内容上（只改了可见性的规则尤其危险）。掩码在应用时
+    // 记录，还原时逐属性判断。
+
+    private const val MASK_SIZE = 1
+    private const val MASK_MARGIN = 1 shl 1
+    private const val MASK_PADDING = 1 shl 2
+    private const val MASK_VISIBILITY = 1 shl 3
+    private const val MASK_TEXT = 1 shl 4
+    private const val MASK_HINT = 1 shl 5
+    private const val MASK_IMAGE = 1 shl 6
+
+    /** repeatable 视图 -> 应用时规则声明的 changed* 掩码 */
+    private val repeatableChangedMasks = WeakHashMap<View, Int>()
+
+    private fun changedMaskOf(rule: ViewRule): Int {
+        var mask = 0
+        if (rule.changedSize) mask = mask or MASK_SIZE
+        if (rule.changedMargin) mask = mask or MASK_MARGIN
+        if (rule.changedPadding) mask = mask or MASK_PADDING
+        if (rule.changedVisibility) mask = mask or MASK_VISIBILITY
+        if (rule.changedText) mask = mask or MASK_TEXT
+        if (rule.changedHint) mask = mask or MASK_HINT
+        if (rule.changedImage) mask = mask or MASK_IMAGE
+        return mask
+    }
+
+    /**
+     * repeatable 视图 -> 应用时的绑定代次（epoch）。
+     *
+     * [EPOCH_RECONCILER] = 布局期对账器（RepeatableRuleReconciler，ListView 等无
+     * bind hook 场景）所属；> 0 = [RecyclerBindingHooker] 的某次 ViewHolder 绑定
+     * 所属。epoch 隔离两个写者的效果所有权：hook 的 discard/revoke 按 epoch 过滤，
+     * 不会触碰对账器的登记项；对账器跳过 hook 管辖的 RecyclerView 子树。
+     */
+    private val appliedEpochs = WeakHashMap<View, Long>()
+
+    /** 对账器命名空间的 epoch（hook 路径从 1 起自增） */
+    const val EPOCH_RECONCILER = 0L
+
+    /**
+     * RecyclerView 绑定期 hook 是否已激活（[RecyclerBindingHooker] 安装成功时置位）。
+     * 对账器据此让位 hook 管辖的 RecyclerView 子树——状态住在本对象避免
+     * rule → hook 的反向依赖。
+     */
+    @Volatile
+    var bindHookActive = false
+
+    /**
+     * bind hook 激活后由 hook 侧注入：对 [activity] 内已绑定可见的 RecyclerView item
+     * 立即重应用规则（新规则保存 / 换值后的即时生效路径，不必等下一次 rebind）。
+     * 对账器让位了 RecyclerView 子树，规则变更的即时生效必须借这条回调回到 hook——
+     * 状态与回调都住在本对象，保持 rule 侧不反向依赖 hook。
+     */
+    @Volatile
+    var boundItemRefresher: ((android.app.Activity) -> Unit)? = null
+
     /** 重放：把规则的修改值应用到视图。返回是否发生了布局变化。 */
     fun applyRuleToView(view: View, rule: ViewRule): Boolean {
         return runCatching {
@@ -179,8 +237,10 @@ internal object ViewRuleApplier {
      *
      * 幂等：同一规则同一 timestamp 已应用则跳过；规则换值（timestamp 变化）先还原
      * 旧效果再应用新值；视图已被其他 repeatable 规则占用时跳过（先到先得）。
+     *
+     * @param epoch 应用所属的绑定代次（见 [appliedEpochs]）
      */
-    fun applyRepeatable(view: View, rule: ViewRule): Boolean {
+    fun applyRepeatable(view: View, rule: ViewRule, epoch: Long = EPOCH_RECONCILER): Boolean {
         return runCatching {
             val key = rule.key()
             val existing = appliedRepeatable[view]
@@ -188,6 +248,9 @@ internal object ViewRuleApplier {
                 return false
             }
             if (existing == key && appliedTimestamps[view] == rule.timestamp) {
+                // 同规则同值已应用（bind 路径 attach 恢复高频进入）：仍补记 epoch，
+                // 覆盖跨 epoch 复用同一视图但内容未变的场景
+                appliedEpochs[view] = epoch
                 return false
             }
             if (existing == key) {
@@ -199,6 +262,8 @@ internal object ViewRuleApplier {
             }
             appliedRepeatable[view] = key
             appliedTimestamps[view] = rule.timestamp
+            appliedEpochs[view] = epoch
+            repeatableChangedMasks[view] = changedMaskOf(rule)
             // appliedImages 去重按规则键记账，repeatable 一键多视图会被去重误跳过，
             // 图片规则逐视图强制重新 enqueue
             if (rule.changedImage) {
@@ -209,6 +274,55 @@ internal object ViewRuleApplier {
             GvLog.w(TAG, "applyRepeatable failed key=${rule.key()} view=${view.javaClass.name}", tr)
             false
         }
+    }
+
+    /**
+     * ViewHolder 重绑定（bindViewHolder before）：丢弃 itemView 子树内属于
+     * [epoch] 这一次绑定的全部已应用效果——**只清记账、不还原**。
+     *
+     * 借鉴 GodMode-Pro `discardBindingEffects`：宿主 adapter 紧接着会写入下一行
+     * 内容，把旧效果按旧基线还原反而会把旧行内容写进新行（复用正确性的关键）。
+     * 与 [revokeRepeatableByEpoch] 的区别：后者用于回收/分离边界，需还原基线。
+     */
+    fun discardRepeatableByEpoch(itemRoot: View, epoch: Long) {
+        for (view in repeatableViewsInSubtree(itemRoot)) {
+            if (appliedEpochs[view] != epoch) continue
+            runCatching {
+                repeatableBaselines.remove(view)
+                appliedRepeatable.remove(view)
+                appliedTimestamps.remove(view)
+                appliedEpochs.remove(view)
+            }
+        }
+    }
+
+    /**
+     * ViewHolder 回收 / 分离子窗口（onViewRecycled / onDetachedFromWindow）：
+     * 按 [epoch] 还原 itemView 子树内的已应用效果（恢复各自基线）。
+     * epoch 过滤保证旧代次的回收事件不会还原新代次刚写入的效果。
+     */
+    fun revokeRepeatableByEpoch(itemRoot: View, epoch: Long) {
+        for (view in repeatableViewsInSubtree(itemRoot)) {
+            if (appliedEpochs[view] != epoch) continue
+            restoreRepeatable(view, appliedRepeatable[view] ?: continue)
+        }
+    }
+
+    /** [root] 子树内已在 repeatable 登记表中的视图（item 子树很小，直接递归） */
+    private fun repeatableViewsInSubtree(root: View): List<View> {
+        val out = ArrayList<View>()
+        fun collect(view: View) {
+            if (appliedRepeatable.containsKey(view)) {
+                out.add(view)
+            }
+            if (view is ViewGroup) {
+                for (i in 0 until view.childCount) {
+                    collect(view.getChildAt(i))
+                }
+            }
+        }
+        runCatching { collect(root) }
+        return out
     }
 
     /** 把 repeatable 规则在 [view] 上的效果按其自身基线还原（未登记时为 no-op） */
@@ -228,6 +342,9 @@ internal object ViewRuleApplier {
         }
     }
 
+    /** 视图当前登记的绑定代次；未登记返回 [Long.MIN_VALUE] */
+    fun epochOf(view: View): Long = appliedEpochs[view] ?: Long.MIN_VALUE
+
     /** 全部 repeatable 登记项的快照（对账遍历用） */
     fun appliedRepeatableEntries(): List<Pair<View, ViewRule.RuleKey>> {
         return synchronized(appliedRepeatable) {
@@ -244,6 +361,8 @@ internal object ViewRuleApplier {
             appliedRepeatable.clear()
             repeatableBaselines.clear()
             appliedTimestamps.clear()
+            appliedEpochs.clear()
+            repeatableChangedMasks.clear()
         }
     }
 
@@ -251,24 +370,41 @@ internal object ViewRuleApplier {
         val baseline = repeatableBaselines.remove(view)
         appliedRepeatable.remove(view)
         appliedTimestamps.remove(view)
+        appliedEpochs.remove(view)
+        val mask = repeatableChangedMasks.remove(view) ?: -1
         if (baseline == null) return
-        val lp = view.layoutParams
-        if (lp != null) {
-            lp.width = baseline.width
-            lp.height = baseline.height
-            if (lp is ViewGroup.MarginLayoutParams) {
-                lp.setMargins(baseline.marginLeft, baseline.marginTop, baseline.marginRight, baseline.marginBottom)
+        // 错杀防线：只还原规则声明过的属性；宿主自己写入的内容（如 rebind 后的
+        // 新文本）不属于规则，绝不回写。掩码缺失（理论不可达，登记即有掩码）时
+        // 退回全量还原保底。
+        if (mask and (MASK_SIZE or MASK_MARGIN) != 0) {
+            val lp = view.layoutParams
+            if (lp != null) {
+                if (mask and MASK_SIZE != 0) {
+                    lp.width = baseline.width
+                    lp.height = baseline.height
+                }
+                if (mask and MASK_MARGIN != 0 && lp is ViewGroup.MarginLayoutParams) {
+                    lp.setMargins(baseline.marginLeft, baseline.marginTop, baseline.marginRight, baseline.marginBottom)
+                }
+                view.layoutParams = lp
             }
-            view.layoutParams = lp
         }
-        view.setPadding(baseline.paddingLeft, baseline.paddingTop, baseline.paddingRight, baseline.paddingBottom)
-        view.visibility = baseline.visibility
+        if (mask and MASK_PADDING != 0) {
+            view.setPadding(baseline.paddingLeft, baseline.paddingTop, baseline.paddingRight, baseline.paddingBottom)
+        }
+        if (mask and MASK_VISIBILITY != 0) {
+            view.visibility = baseline.visibility
+        }
         if (view is TextView) {
-            view.text = baseline.text ?: ""
-            view.maxLines = baseline.maxLines
-            view.hint = baseline.hint ?: ""
+            if (mask and MASK_TEXT != 0) {
+                view.text = baseline.text ?: ""
+                view.maxLines = baseline.maxLines
+            }
+            if (mask and MASK_HINT != 0) {
+                view.hint = baseline.hint ?: ""
+            }
         }
-        if (view is ImageView) {
+        if (view is ImageView && mask and MASK_IMAGE != 0) {
             baseline.scaleType?.let { name ->
                 runCatching { ImageView.ScaleType.valueOf(name) }
                     .getOrNull()

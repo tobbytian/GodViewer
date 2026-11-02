@@ -39,8 +39,9 @@ object PopupIntercept {
     @Volatile
     private var loaded = false
 
+    /** 缓存未同步时的默认值：内测期默认开启（宿主同步过的显式值优先） */
     @Volatile
-    private var enabled = false
+    private var enabled = true
 
     @Volatile
     private var updatedAt = 0L
@@ -64,7 +65,7 @@ object PopupIntercept {
         return elapsed <= windowSeconds * 1000L
     }
 
-    /** 开关状态（默认关闭）。过期时顺手向宿主拉取最新值，本次返回缓存值 */
+    /** 开关状态（缓存未同步时默认开启，内测期免配置）。过期时顺手向宿主拉取最新值，本次返回缓存值 */
     fun isEnabled(context: Context): Boolean {
         ensureLoaded(context)
         if (System.currentTimeMillis() - updatedAt > REFRESH_MS) requestState(context)
@@ -131,8 +132,9 @@ object PopupIntercept {
                         ?.coerceIn(1, 120) ?: DEFAULT_WINDOW_SECONDS
                 } else {
                     // 旧版本只写 SharedPreferences：迁移期间读一次作兜底
+                    // （无任何记录时默认开启——内测期免配置，宿主同步后以同步值为准）
                     val p = prefs(context)
-                    enabled = p.getBoolean(KEY_ENABLED, false)
+                    enabled = p.getBoolean(KEY_ENABLED, true)
                     updatedAt = p.getLong(KEY_UPDATED_AT, 0L)
                     windowSeconds = p.getInt(KEY_WINDOW_SECONDS, DEFAULT_WINDOW_SECONDS)
                 }

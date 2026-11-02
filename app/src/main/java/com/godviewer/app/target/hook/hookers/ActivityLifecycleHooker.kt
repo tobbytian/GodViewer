@@ -57,6 +57,9 @@ class ActivityLifecycleHooker : IHooker {
                         liveActivities.add(activity)
                         // 弹窗 BadToken 回退：View.context 不是 Activity 时用
                         ModuleDialogUi.noteResumedActivity(activity)
+                        // repeatable（列表项）规则绑定期精确应用：仅当该包已有
+                        // repeatable 规则或编辑模式开启时安装（幂等，见类注释）
+                        RecyclerBindingHooker.installIfNeeded(activity)
                         replay(activity, captureThumbs = true)
                         registerLayoutListener(activity)
                     }.onFailure {

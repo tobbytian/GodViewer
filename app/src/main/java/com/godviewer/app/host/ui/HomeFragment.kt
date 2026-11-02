@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.godviewer.app.BuildConfig
@@ -90,13 +89,7 @@ class HomeFragment : Fragment() {
             onHostNotifyToggled(checked)
         }
 
-        // 弹窗拦截内测中：整行灰化、开关禁点，点击整行仅提示
-        binding.popupInterceptRow.alpha = 0.45f
-        binding.popupInterceptSwitch.isClickable = false
-        binding.popupInterceptRow.setOnClickListener {
-            Toast.makeText(requireContext(), R.string.feature_beta_toast, Toast.LENGTH_SHORT).show()
-        }
-
+        // 弹窗拦截内测已放开：开关可用（默认开启见 HostPrefs.isPopupInterceptEnabled）
         refreshPopupInterceptSwitch()
         binding.popupInterceptSwitch.setOnCheckedChangeListener { _, checked ->
             if (suppressPopupCallback) return@setOnCheckedChangeListener
@@ -153,7 +146,8 @@ class HomeFragment : Fragment() {
 
     /**
      * 首页「强制弹窗拦截」开关：写 HostPrefs 后向曾拉取过状态的目标推送最新状态
-     * （检测时长已按应用配置，逐包取值）；首次打开弹教程。
+     * （检测时长已按应用配置，逐包取值）。内测期不做首次开启的强制教程锁定；
+     * 教程仍可在 设置 → 使用教程 随时查看。
      */
     private fun onPopupInterceptToggled(enabled: Boolean) {
         val ctx = requireContext()
@@ -169,18 +163,6 @@ class HomeFragment : Fragment() {
             if (enabled) R.string.home_popup_intercept_on else R.string.home_popup_intercept_off,
             Toast.LENGTH_SHORT,
         ).show()
-        if (enabled && !HostPrefs.isPopupGuideShown(ctx)) {
-            HostPrefs.markPopupGuideShown(ctx)
-            showGuide()
-        }
-    }
-
-    private fun showGuide() {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.popup_intercept_tutorial_title)
-            .setMessage(R.string.popup_intercept_tutorial_message)
-            .setPositiveButton(R.string.popup_intercept_tutorial_ok) { d, _ -> d.dismiss() }
-            .show()
     }
 
     /**
