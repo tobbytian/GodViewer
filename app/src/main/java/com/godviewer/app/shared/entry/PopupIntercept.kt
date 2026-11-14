@@ -91,30 +91,61 @@ object PopupIntercept {
         }
     }
 
+    /** 上次落盘的值：重复收到的同值广播只刷新内存，不重写文件 */
+    @Volatile
+    private var persistedEnabled: Boolean? = null
+
+    @Volatile
+    private var persistedWindowSeconds: Int = -1
+
     /** 宿主回发/推送的开关状态落地（内存 + 目标自身 prefs） */
     fun onStateReceived(context: Context, value: Boolean, windowSec: Int) {
+        val window = windowSec.coerceIn(1, 120)
+        val unchanged = value == persistedEnabled && window == persistedWindowSeconds
         enabled = value
-        windowSeconds = windowSec.coerceIn(1, 120)
+        windowSeconds = window
         updatedAt = System.currentTimeMillis()
         loaded = true
+        // 宿主可能连发多次同值（REQUEST/推送/前台刷新），同值不重复写盘
+        if (!unchanged) persist(context, value, window)
+        GvLog.d(TAG, "state synced enabled=$value window=$window persisted=${!unchanged}")
+    }
+
+    /**
+     * 原子写缓存：先写 `.tmp` 再 rename。
+     *
+     * 不能用 `File.copyTo`（旧实现）：它会先删目标再复制，一旦 rename 失败就抛
+     * `NoSuchFileException`（真机淘宝日志 `popup_intercept.cache.tmp: The source file
+     * doesn't exist`）。这里改为「删目标重试 rename」，最后才退化为直接覆盖写，
+     * 全程失败只记 warn，绝不抛给目标应用。
+     */
+    private fun persist(context: Context, value: Boolean, windowSec: Int) {
         runCatching {
             val file = cacheFile(context)
             file.parentFile?.mkdirs()
             val props = java.util.Properties().apply {
                 setProperty(KEY_ENABLED, value.toString())
                 setProperty(KEY_UPDATED_AT, updatedAt.toString())
-                setProperty(KEY_WINDOW_SECONDS, windowSeconds.toString())
+                setProperty(KEY_WINDOW_SECONDS, windowSec.toString())
             }
             val tmp = java.io.File(file.parentFile, file.name + ".tmp")
             tmp.outputStream().use { props.store(it, null) }
             if (!tmp.renameTo(file)) {
-                tmp.copyTo(file, overwrite = true)
-                tmp.delete()
+                // 部分 ROM/文件系统 rename 到已存在文件会失败：先删目标再试一次
+                file.delete()
+                if (!tmp.renameTo(file)) {
+                    // 仍失败（跨挂载点等）：直接覆盖写，不走 copyTo
+                    tmp.inputStream().use { input ->
+                        file.outputStream().use { output -> input.copyTo(output) }
+                    }
+                    tmp.delete()
+                }
             }
+            persistedEnabled = value
+            persistedWindowSeconds = windowSec
         }.onFailure {
             GvLog.w(TAG, "persist state failed", it)
         }
-        GvLog.d(TAG, "state synced enabled=$value")
     }
 
     private fun ensureLoaded(context: Context) {
@@ -145,11 +176,22 @@ object PopupIntercept {
         }
     }
 
-    /** 向宿主拉取状态；发出即推进 updatedAt 节流（宿主无应答也不会广播风暴） */
+    /** 上次向宿主发拉取的时刻（elapsedRealtime）：只用于节流，不参与「缓存是否新鲜」判断 */
+    @Volatile
+    private var lastRequestElapsed = 0L
+
+    /** 拉取最小间隔内的重复请求直接丢弃（时间基准用 elapsedRealtime，不受系统改时间影响） */
+    private const val REQUEST_THROTTLE_MS = 2_000L
+
+    /** 向宿主拉取状态；节流只看「最近是否刚发过」，不动 [updatedAt] */
     private fun requestState(context: Context) {
-        updatedAt = System.currentTimeMillis()
+        val elapsed = android.os.SystemClock.elapsedRealtime()
+        if (elapsed - lastRequestElapsed < REQUEST_THROTTLE_MS) return
+        lastRequestElapsed = elapsed
         GvLog.d(TAG, "request state -> host pkg=${context.packageName}")
-        HostControlBridge.requestPopupInterceptState(context, context.packageName)
+        runCatching {
+            HostControlBridge.requestPopupInterceptState(context, context.packageName)
+        }.onFailure { GvLog.w(TAG, "request state failed", it) }
     }
 
     /**
